@@ -3,6 +3,27 @@
 Public, no‑PII AI stack modules. This repo provides opinionated defaults and
 wiring for `nix-clawdis`, but contains no secrets or user-specific data.
 
+## Core AI stack
+
+This is my AI development stack. There are many stacks like it, but this one is mine.
+
+I use Codex w/GPT-5.2-codex for coding. I use Clawdis with Opus 4.5 as my AI assistant. I use it on a Big Monitor (TM) (57" 7680 x 2160). I have max plans on both tools. I try and write all my tools in golang (BE), proto (API), typescript+react (FE), as this stack works very well with codex.
+
+I have some skills that do things. I like the RFC one. This is very useful. `nanobanana` is helpful too, for when you want to generate project images. The product manager one is sort of okay. The rest are mostly boring and plumbing.
+
+This repository is all nix-based, so if you want to steal what I'm doing, you can point your AI agent at it, and copy my approach. That might be a good idea, it might be not: my defaults and preferred toolchain work for me, they might not work for you.
+
+The most fun part, and the part that I'm most excitted about is [`nix-clawdis`](https://github.com/joshp123/nix-clawdis), which wraps [`clawdis`](https://github.com/steipete/clawdis) in nix and has a plugin system. This is the basis of my AI assistant stack, and should be wired in here. [`clawdis`](https://github.com/steipete/clawdis) can also self-modify its own configuration, and has a development and test `clawdis` instance.
+
+The most fun part of my [`nix-clawdis`](https://github.com/joshp123/nix-clawdis) stack is [`gohome`](https://github.com/joshp123/gohome), my [`clawdis`](https://github.com/steipete/clawdis) based Home Assistant clone.
+
+## Projects
+
+- [`ai-stack`](https://github.com/joshp123/ai-stack)
+- [`nix-clawdis`](https://github.com/joshp123/nix-clawdis)
+- [`gohome`](https://github.com/joshp123/gohome)
+- [`clawdis` (upstream)](https://github.com/steipete/clawdis)
+
 ## What this is
 
 - A **public** module layer you can import from private config.
