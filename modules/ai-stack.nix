@@ -5,7 +5,7 @@
   ];
 
   config = {
-    nixpkgs.overlays = [
+    nixpkgs.overlays = lib.mkAfter [
       (import ../overlays/clawdbot-gateway-ui-assets.nix)
     ];
     programs.clawdbot.documents = lib.mkDefault ../documents;
