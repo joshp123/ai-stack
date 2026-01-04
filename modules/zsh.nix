@@ -43,6 +43,6 @@
       }
     ];
 
-    initExtraFirst = lib.mkBefore (builtins.readFile ../config/zsh/init-public.zsh);
+    initContent = lib.mkBefore (builtins.readFile ../config/zsh/init-public.zsh);
   };
 }
