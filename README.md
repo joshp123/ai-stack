@@ -46,8 +46,8 @@ This sets:
 
 This repo ships public guidance and skills only:
 
-- `docs/agents/CODEX.md` → `~/.codex/AGENTS.md`
-- `docs/agents/CLAUDE.md` → `~/.claude/CLAUDE.md`
+- `docs/agents/GLOBAL_CODEX.md` → `~/.codex/AGENTS.md`
+- `docs/agents/GLOBAL_CLAUDE.md` → `~/.claude/CLAUDE.md`
 - `skills/` → `~/.codex/skills` and `~/.claude/skills`
 
 Deliberately **not included** here:
