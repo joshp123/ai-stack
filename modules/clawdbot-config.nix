@@ -61,7 +61,19 @@ in
 
     prod = {
       plugins = lib.mkOption {
-        type = lib.types.listOf lib.types.attrs;
+        type = lib.types.listOf (lib.types.submodule {
+          options = {
+            source = lib.mkOption {
+              type = lib.types.str;
+              description = "Plugin source pointer (e.g., github:owner/repo or path:/...).";
+            };
+            config = lib.mkOption {
+              type = lib.types.attrs;
+              default = { };
+              description = "Plugin-specific configuration (env/files/etc).";
+            };
+          };
+        });
         default = [ ];
         description = "Additional plugins for the prod instance.";
       };
@@ -99,7 +111,19 @@ in
 
     test = {
       plugins = lib.mkOption {
-        type = lib.types.listOf lib.types.attrs;
+        type = lib.types.listOf (lib.types.submodule {
+          options = {
+            source = lib.mkOption {
+              type = lib.types.str;
+              description = "Plugin source pointer (e.g., github:owner/repo or path:/...).";
+            };
+            config = lib.mkOption {
+              type = lib.types.attrs;
+              default = { };
+              description = "Plugin-specific configuration (env/files/etc).";
+            };
+          };
+        });
         default = [ ];
         description = "Additional plugins for the test instance.";
       };
