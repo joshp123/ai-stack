@@ -21,6 +21,9 @@ PII includes (not exhaustive):
 - `modules/` — Home Manager modules wiring docs + skills + agent guidance.
 - `flake.nix` — Public module entrypoints. No secrets, no installs.
 
+Clawdbot packaging (including UI assets) belongs in `nix-clawdbot`. Do not add
+Clawdbot build overlays here.
+
 ## What this repo contains (and does NOT contain)
 
 - ✅ Safe, public guidance + skill scaffolding
