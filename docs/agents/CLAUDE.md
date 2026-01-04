@@ -106,10 +106,6 @@ Triggers: "implement", "add", "make a plan", "create ticket", "file issue", "new
 **Ticket references**: Always include titles, not just IDs.
 **Smoke test** (MANDATORY): run the feature and show output; include tests and concrete evidence (UI screenshot/description, CLI command+output, API request+response).
 
-## Agent Mail (coordination)
-
-Agent Mail is an MCP server for inter-agent messaging. It is available to agents but should only be used when explicitly instructed.
-
 ## Skills
 
 Skills are auto-triggering automation patterns installed in the agent skills directory.
@@ -181,7 +177,7 @@ All tools support `--help` for full usage. Prefer CLI over MCP where possible.
     - If mismatch, propose concrete fixes or next actions.
   - Skip the UI verification pass for non-UI automation (e.g., login flows, third-party sites) unless the user explicitly asks.
 
-  - `bv --robot-plan` (execution order), `bv --robot-priority` (recommendations), `bv --robot-insights` (graph analysis).
+  - `bd/bv` tooling not used in this repo.
 
 ### Code Quality
 - **ubs**: Fast bug scanner for agents. Run on changed files before commits.

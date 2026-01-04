@@ -2,6 +2,7 @@
 {
   imports = [
     ./codex-config.nix
+    ./clawdbot-config.nix
     ./zsh.nix
   ];
 

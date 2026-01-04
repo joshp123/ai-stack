@@ -37,6 +37,10 @@ Shell config split:
 - Public zsh defaults live here (`modules/zsh.nix`, `config/zsh/`).
 - Private, host/user-specific overrides belong in the private repo.
 
+Clawdbot slicing:
+- Instance wiring and defaults live here (`modules/clawdbot-config.nix`).
+- Private repo provides secrets, allowlists, and local skill paths via `ai.clawdbot.profile.*`.
+
 ## Apply changes (no sudo)
 
 This repo is intended to apply via **Home Manager only**.
