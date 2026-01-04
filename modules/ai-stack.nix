@@ -5,7 +5,7 @@
   ];
 
   config = {
-    programs.clawdis.documents = lib.mkDefault ../documents;
+    programs.clawdbot.documents = lib.mkDefault ../documents;
 
     home.file = {
       ".codex/AGENTS.md".source = ../docs/agents/CODEX.md;
@@ -14,7 +14,7 @@
       ".codex/skills".source = ../skills;
       ".claude/skills".source = ../skills;
     };
-  } // (lib.mkIf (lib.hasAttrByPath [ "programs" "clawdis" ] config) {
-    programs.clawdis.reloadScript.enable = lib.mkDefault true;
+  } // (lib.mkIf (lib.hasAttrByPath [ "programs" "clawdbot" ] config) {
+    programs.clawdbot.reloadScript.enable = lib.mkDefault true;
   });
 }

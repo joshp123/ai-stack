@@ -15,7 +15,7 @@ PII includes (not exhaustive):
 
 ## Repo structure (source of truth)
 
-- `documents/` — Clawdis docs (AGENTS/SOUL/TOOLS) referenced by nix-clawdbot.
+- `documents/` — Clawdbot docs (AGENTS/SOUL/TOOLS) referenced by nix-clawdbot.
 - `docs/agents/` — Global agent guidance deployed to Codex/Claude.
 - `skills/` — Shared skills synced into `~/.codex/skills` and `~/.claude/skills`.
 - `modules/` — Home Manager modules wiring docs + skills + agent guidance.

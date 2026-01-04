@@ -7,22 +7,22 @@ wiring for `nix-clawdbot`, but contains no secrets or user-specific data.
 
 This is my AI development stack. There are many stacks like it, but this one is mine.
 
-I use Codex w/GPT-5.2-codex for coding. I use Clawdis with Opus 4.5 as my AI assistant. I use it on a Big Monitor (TM) (57" 7680 x 2160). I have max plans on both tools. I try and write all my tools in golang (BE), proto (API), typescript+react (FE), as this stack works very well with codex.
+I use Codex w/GPT-5.2-codex for coding. I use Clawdbot with Opus 4.5 as my AI assistant. I use it on a Big Monitor (TM) (57" 7680 x 2160). I have max plans on both tools. I try and write all my tools in golang (BE), proto (API), typescript+react (FE), as this stack works very well with codex.
 
 I have some skills that do things. I like the RFC one. This is very useful. `nanobanana` is helpful too, for when you want to generate project images. The product manager one is sort of okay. The rest are mostly boring and plumbing.
 
 This repository is all nix-based, so if you want to steal what I'm doing, you can point your AI agent at it, and copy my approach. That might be a good idea, it might be not: my defaults and preferred toolchain work for me, they might not work for you.
 
-The most fun part, and the part that I'm most excitted about is [`nix-clawdbot`](https://github.com/clawdbot/nix-clawdbot), which wraps [`clawdis`](https://github.com/steipete/clawdis) in nix and has a plugin system. This is the basis of my AI assistant stack, and should be wired in here. [`clawdis`](https://github.com/steipete/clawdis) can also self-modify its own configuration, and has a development and test `clawdis` instance.
+The most fun part, and the part that I'm most excitted about is [`nix-clawdbot`](https://github.com/clawdbot/nix-clawdbot), which wraps [`clawdbot`](https://github.com/steipete/clawdbot) in nix and has a plugin system. This is the basis of my AI assistant stack, and should be wired in here. [`clawdbot`](https://github.com/steipete/clawdbot) can also self-modify its own configuration, and has a development and test `clawdbot` instance.
 
-The most fun part of my [`nix-clawdbot`](https://github.com/clawdbot/nix-clawdbot) stack is [`gohome`](https://github.com/joshp123/gohome), my [`clawdis`](https://github.com/steipete/clawdis) based Home Assistant clone.
+The most fun part of my [`nix-clawdbot`](https://github.com/clawdbot/nix-clawdbot) stack is [`gohome`](https://github.com/joshp123/gohome), my [`clawdbot`](https://github.com/steipete/clawdbot) based Home Assistant clone.
 
 ## Projects
 
 - [`ai-stack`](https://github.com/joshp123/ai-stack)
 - [`nix-clawdbot`](https://github.com/clawdbot/nix-clawdbot)
 - [`gohome`](https://github.com/joshp123/gohome)
-- [`clawdis` (upstream)](https://github.com/steipete/clawdis)
+- [`clawdbot` (upstream)](https://github.com/steipete/clawdbot)
 
 ## What this is
 
@@ -40,7 +40,7 @@ imports = [ ~/code/ai-stack/modules/ai-stack.nix ];
 ```
 
 This sets:
-- `programs.clawdis.documents = ../documents` (override if needed)
+- `programs.clawdbot.documents = ../documents` (override if needed)
 
 ## Agent guidance (public, no‑PII)
 

@@ -12,7 +12,7 @@
     let
       module = { ... }: {
         imports = [
-          nix-clawdbot.homeManagerModules.clawdis
+          nix-clawdbot.homeManagerModules.clawdbot
           ./modules/ai-stack.nix
         ];
       };

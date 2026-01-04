@@ -1,10 +1,10 @@
 { lib, ... }:
 {
-  options.ai.clawdis = {
+  options.ai.clawdbot = {
     channel = lib.mkOption {
       type = lib.types.enum [ "local" "stable" ];
       default = "stable";
-      description = "Clawdis nix-clawdbot source (local checkout or stable release).";
+      description = "Clawdbot nix-clawdbot source (local checkout or stable release).";
     };
   };
 }
