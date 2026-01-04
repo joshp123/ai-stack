@@ -177,7 +177,6 @@ All tools support `--help` for full usage. Prefer CLI over MCP where possible.
     - If mismatch, propose concrete fixes or next actions.
   - Skip the UI verification pass for non-UI automation (e.g., login flows, third-party sites) unless the user explicitly asks.
 
-  - `bd/bv` tooling not used in this repo.
 
 ### Code Quality
 - **ubs**: Fast bug scanner for agents. Run on changed files before commits.
