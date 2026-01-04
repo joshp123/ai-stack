@@ -2,6 +2,7 @@
 {
   imports = [
     ./codex-config.nix
+    ./zsh.nix
   ];
 
   config = {

@@ -33,6 +33,10 @@ Clawdbot build overlays here.
 
 If you need private settings, keep them in your private repo and import this flake.
 
+Shell config split:
+- Public zsh defaults live here (`modules/zsh.nix`, `config/zsh/`).
+- Private, host/user-specific overrides belong in the private repo.
+
 ## Apply changes (no sudo)
 
 This repo is intended to apply via **Home Manager only**.
