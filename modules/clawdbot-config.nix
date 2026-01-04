@@ -60,6 +60,11 @@ in
     };
 
     prod = {
+      plugins = lib.mkOption {
+        type = lib.types.listOf lib.types.attrs;
+        default = [ ];
+        description = "Additional plugins for the prod instance.";
+      };
       telegramTokenFile = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
@@ -93,6 +98,11 @@ in
     };
 
     test = {
+      plugins = lib.mkOption {
+        type = lib.types.listOf lib.types.attrs;
+        default = [ ];
+        description = "Additional plugins for the test instance.";
+      };
       telegramTokenFile = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
@@ -180,6 +190,7 @@ in
               };
               gatewayPort = 18789;
               appDefaults.enable = false;
+              plugins = cfg.prod.plugins;
               configOverrides = lib.recursiveUpdate
                 (mkIdentity cfg.prod.identityName cfg.prod.identityEmoji)
                 (lib.recursiveUpdate
@@ -208,6 +219,7 @@ in
               };
               gatewayPort = 18790;
               appDefaults.enable = false;
+              plugins = cfg.test.plugins;
               configOverrides = lib.recursiveUpdate
                 (mkIdentity cfg.test.identityName cfg.test.identityEmoji)
                 (lib.recursiveUpdate
