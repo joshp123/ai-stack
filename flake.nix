@@ -5,14 +5,14 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-    nix-clawdis.url = "github:joshp123/nix-clawdis";
+    nix-clawdbot.url = "github:clawdbot/nix-clawdbot";
   };
 
-  outputs = { self, nixpkgs, home-manager, nix-clawdis }:
+  outputs = { self, nixpkgs, home-manager, nix-clawdbot }:
     let
       module = { ... }: {
         imports = [
-          nix-clawdis.homeManagerModules.clawdis
+          nix-clawdbot.homeManagerModules.clawdis
           ./modules/ai-stack.nix
         ];
       };

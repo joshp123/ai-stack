@@ -1,7 +1,7 @@
 # ai-stack
 
 Public, no‑PII AI stack modules. This repo provides opinionated defaults and
-wiring for `nix-clawdis`, but contains no secrets or user-specific data.
+wiring for `nix-clawdbot`, but contains no secrets or user-specific data.
 
 ## Core AI stack
 
@@ -13,14 +13,14 @@ I have some skills that do things. I like the RFC one. This is very useful. `nan
 
 This repository is all nix-based, so if you want to steal what I'm doing, you can point your AI agent at it, and copy my approach. That might be a good idea, it might be not: my defaults and preferred toolchain work for me, they might not work for you.
 
-The most fun part, and the part that I'm most excitted about is [`nix-clawdis`](https://github.com/joshp123/nix-clawdis), which wraps [`clawdis`](https://github.com/steipete/clawdis) in nix and has a plugin system. This is the basis of my AI assistant stack, and should be wired in here. [`clawdis`](https://github.com/steipete/clawdis) can also self-modify its own configuration, and has a development and test `clawdis` instance.
+The most fun part, and the part that I'm most excitted about is [`nix-clawdbot`](https://github.com/clawdbot/nix-clawdbot), which wraps [`clawdis`](https://github.com/steipete/clawdis) in nix and has a plugin system. This is the basis of my AI assistant stack, and should be wired in here. [`clawdis`](https://github.com/steipete/clawdis) can also self-modify its own configuration, and has a development and test `clawdis` instance.
 
-The most fun part of my [`nix-clawdis`](https://github.com/joshp123/nix-clawdis) stack is [`gohome`](https://github.com/joshp123/gohome), my [`clawdis`](https://github.com/steipete/clawdis) based Home Assistant clone.
+The most fun part of my [`nix-clawdbot`](https://github.com/clawdbot/nix-clawdbot) stack is [`gohome`](https://github.com/joshp123/gohome), my [`clawdis`](https://github.com/steipete/clawdis) based Home Assistant clone.
 
 ## Projects
 
 - [`ai-stack`](https://github.com/joshp123/ai-stack)
-- [`nix-clawdis`](https://github.com/joshp123/nix-clawdis)
+- [`nix-clawdbot`](https://github.com/clawdbot/nix-clawdbot)
 - [`gohome`](https://github.com/joshp123/gohome)
 - [`clawdis` (upstream)](https://github.com/steipete/clawdis)
 

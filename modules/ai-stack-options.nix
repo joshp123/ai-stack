@@ -4,7 +4,7 @@
     channel = lib.mkOption {
       type = lib.types.enum [ "local" "stable" ];
       default = "stable";
-      description = "Clawdis nix-clawdis source (local checkout or stable release).";
+      description = "Clawdis nix-clawdbot source (local checkout or stable release).";
     };
   };
 }
