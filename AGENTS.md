@@ -29,3 +29,11 @@ PII includes (not exhaustive):
 - ❌ Claude permission rules or sub-agent definitions
 
 If you need private settings, keep them in your private repo and import this flake.
+
+## Apply changes (no sudo)
+
+This repo is intended to apply via **Home Manager only**.
+
+- Recommended (from your private repo):
+  - `home-manager switch --flake "$HOME/code/nixos-config#$(whoami)"`
+- Avoid full nix-darwin rebuilds unless you changed system-level config.
