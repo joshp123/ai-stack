@@ -2,7 +2,7 @@
 let
   cfg = config.ai.clawdbot.profile;
 
-  mkTelegram = tokenFile: allowFrom: requireMention:
+  mkTelegram = tokenFile: allowFrom: requireMention: groups:
     if tokenFile == null then { } else {
       providers.telegram = {
         enable = true;
@@ -10,7 +10,7 @@ let
         allowFrom = allowFrom;
         groups = {
           _default = { inherit requireMention; };
-        };
+        } // groups;
       };
     };
 
@@ -87,6 +87,11 @@ in
         default = [ ];
         description = "Telegram allowlist for prod.";
       };
+      telegramGroups = lib.mkOption {
+        type = lib.types.attrs;
+        default = { };
+        description = "Telegram per-group overrides for prod (chat-id -> options).";
+      };
       requireMention = lib.mkOption {
         type = lib.types.bool;
         default = true;
@@ -136,6 +141,11 @@ in
         type = lib.types.listOf lib.types.int;
         default = [ ];
         description = "Telegram allowlist for test.";
+      };
+      telegramGroups = lib.mkOption {
+        type = lib.types.attrs;
+        default = { };
+        description = "Telegram per-group overrides for test (chat-id -> options).";
       };
       requireMention = lib.mkOption {
         type = lib.types.bool;
@@ -223,7 +233,7 @@ in
                     skillsLoad.extraDirs = cfg.prod.extraSkillDirs;
                   }));
             }
-            (mkTelegram cfg.prod.telegramTokenFile cfg.prod.telegramAllowFrom cfg.prod.requireMention);
+            (mkTelegram cfg.prod.telegramTokenFile cfg.prod.telegramAllowFrom cfg.prod.requireMention cfg.prod.telegramGroups);
         })
         (lib.optionalAttrs cfg.enableTest {
           test = lib.recursiveUpdate
@@ -252,7 +262,7 @@ in
                     skillsLoad.extraDirs = cfg.test.extraSkillDirs;
                   }));
             }
-            (mkTelegram cfg.test.telegramTokenFile cfg.test.telegramAllowFrom cfg.test.requireMention);
+            (mkTelegram cfg.test.telegramTokenFile cfg.test.telegramAllowFrom cfg.test.requireMention cfg.test.telegramGroups);
         })
       ];
     };
