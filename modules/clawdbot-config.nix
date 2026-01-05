@@ -21,6 +21,11 @@ let
       };
     };
 
+  mkConcurrency = maxConcurrent:
+    if maxConcurrent == null then { } else {
+      agent = { inherit maxConcurrent; };
+    };
+
   mkTranscribe = whisperPath:
     if whisperPath == null then { } else {
       inbound = {
@@ -97,6 +102,11 @@ in
         default = true;
         description = "Require @mention for prod group messages.";
       };
+      maxConcurrent = lib.mkOption {
+        type = lib.types.nullOr lib.types.int;
+        default = null;
+        description = "Max concurrent runs for prod (agent.maxConcurrent).";
+      };
       identityName = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
@@ -151,6 +161,11 @@ in
         type = lib.types.bool;
         default = true;
         description = "Require @mention for test group messages.";
+      };
+      maxConcurrent = lib.mkOption {
+        type = lib.types.nullOr lib.types.int;
+        default = null;
+        description = "Max concurrent runs for test (agent.maxConcurrent).";
       };
       identityName = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
@@ -229,9 +244,11 @@ in
                 (mkIdentity cfg.prod.identityName cfg.prod.identityEmoji)
                 (lib.recursiveUpdate
                   (mkTranscribe cfg.whisperPath)
-                  (lib.optionalAttrs (cfg.prod.extraSkillDirs != [ ]) {
-                    skillsLoad.extraDirs = cfg.prod.extraSkillDirs;
-                  }));
+                  (lib.recursiveUpdate
+                    (mkConcurrency cfg.prod.maxConcurrent)
+                    (lib.optionalAttrs (cfg.prod.extraSkillDirs != [ ]) {
+                      skillsLoad.extraDirs = cfg.prod.extraSkillDirs;
+                    })));
             }
             (mkTelegram cfg.prod.telegramTokenFile cfg.prod.telegramAllowFrom cfg.prod.requireMention cfg.prod.telegramGroups);
         })
@@ -258,9 +275,11 @@ in
                 (mkIdentity cfg.test.identityName cfg.test.identityEmoji)
                 (lib.recursiveUpdate
                   (mkTranscribe cfg.whisperPath)
-                  (lib.optionalAttrs (cfg.test.extraSkillDirs != [ ]) {
-                    skillsLoad.extraDirs = cfg.test.extraSkillDirs;
-                  }));
+                  (lib.recursiveUpdate
+                    (mkConcurrency cfg.test.maxConcurrent)
+                    (lib.optionalAttrs (cfg.test.extraSkillDirs != [ ]) {
+                      skillsLoad.extraDirs = cfg.test.extraSkillDirs;
+                    })));
             }
             (mkTelegram cfg.test.telegramTokenFile cfg.test.telegramAllowFrom cfg.test.requireMention cfg.test.telegramGroups);
         })
