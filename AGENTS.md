@@ -46,5 +46,5 @@ Clawdbot slicing:
 This repo is intended to apply via **Home Manager only**.
 
 - Recommended (from your private repo):
-  - `home-manager switch --flake "$HOME/code/nixos-config#$(whoami)"`
+  - `home-manager switch --flake "$HOME/code/nix/nixos-config#$(whoami)"`
 - Avoid full nix-darwin rebuilds unless you changed system-level config.

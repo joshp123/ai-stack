@@ -1,6 +1,18 @@
 { config, lib, ... }:
 let
-  cfg = config.ai.clawdbot.profile;
+  root = config.ai.clawdbot;
+  cfg = root.profile;
+
+  defaultPluginSources = {
+    padel = "github:joshp123/padel-cli";
+    gohome = "github:joshp123/gohome";
+    picnic = "github:joshp123/picnic";
+  };
+
+  pluginSource = name:
+    if root.localPlugins.${name} != null
+    then "path:${root.localPlugins.${name}}"
+    else defaultPluginSources.${name};
 
   mkTelegram = tokenFile: allowFrom: requireMention: groups:
     if tokenFile == null then { } else {
@@ -44,8 +56,140 @@ let
         };
       };
     };
+
+  padelPlugin =
+    if root.plugins.padel.enable && root.secrets.padelAuthFile != null then {
+      source = pluginSource "padel";
+      config = {
+        env = {
+          PADEL_AUTH_FILE = root.secrets.padelAuthFile;
+          PADEL_CONFIG_DIR = root.padel.configDir;
+        };
+      };
+    } else null;
+
+  picnicPlugin =
+    if root.plugins.picnic.enable && root.secrets.picnicAuthFile != null then {
+      source = pluginSource "picnic";
+      config = {
+        env = {
+          PICNIC_AUTH_FILE = root.secrets.picnicAuthFile;
+          PICNIC_COUNTRY = root.picnic.country;
+        };
+      };
+    } else null;
+
+  gohomePlugin =
+    if root.plugins.gohome.enable then {
+      source = pluginSource "gohome";
+    } else null;
+
+  basePlugins = lib.filter (p: p != null) [ padelPlugin gohomePlugin picnicPlugin ];
+
+  padelConfig = {
+    default_location = root.padel.defaultLocation;
+    favourite_clubs = root.padel.favouriteClubs;
+    preferred_times = root.padel.preferredTimes;
+    preferred_duration = root.padel.preferredDuration;
+  };
+
+  padelConfigFiltered = lib.filterAttrs (_: v:
+    v != null && v != [ ]
+  ) padelConfig;
 in
 {
+  options.ai.clawdbot = {
+    localPlugins = {
+      padel = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        description = "Local path to padel-cli plugin (path:/... override).";
+      };
+      gohome = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        description = "Local path to gohome plugin (path:/... override).";
+      };
+      picnic = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        description = "Local path to picnic plugin (path:/... override).";
+      };
+    };
+
+    secrets = {
+      padelAuthFile = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        description = "Path to padel auth file (PADEL_AUTH_FILE).";
+      };
+      picnicAuthFile = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        description = "Path to picnic auth file (PICNIC_AUTH_FILE).";
+      };
+    };
+
+    plugins = {
+      padel.enable = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Enable the padel plugin.";
+      };
+      gohome.enable = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Enable the gohome plugin.";
+      };
+      picnic.enable = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Enable the picnic plugin.";
+      };
+    };
+
+    padel = {
+      configDir = lib.mkOption {
+        type = lib.types.str;
+        default = "~/.config/padel";
+        description = "Padel config directory (PADEL_CONFIG_DIR).";
+      };
+      defaultLocation = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        description = "Padel default location (PII).";
+      };
+      favouriteClubs = lib.mkOption {
+        type = lib.types.listOf (lib.types.submodule {
+          options = {
+            id = lib.mkOption { type = lib.types.str; };
+            alias = lib.mkOption { type = lib.types.str; };
+          };
+        });
+        default = [ ];
+        description = "Padel favourite clubs (public).";
+      };
+      preferredTimes = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        description = "Padel preferred times (public).";
+      };
+      preferredDuration = lib.mkOption {
+        type = lib.types.nullOr lib.types.int;
+        default = null;
+        description = "Padel preferred duration in minutes (public).";
+      };
+    };
+
+    picnic = {
+      country = lib.mkOption {
+        type = lib.types.str;
+        default = "NL";
+        description = "Picnic country code (public).";
+      };
+    };
+  };
+
   options.ai.clawdbot.profile = {
     enableProd = lib.mkOption {
       type = lib.types.bool;
@@ -239,7 +383,7 @@ in
               };
               gatewayPort = 18789;
               appDefaults.enable = false;
-              plugins = cfg.prod.plugins;
+              plugins = basePlugins ++ cfg.prod.plugins;
               configOverrides = lib.recursiveUpdate
                 (mkIdentity cfg.prod.identityName cfg.prod.identityEmoji)
                 (lib.recursiveUpdate
@@ -270,7 +414,7 @@ in
               };
               gatewayPort = 18790;
               appDefaults.enable = false;
-              plugins = cfg.test.plugins;
+              plugins = basePlugins ++ cfg.test.plugins;
               configOverrides = lib.recursiveUpdate
                 (mkIdentity cfg.test.identityName cfg.test.identityEmoji)
                 (lib.recursiveUpdate
@@ -285,5 +429,10 @@ in
         })
       ];
     };
+
+    home.file = lib.optionalAttrs (root.plugins.padel.enable && padelConfigFiltered != { }) {
+      ".config/padel/config.json".text = builtins.toJSON padelConfigFiltered;
+    };
+
   };
 }
