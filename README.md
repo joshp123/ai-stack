@@ -1,46 +1,56 @@
 # ai-stack
 
 Public, no‑PII AI stack modules. This repo provides opinionated defaults and
-wiring for `nix-clawdbot`, but contains no secrets or user-specific data.
+wiring for `nix-clawdbot`, but contains **no secrets or user-specific data**.
 
-## Core AI stack
+This repository is intentionally **not standalone**. It must be imported by a
+private repo (e.g., `nixos-config`) that supplies secrets, allowlists, and local
+paths. If those inputs are missing, builds should fail with clear errors.
 
-This is my AI development stack. There are many stacks like it, but this one is mine.
+## What this repo is
 
-I use Codex w/GPT-5.2-codex for coding. I use Clawdbot with Opus 4.5 as my AI assistant. I use it on a Big Monitor (TM) (57" 7680 x 2160). I have max plans on both tools. I try and write all my tools in golang (BE), proto (API), typescript+react (FE), as this stack works very well with codex.
+This repo is designed to be copyable by other users with a single agent prompt.
+The public defaults should describe a complete Clawdbot setup once private inputs are provided.
 
-I have some skills that do things. I like the RFC one. This is very useful. `nanobanana` is helpful too, for when you want to generate project images. The product manager one is sort of okay. The rest are mostly boring and plumbing.
+- Public module layer imported from a private repo
+- Non‑PII defaults for Clawdbot and AI tooling
+- Source of truth for public docs + skills
 
-This repository is all nix-based, so if you want to steal what I'm doing, you can point your AI agent at it, and copy my approach. That might be a good idea, it might be not: my defaults and preferred toolchain work for me, they might not work for you.
+## What this repo is not
 
-The most fun part, and the part that I'm most excitted about is [`nix-clawdbot`](https://github.com/clawdbot/nix-clawdbot), which wraps [`clawdbot`](https://github.com/steipete/clawdbot) in nix and has a plugin system. This is the basis of my AI assistant stack, and should be wired in here. [`clawdbot`](https://github.com/steipete/clawdbot) can also self-modify its own configuration, and has a development and test `clawdbot` instance.
+- A complete, runnable bot config
+- A home for secrets, tokens, or allowlists
+- A place to wire private tool paths
 
-The most fun part of my [`nix-clawdbot`](https://github.com/clawdbot/nix-clawdbot) stack is [`gohome`](https://github.com/joshp123/gohome), my [`clawdbot`](https://github.com/steipete/clawdbot) based Home Assistant clone.
+## Slicing & dicing (repo boundaries)
 
-## Projects
+Use `AGENTS.md` as the index for how these repos split responsibilities:
 
-- [`ai-stack`](https://github.com/joshp123/ai-stack)
-- [`nix-clawdbot`](https://github.com/clawdbot/nix-clawdbot)
-- [`gohome`](https://github.com/joshp123/gohome)
-- [`clawdbot` (upstream)](https://github.com/steipete/clawdbot)
+- `ai-stack`: public defaults + wiring (no PII)
+- `nixos-config`: private secrets + allowlists + local paths
+- `nix-clawdbot`: packaging and batteries‑included defaults for Clawdbot itself
 
-## What this is
+## Core setup (private repo)
 
-- A **public** module layer you can import from private config.
-- A stable home for non‑PII AI defaults (documents, policies, module wiring).
-
-## What this is not
-
-- Your actual bot config (tokens, allowlists, PII). That belongs in a private repo.
-
-## Usage (private repo)
+Import this repo from your private flake:
 
 ```nix
-imports = [ ~/code/ai-stack/modules/ai-stack.nix ];
+imports = [ ~/code/nix/ai-stack/modules/ai-stack.nix ];
 ```
 
-This sets:
-- `programs.clawdbot.documents = ../documents` (override if needed)
+Private repo responsibilities:
+- Provide secrets and PII inputs to `programs.clawdbot.*`
+- Set Telegram allowlists and group modes
+- Optionally override plugin sources with local paths
+
+## Clawdbot wiring
+
+This repo sets public defaults for `programs.clawdbot` (mirroring the full
+example config from `nix-clawdbot`). Secrets are required for live plugins, and
+the build should fail if they’re missing.
+
+A short wiring guide lives at:
+- `docs/agents/clawdbot-wiring-checklist.md`
 
 ## Agent guidance (public, no‑PII)
 
@@ -50,12 +60,9 @@ This repo ships public guidance and skills only:
 - `docs/agents/GLOBAL_CLAUDE.md` → `~/.claude/CLAUDE.md`
 - `skills/` → `~/.codex/skills` and `~/.claude/skills`
 
-Deliberately **not included** here:
-- Claude sub‑agents
+Not included here:
 - Claude permissions or `settings.json`
-
-Keep those in your private repo. If you’re running in YOLO mode, the safest public
-default is to **omit** managed permissions entirely.
+- Sub‑agent definitions
 
 ## Skills included
 
@@ -73,3 +80,17 @@ Synced into both Codex and Claude:
 ## No‑sudo rule
 
 Everything here is user‑level. No system‑level services or sudo required.
+
+## Suggested repo layout
+
+This stack assumes a simple layout under `~/code/nix`:
+
+```text
+~/code/nix/
+  ai-stack/
+  nixos-config/
+  nix-secrets/
+  nix-clawdbot/ (optional, dev only)
+```
+
+Adjust paths in the private repo if your layout differs.

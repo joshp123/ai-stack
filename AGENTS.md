@@ -13,6 +13,27 @@ PII includes (not exhaustive):
 - Emails, phone numbers, IPs, MACs, or device names
 - API keys, tokens, cookies, and auth files
 
+## Slicing & dicing index (source of truth)
+
+Keep these boundaries strict:
+
+- `ai-stack` (this repo)
+  - Public defaults and wiring
+  - Parameterized Clawdbot config (no secrets)
+  - Shared skills + public docs
+
+- `nixos-config` (private)
+  - Secrets, allowlists, and PII
+  - Local plugin paths and machine‑specific settings
+  - Private overrides for Clawdbot instances
+
+- `nix-clawdbot` (public)
+  - Packaging, launchers, batteries‑included defaults
+  - Plugin machinery and runtime wrappers
+  - Example configs (do not edit from here)
+
+Rule of thumb: If it can identify a person or location, it does not live here.
+
 ## Repo structure (source of truth)
 
 - `documents/` — Clawdbot docs (AGENTS/SOUL/TOOLS) referenced by nix-clawdbot.
@@ -39,7 +60,12 @@ Shell config split:
 
 Clawdbot slicing:
 - Instance wiring and defaults live here (`modules/clawdbot-config.nix`).
-- Private repo provides secrets, allowlists, and local skill paths via `ai.clawdbot.profile.*`.
+- Private repo provides secrets, allowlists, and local plugin paths via `programs.clawdbot.*`.
+
+## Private repo wiring checklist
+
+See `docs/agents/clawdbot-wiring-checklist.md` for required inputs and recommended
+settings. Builds should fail when required secrets are missing.
 
 ## Apply changes (no sudo)
 
