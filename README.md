@@ -56,8 +56,8 @@ A short wiring guide lives at:
 
 This repo ships public guidance and skills only:
 
-- `docs/agents/GLOBAL_CODEX.md` → `~/.codex/AGENTS.md`
-- `docs/agents/GLOBAL_CLAUDE.md` → `~/.claude/CLAUDE.md`
+- `docs/agents/GLOBAL_PREAMBLE.md` + `docs/agents/GLOBAL_CODEX_APPENDIX.md` → `~/.codex/AGENTS.md`
+- `docs/agents/GLOBAL_PREAMBLE.md` + `docs/agents/GLOBAL_CLAUDE_APPENDIX.md` → `~/.claude/CLAUDE.md`
 - `skills/` → `~/.codex/skills` and `~/.claude/skills`
 
 Not included here:
