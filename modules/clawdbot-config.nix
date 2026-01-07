@@ -34,11 +34,11 @@ let
     enable = true;
     providers.telegram = {
       enable = true;
-      botTokenFile = "";
-      allowFrom = [ ];
+      botTokenFile = lib.mkDefault "";
+      allowFrom = lib.mkDefault [ ];
       groups = { "*" = { requireMention = true; }; };
     };
-    providers.anthropic.apiKeyFile = "";
+    providers.anthropic.apiKeyFile = lib.mkDefault "";
     routing.queue = {
       mode = "interrupt";
       bySurface = {
