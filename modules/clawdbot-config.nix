@@ -57,10 +57,22 @@ let
 
   prodInstance = lib.recursiveUpdate baseInstance {
     gatewayPort = 18789;
+    configOverrides = {
+      identity = { name = "DJTBOT"; emoji = "🇺🇸"; };
+      skillsLoad.extraDirs = [
+        "${homeDir}/.clawdbot-prod/workspace/skills"
+      ];
+    };
   };
 
   testInstance = lib.recursiveUpdate baseInstance {
     gatewayPort = 18790;
+    configOverrides = {
+      identity = { name = "DJTBOT-TEST"; emoji = "🧪"; };
+      skillsLoad.extraDirs = [
+        "${homeDir}/.clawdbot-test/workspace/skills"
+      ];
+    };
   };
 in
 {
@@ -68,6 +80,7 @@ in
     programs.clawdbot = {
       defaults.model = lib.mkDefault "anthropic/claude-opus-4-5";
       defaults.thinkingDefault = lib.mkDefault "high";
+      installApp = lib.mkDefault false;
       firstParty.oracle.enable = lib.mkDefault true;
       instances = {
         prod = prodInstance;
