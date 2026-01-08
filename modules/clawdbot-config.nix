@@ -48,7 +48,7 @@ let
         webchat = "queue";
       };
     };
-    plugins = basePlugins;
+    plugins = lib.mkDefault basePlugins;
     configOverrides = {
       agent.maxConcurrent = 5;
     };
