@@ -5,7 +5,7 @@ let
   defaultPluginSources = {
     padel = "github:joshp123/padel-cli";
     gohome = "github:joshp123/gohome";
-    picnic = "github:joshp123/picnic";
+    picnic = null;
   };
 
   padelPlugin = {
@@ -28,7 +28,9 @@ let
     source = defaultPluginSources.gohome;
   };
 
-  basePlugins = [ padelPlugin gohomePlugin picnicPlugin ];
+  basePlugins =
+    [ padelPlugin gohomePlugin ]
+    ++ lib.optionals (defaultPluginSources.picnic != null) [ picnicPlugin ];
 
   baseInstance = {
     enable = true;
