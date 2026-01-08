@@ -15,6 +15,9 @@
           nix-clawdbot.homeManagerModules.clawdbot
           ./modules/ai-stack.nix
         ];
+        nixpkgs.overlays = [
+          nix-clawdbot.overlays.default
+        ];
       };
     in {
       homeManagerModules.ai-stack = module;
