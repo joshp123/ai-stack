@@ -2,14 +2,16 @@
 let
   homeDir = config.home.homeDirectory or "~";
 
+  pluginSourcesOverride = config.programs.clawdbot.pluginSourcesOverride or {};
   defaultPluginSources = {
     padel = "github:joshp123/padel-cli";
     gohome = "github:joshp123/gohome";
     picnic = "github:joshp123/picnic-cli";
   };
+  pluginSources = defaultPluginSources // pluginSourcesOverride;
 
   padelPlugin = {
-    source = defaultPluginSources.padel;
+    source = pluginSources.padel;
     config.env = {
       PADEL_AUTH_FILE = "/run/agenix/padel-auth";
       PADEL_CONFIG_DIR = "${homeDir}/.config/padel";
@@ -17,7 +19,7 @@ let
   };
 
   picnicPlugin = {
-    source = defaultPluginSources.picnic;
+    source = pluginSources.picnic;
     config.env = {
       PICNIC_AUTH_FILE = "/run/agenix/picnic-auth";
       PICNIC_COUNTRY = "NL";
@@ -25,7 +27,7 @@ let
   };
 
   gohomePlugin = {
-    source = defaultPluginSources.gohome;
+    source = pluginSources.gohome;
   };
 
   basePlugins = [ padelPlugin gohomePlugin picnicPlugin ];
@@ -76,6 +78,12 @@ let
   };
 in
 {
+  options.programs.clawdbot.pluginSourcesOverride = lib.mkOption {
+    type = lib.types.attrsOf lib.types.str;
+    default = {};
+    description = "Override plugin sources by name (e.g. local dev paths).";
+  };
+
   config = lib.mkIf (lib.hasAttrByPath [ "programs" "clawdbot" ] config) {
     programs.clawdbot = {
       defaults.model = lib.mkDefault "anthropic/claude-opus-4-5";
