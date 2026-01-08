@@ -19,6 +19,7 @@ in
   imports = [
     ./codex-config.nix
     ./clawdbot-config.nix
+    ./cass.nix
     ./zsh.nix
   ];
 
