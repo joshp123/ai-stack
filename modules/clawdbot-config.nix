@@ -41,7 +41,7 @@ let
     providers.anthropic.apiKeyFile = lib.mkDefault "";
     routing.queue = {
       mode = "interrupt";
-      bySurface = {
+      byProvider = {
         telegram = "interrupt";
         whatsapp = "interrupt";
         discord = "queue";
