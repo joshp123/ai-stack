@@ -40,6 +40,10 @@ in
     }
     (lib.mkIf (lib.hasAttrByPath [ "programs" "clawdbot" ] config) {
       programs.clawdbot.reloadScript.enable = lib.mkDefault true;
+      home.activation.oracleKeychainAccess =
+        lib.mkIf (config.programs.clawdbot.firstParty.oracle.enable or false)
+          (lib.hm.dag.entryAfter [ "writeBoundary" ]
+            (builtins.readFile ../scripts/oracle-keychain-access.sh));
     })
   ];
 }
