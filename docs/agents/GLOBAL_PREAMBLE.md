@@ -103,6 +103,12 @@ Triggers: "implement", "add", "make a plan", "create ticket", "file issue", "new
 4. **Track**: Log bugs/todos in the repo’s preferred system.
 5. **Prove**: Smoke test + full test suite, then report evidence.
 
+## GitHub review comments (mandatory)
+
+- Always check BOTH: `gh pr view <id> --comments` and `gh api /repos/<org>/<repo>/pulls/<id>/comments --paginate`.
+- Report inline feedback explicitly: file + line + one‑line summary + link.
+- If one says “none” but the other shows results, keep searching and report them.
+
 **Ticket references**: Always include titles, not just IDs.
 **Smoke test** (MANDATORY): run the feature and show output; include tests and concrete evidence (UI screenshot/description, CLI command+output, API request+response).
 
@@ -206,4 +212,3 @@ All tools support `--help` for full usage. Prefer CLI over MCP where possible.
   - Config: `~/.mcporter-local/mcporter.json`. Set `MCPORTER_CONFIG` env when invoking. Avoid unless the user explicitly instructs.
 - **Research repos**: Clone sources to `~/code/research/<topic>/src/<repo>`, examples to `/examples/`.
   - Before cloning: search tree to find correct bucket. Before "check the source": search tree first.
-
