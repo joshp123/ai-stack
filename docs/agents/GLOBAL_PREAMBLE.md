@@ -6,7 +6,7 @@ Ground rules for all agents (Claude, Codex, future tools) working in this repo.
 
 - **NEVER delete files without asking**: Untracked files may contain important work. ALWAYS ask user before running `rm`, `git clean`, or any file deletion. No exceptions.
 - **Docs over web**: Prefer Dash MCP, direct file reads, repo clones. Web search is LAST RESORT with user consent.
-- **No global installs**: Use devenv.sh/devenv.nix per-project (`devenv --help`). Global config only via ~/code/nix/nixos-config.
+- **No global installs**: Use devenv.sh/devenv.nix per-project (`devenv --help`). Global config only via your private `nixos-config` repo (typically `$HOME/code/nix/nixos-config`).
 - **Code review required**: Do a self-review before any commit; state that you did so explicitly.
 - **Simplicity**: As simple as possible, no simpler. No premature optimization.
 - **No sudo**: Prompt user for sudo commands after sub-agent verification.
@@ -148,7 +148,7 @@ All tools support `--help` for full usage. Prefer CLI over MCP where possible.
   - Keep queries short for best hits (e.g., `LanguageModelSession` not full sentences).
 
 ### Printable Markdown (pandoc)
-- HTML print: `pandoc --from gfm+hard_line_breaks --to html5 --standalone --embed-resources --lua-filter ~/code/nix/nixos-config/stacks/ai/docs/agents/print-list-fix.lua --css ~/code/nix/nixos-config/stacks/ai/docs/agents/print.css -o out.html in.md`
+- HTML print: `pandoc --from gfm+hard_line_breaks --to html5 --standalone --embed-resources --lua-filter $HOME/code/nix/ai-stack/docs/agents/print-list-fix.lua --css $HOME/code/nix/ai-stack/docs/agents/print.css -o out.html in.md`
 
 ### Steipete Tap Tools
 - **codexbar**: Codex/Claude usage menu bar monitor (cask).
@@ -206,5 +206,4 @@ All tools support `--help` for full usage. Prefer CLI over MCP where possible.
   - Config: `~/.mcporter-local/mcporter.json`. Set `MCPORTER_CONFIG` env when invoking. Avoid unless the user explicitly instructs.
 - **Research repos**: Clone sources to `~/code/research/<topic>/src/<repo>`, examples to `/examples/`.
   - Before cloning: search tree to find correct bucket. Before "check the source": search tree first.
-
 

@@ -17,7 +17,7 @@ We will Nix-build overlay tools from their upstream sources and locks, avoiding 
   - Prefer **prebuilt release artifacts** only when they are the upstream-supported distribution (e.g., Peekaboo CLI).
 
 - **Scope**
-  - Replace wrappers for: ccusage, pi-coding-agent, oracle-cli, mcporter, dash-mcp-server, mcp-agent-mail, edge-tts, xcodebuildmcp, peekaboo-mcp.
+  - Replace wrappers for: ccusage, pi-coding-agent, oracle-cli, mcporter, dash-mcp-server, edge-tts, xcodebuildmcp, peekaboo-mcp.
   - Keep locks and hashes pinned; add update workflows rather than runtime installers.
 
 - **Non-goals**

@@ -1,9 +1,7 @@
-# Deprecated
-
-This file is no longer a source of truth.
+# Global Codex Instructions (assembled)
 
 Edit these instead:
-- GLOBAL_PREAMBLE.md
-- GLOBAL_CODEX_APPENDIX.md
+- GLOBAL_PREAMBLE.md (shared rules)
+- GLOBAL_CODEX_APPENDIX.md (Codex-only rules)
 
 Home Manager concatenates them into `~/.codex/AGENTS.md`.

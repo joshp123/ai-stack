@@ -20,11 +20,11 @@
    - Close with explicit testing + follow-up bullets (commands run, environments, deferred validation). Flag outstanding operator actions instead of leaving reviewers to infer them.
 
 4. **Codex config hygiene**  
-   - `~/.codex/config.toml` is managed by Nix (see `modules/darwin/files.nix`). Change Nix, not the file, when adjusting models, trust lists, or MCP wiring.
-   - If Codex reports missing MCP servers after a rebuild, run `darwin-rebuild switch --flake .#aarch64-darwin` (sudo) and restart Codex.
+   - `~/.codex/config.toml` is managed by Nix in `ai-stack/modules/codex-config.nix`. Change Nix, not the file, when adjusting models, trust lists, or MCP wiring.
+   - If Codex reports missing MCP servers after a rebuild, run `nix run .#build-switch` in `nixos-config` (sudo) and restart Codex.
 
 5. **Trusted projects**  
-   - Trusted roots are managed in Nix under `modules/darwin/files.nix` (`projects = [...]`). Add paths there and rebuild; Codex will regenerate `~/.codex/config.toml`.
+   - Trusted roots should be set in `ai-stack/modules/codex-config.nix` (add a `projects = [ ... ]` entry) and rebuild; Codex will regenerate `~/.codex/config.toml`.
 
 ## MCP usage philosophy
 

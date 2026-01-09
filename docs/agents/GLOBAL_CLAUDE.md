@@ -1,9 +1,7 @@
-# Deprecated
-
-This file is no longer a source of truth.
+# Global Claude Instructions (assembled)
 
 Edit these instead:
-- GLOBAL_PREAMBLE.md
-- GLOBAL_CLAUDE_APPENDIX.md
+- GLOBAL_PREAMBLE.md (shared rules)
+- GLOBAL_CLAUDE_APPENDIX.md (Claude-only rules)
 
 Home Manager concatenates them into `~/.claude/CLAUDE.md`.
