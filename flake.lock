@@ -83,11 +83,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1767996041,
-        "narHash": "sha256-8lwidE+hYedlcHHACm+wz1JHR6xWzVcif5QywDOfM8U=",
+        "lastModified": 1768000084,
+        "narHash": "sha256-H6ndHSOl3hBHtlDtcatdinSQGy28KOvAp6pN3h+sCVg=",
         "owner": "clawdbot",
         "repo": "nix-clawdbot",
-        "rev": "9d4cdea64b102063f46583196b56c343539f2163",
+        "rev": "3c7758800b02cd484ca36de11666b05553fb5baf",
         "type": "github"
       },
       "original": {
