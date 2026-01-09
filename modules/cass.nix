@@ -1,19 +1,6 @@
 { config, pkgs, lib, ... }:
 
 let
-  homeDir =
-    if config ? home && config.home ? homeDirectory then
-      config.home.homeDirectory
-    else if config ? home && config.home ? username then
-      if pkgs.stdenv.isDarwin then
-        "/Users/${config.home.username}"
-      else
-        "/home/${config.home.username}"
-    else if pkgs.stdenv.isDarwin then
-      "/Users/${builtins.getEnv "USER"}"
-    else
-      "/home/${builtins.getEnv "USER"}";
-
   cassIndexerPkg = pkgs.writeShellScriptBin "cass-indexer" ''
     set -euo pipefail
 
@@ -36,9 +23,6 @@ let
     exec "$cass_bin" index --watch
   '';
 
-  # Stable name for macOS Login Items (avoid nix-store hash basenames).
-  cassIndexerBin = "${homeDir}/.nix-profile/bin/cass-indexer";
-
 in
 {
   home.sessionVariables = {
@@ -56,16 +40,17 @@ in
   launchd.agents.cass-indexer = {
     enable = true;
     config = {
-      ProgramArguments = [ cassIndexerBin ];
+      # Stable name for macOS Login Items (avoid nix-store hash basenames).
+      ProgramArguments = [ "${config.home.homeDirectory}/.nix-profile/bin/cass-indexer" ];
       KeepAlive = true;
       ThrottleInterval = 5;
       RunAtLoad = true;
 
-      StandardOutPath = "${homeDir}/Library/Logs/cass-indexer.stdout.log";
-      StandardErrorPath = "${homeDir}/Library/Logs/cass-indexer.stderr.log";
+      StandardOutPath = "${config.home.homeDirectory}/Library/Logs/cass-indexer.stdout.log";
+      StandardErrorPath = "${config.home.homeDirectory}/Library/Logs/cass-indexer.stderr.log";
 
       EnvironmentVariables = {
-        HOME = "${homeDir}";
+        HOME = "${config.home.homeDirectory}";
         CODING_AGENT_SEARCH_NO_UPDATE_PROMPT = "1";
       };
     };

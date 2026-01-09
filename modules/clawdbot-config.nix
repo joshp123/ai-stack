@@ -52,7 +52,7 @@ let
     };
     plugins = lib.mkDefault basePlugins;
     configOverrides = {
-      agent.maxConcurrent = 5;
+      agents.defaults.maxConcurrent = 5;
     };
     appDefaults.enable = false;
   };
@@ -60,7 +60,13 @@ let
   prodInstance = lib.recursiveUpdate baseInstance {
     gatewayPort = 18789;
     configOverrides = {
-      identity = { name = "DJTBOT"; emoji = "🇺🇸"; };
+      agents.list = [
+        {
+          id = "main";
+          default = true;
+          identity = { name = "DJTBOT"; emoji = "🇺🇸"; };
+        }
+      ];
       skillsLoad.extraDirs = [
         "${homeDir}/.clawdbot-prod/workspace/skills"
       ];
@@ -70,7 +76,13 @@ let
   testInstance = lib.recursiveUpdate baseInstance {
     gatewayPort = 18790;
     configOverrides = {
-      identity = { name = "DJTBOT-TEST"; emoji = "🧪"; };
+      agents.list = [
+        {
+          id = "main";
+          default = true;
+          identity = { name = "DJTBOT-TEST"; emoji = "🧪"; };
+        }
+      ];
       skillsLoad.extraDirs = [
         "${homeDir}/.clawdbot-test/workspace/skills"
       ];
