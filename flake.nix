@@ -24,7 +24,7 @@
     let
       aiStackOverlays = import ./overlays { inputs = { inherit ubs cass; }; };
       module = { ... }: {
-        _module.args.inputs = {
+        _module.args.aiStackInputs = {
           inherit clawdbot nix-clawdbot ubs cass;
         };
         imports = [
