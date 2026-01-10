@@ -2,9 +2,6 @@
 
 # Claude Guidance
 
-## Claude Rules
-
-## Claude Workflow
-
-- **Self-review**: Check for correctness, risks, and regressions before committing.
-- **Tests**: Run tests when available; summarize evidence.
+## Claude
+- Make extensive use of opus-4.5 subagents wherever possible.
+- Do self-review wherever possible using code-review subagents.
