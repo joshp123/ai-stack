@@ -16,6 +16,22 @@
         "type": "github"
       }
     },
+    "clawdbot": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1768064541,
+        "narHash": "sha256-G/jUGkydFJb80HQPj8t5vuOSUkEG5eJ0XUP296L9ZOQ=",
+        "owner": "clawdbot",
+        "repo": "clawdbot",
+        "rev": "ef08c3f0382c84fa417343347113332bb140f416",
+        "type": "github"
+      },
+      "original": {
+        "owner": "clawdbot",
+        "repo": "clawdbot",
+        "type": "github"
+      }
+    },
     "flake-utils": {
       "inputs": {
         "systems": "systems"
@@ -83,11 +99,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1768063043,
-        "narHash": "sha256-X8WMh5AS5ifjlKRP3EhUZQpov6i/eNOom7Gkg0PrcZ0=",
+        "lastModified": 1768064818,
+        "narHash": "sha256-RKCJuNzdCezb44//hL6jdDsYxVMs0+0n1A+Aa+X6ibE=",
         "owner": "clawdbot",
         "repo": "nix-clawdbot",
-        "rev": "e5d650aa99823ec8869224e4bac127e40c0b7bb2",
+        "rev": "14274f896b6bb7b5b757d7dff7a93e6e38214526",
         "type": "github"
       },
       "original": {
@@ -165,6 +181,7 @@
     "root": {
       "inputs": {
         "cass": "cass",
+        "clawdbot": "clawdbot",
         "home-manager": "home-manager",
         "nix-clawdbot": "nix-clawdbot",
         "nixpkgs": "nixpkgs_3",

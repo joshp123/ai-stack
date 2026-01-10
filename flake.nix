@@ -5,6 +5,10 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    clawdbot = {
+      url = "github:clawdbot/clawdbot";
+      flake = false;
+    };
     nix-clawdbot.url = "github:clawdbot/nix-clawdbot";
     ubs = {
       url = "github:Dicklesworthstone/ultimate_bug_scanner";
@@ -16,10 +20,13 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, nix-clawdbot, ubs, cass }:
+  outputs = { self, nixpkgs, home-manager, clawdbot, nix-clawdbot, ubs, cass }:
     let
       aiStackOverlays = import ./overlays { inputs = { inherit ubs cass; }; };
       module = { ... }: {
+        _module.args.aiStackInputs = {
+          inherit clawdbot nix-clawdbot;
+        };
         imports = [
           nix-clawdbot.homeManagerModules.clawdbot
           ./modules/ai-stack.nix

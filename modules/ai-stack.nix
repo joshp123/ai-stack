@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }:
+{ lib, config, pkgs, aiStackInputs ? {}, ... }:
 let
   codexAgents = pkgs.concatTextFile {
     name = "codex-agents.md";
@@ -14,6 +14,23 @@ let
       ../docs/agents/GLOBAL_CLAUDE_APPENDIX.md
     ];
   };
+
+  clawdbotUpstreamAgents =
+    if aiStackInputs ? clawdbot
+    then "${aiStackInputs.clawdbot}/docs/reference/templates/AGENTS.md"
+    else null;
+
+  clawdbotDocs =
+    if clawdbotUpstreamAgents != null then
+      pkgs.runCommand "clawdbot-documents" {} ''
+        bash ${../scripts/build-clawdbot-documents.sh} \
+          ${../documents} \
+          ${clawdbotUpstreamAgents} \
+          ${../documents/AGENTS.josh.md} \
+          $out
+      ''
+    else
+      ../documents;
 in
 {
   imports = [
@@ -26,7 +43,7 @@ in
 
   config = lib.mkMerge [
     {
-      programs.clawdbot.documents = lib.mkDefault ../documents;
+      programs.clawdbot.documents = lib.mkDefault clawdbotDocs;
 
       home.file = {
         ".codex/AGENTS.md".source = codexAgents;
