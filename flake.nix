@@ -30,7 +30,7 @@
         _module.args.aiStackInputs = aiStackInputs;
         imports = [
           nix-clawdbot.homeManagerModules.clawdbot
-          (import ./modules/ai-stack.nix { inherit aiStackInputs; })
+          ./modules/ai-stack.nix
         ];
         nixpkgs.overlays = [
           nix-clawdbot.overlays.default
