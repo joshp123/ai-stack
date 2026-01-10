@@ -15,8 +15,7 @@ let
     ];
   };
 
-  effectiveInputs =
-    if inputs != {} then inputs else (pkgs.inputs or {});
+  effectiveInputs = (pkgs.inputs or {}) // inputs;
 
   baseSkills = ../skills;
   devBrowserSkill =
