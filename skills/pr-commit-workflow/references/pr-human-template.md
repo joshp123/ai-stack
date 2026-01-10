@@ -1,5 +1,6 @@
-# Human Intent
-<USER_TEXT_HERE>
+# Human written summary:
+The intent of this change is, as written by a human:
+> <USER_TEXT_HERE>
 
 # Summary
 - <bullet>
