@@ -20,6 +20,7 @@ in
     ./codex-config.nix
     ./clawdbot-config.nix
     ./cass.nix
+    ./ghostty.nix
     ./zsh.nix
   ];
 
