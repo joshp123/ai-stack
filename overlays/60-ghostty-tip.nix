@@ -1,4 +1,3 @@
-{ }:
 final: prev: {
   ghostty-bin = prev.ghostty-bin.overrideAttrs (_old: {
     version = "tip";
