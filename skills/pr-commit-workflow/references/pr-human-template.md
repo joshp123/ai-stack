@@ -4,9 +4,6 @@ The intent of this change is, as written by a human:
 
 _The rest of this PR was written by <MODEL>-<THINKING_LEVEL>, running in the <HARNESS> harness. Full environment + prompt history appear at the end._
 
-# Summary
-- <bullet>
-
 # Changes
 - <bullet>
 
@@ -14,10 +11,10 @@ _The rest of this PR was written by <MODEL>-<THINKING_LEVEL>, running in the <HA
 - <command + result>
 
 # Risks
-- <bullet>
+- <bullet or "None: <reason>">
 
 # Follow-ups
-- <bullet>
+- <bullet or "None">
 
 # Prompt History
 

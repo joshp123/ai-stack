@@ -14,7 +14,7 @@ if [[ -z "$harness" ]]; then
   fi
 fi
 
-model="${CODEX_MODEL:-${OPENAI_MODEL:-${CLAUDE_MODEL:-${CURSOR_MODEL:-${LLM_MODEL:-unknown}}}}}"
+model="${CODEX_MODEL:-${OPENAI_MODEL:-${ANTHROPIC_MODEL:-${CLAUDE_MODEL:-${CURSOR_MODEL:-${LLM_MODEL:-unknown}}}}}}"
 thinking="${THINKING_LEVEL:-${CODEX_THINKING_LEVEL:-${OPENAI_THINKING_LEVEL:-unknown}}}"
 
 terminal="${TERM_PROGRAM:-${LC_TERMINAL:-unknown}}"
