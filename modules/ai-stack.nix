@@ -1,5 +1,6 @@
-{ lib, config, pkgs, inputs, ... }:
+{ lib, config, pkgs, ... }:
 let
+  aiStackInputs = config._module.args.aiStackInputs or {};
   codexAgents = pkgs.concatTextFile {
     name = "codex-agents.md";
     files = [
@@ -16,8 +17,8 @@ let
   };
 
   clawdbotInput =
-    if inputs ? clawdbot
-    then inputs.clawdbot
+    if aiStackInputs ? clawdbot
+    then aiStackInputs.clawdbot
     else null;
   clawdbotUpstreamAgents =
     if clawdbotInput != null
