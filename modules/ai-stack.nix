@@ -15,12 +15,15 @@ let
     ];
   };
 
+  effectiveInputs =
+    if inputs != {} then inputs else (pkgs.inputs or {});
+
   baseSkills = ../skills;
   devBrowserSkill =
-    if inputs ? dev-browser
+    if effectiveInputs ? dev-browser
     then
-      (if lib.hasAttrByPath [ "packages" pkgs.system "dev-browser-skill" ] inputs.dev-browser
-       then inputs.dev-browser.packages.${pkgs.system}.dev-browser-skill
+      (if lib.hasAttrByPath [ "packages" pkgs.system "dev-browser-skill" ] effectiveInputs.dev-browser
+       then effectiveInputs.dev-browser.packages.${pkgs.system}.dev-browser-skill
        else null)
     else null;
   extraSkills = lib.optionals (devBrowserSkill != null) [ devBrowserSkill ];
@@ -33,8 +36,8 @@ let
     };
 
   clawdbotInput =
-    if inputs ? clawdbot
-    then inputs.clawdbot
+    if effectiveInputs ? clawdbot
+    then effectiveInputs.clawdbot
     else null;
   clawdbotUpstreamAgents =
     if clawdbotInput != null
