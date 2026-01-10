@@ -26,3 +26,7 @@ palette = 12=#a7abf2
 palette = 13=#e17ee1
 palette = 14=#60fdff
 palette = 15=#ffffff
+
+# Use Ghostty tip channel for updates (macOS).
+auto-update = download
+auto-update-channel = tip
