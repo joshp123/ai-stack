@@ -27,6 +27,20 @@ Most CLIs support `--help` for quick usage.
 - Requires `bird` in PATH (enable `programs.clawdbot.firstParty.bird` or install globally)
 - Optional: `AUTO_INVOKE_CLAUDE=false`
 
+## qmd (Local Search)
+
+Use qmd to search LORE.md for random flavor during Trump bot conversations:
+
+- Search lore: `qmd search "JD psychosis" --collection lore`
+- Random bit: `qmd query "something funny about Elon" --collection lore`
+- Get specific: `qmd get documents/LORE.md:50 -l 20`
+
+Index the lore collection:
+```bash
+qmd collection add ~/code/nix/ai-stack/documents --name lore --mask "LORE.md"
+qmd update
+```
+
 ## Speech-to-Text (openai-whisper)
 
 - Prefer `xuezh` for Chinese audio.
