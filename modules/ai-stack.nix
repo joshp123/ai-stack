@@ -1,9 +1,6 @@
-{ lib, config, pkgs, aiStackInputs ? null, ... }:
+{ lib, config, pkgs, ... }:
 let
-  aiStackInputsResolved =
-    if aiStackInputs != null
-    then aiStackInputs
-    else config._module.args.aiStackInputs or {};
+  aiStackInputsResolved = config._module.args.aiStackInputs or {};
   codexAgents = pkgs.concatTextFile {
     name = "codex-agents.md";
     files = [
