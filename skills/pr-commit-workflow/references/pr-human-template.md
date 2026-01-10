@@ -1,6 +1,7 @@
 # Human written summary:
 The intent of this change is, as written by a human:
 > <USER_TEXT_HERE>
+
 _The rest of this PR was written by <MODEL>-<THINKING_LEVEL>, running in the <HARNESS> harness. The full prompt history used to generate this PR is included at the end of this PR, for your convenience._
 
 # Summary

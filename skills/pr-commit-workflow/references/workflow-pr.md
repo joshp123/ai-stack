@@ -9,7 +9,7 @@
 - Do not draft, rewrite, summarize, or paraphrase the intent.
  - Paste the intent verbatim at the very top of the PR body under the heading `Human written summary:`.
  - Use the lead-in line `The intent of this change is, as written by a human:` and put the intent in a blockquote.
- - Add a single italicized line after the blockquote stating model, thinking level, and harness.
+ - Add a single italicized line after the blockquote (blank line between quote and italics) stating model, thinking level, and harness.
    - Format: `_The rest of this PR was written by <MODEL>-<THINKING_LEVEL>, running in the <HARNESS> harness. The full prompt history used to generate this PR is included at the end of this PR, for your convenience._`
  - Do not include instruction text (e.g., “paste verbatim”) in the PR body.
 - If intent is missing, stop and request it.
