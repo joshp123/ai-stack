@@ -3,11 +3,11 @@
     "cass": {
       "flake": false,
       "locked": {
-        "lastModified": 1767749042,
-        "narHash": "sha256-KFOK4UM+jKiMKlwzjf/XK5qgo0d3GKoRlf+uYG46hyQ=",
+        "lastModified": 1768028193,
+        "narHash": "sha256-GUgMJOu20P+dj/pavV7FCYnXjhUsx85jC4LZ7bnxAOU=",
         "owner": "Dicklesworthstone",
         "repo": "coding_agent_session_search",
-        "rev": "17d807912f8cc734b7ac75fbbddb5b887f30f17d",
+        "rev": "a2bedccabe0cd34d92a97762508641a590e89b0f",
         "type": "github"
       },
       "original": {
@@ -83,11 +83,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1768020209,
-        "narHash": "sha256-MO2FKSUcUMms+9rNlpcYpthJXbRjgG7eZJNhACC1IMI=",
+        "lastModified": 1768063043,
+        "narHash": "sha256-X8WMh5AS5ifjlKRP3EhUZQpov6i/eNOom7Gkg0PrcZ0=",
         "owner": "clawdbot",
         "repo": "nix-clawdbot",
-        "rev": "fe366c1507a150ae3b38a8ba0e455f79802cacd4",
+        "rev": "e5d650aa99823ec8869224e4bac127e40c0b7bb2",
         "type": "github"
       },
       "original": {
@@ -189,11 +189,11 @@
     "ubs": {
       "flake": false,
       "locked": {
-        "lastModified": 1767654891,
-        "narHash": "sha256-z0xOkY9lFoVPsWMoD5WiJ4Y+JUFjqW2MQ/BWfLZBFSo=",
+        "lastModified": 1767996398,
+        "narHash": "sha256-PvodDC00N3c7NP56XhmJcfinHGQ9RGCdIXOXN7+GMY8=",
         "owner": "Dicklesworthstone",
         "repo": "ultimate_bug_scanner",
-        "rev": "901496b555d5fe598d1298dff65d72fd8243391c",
+        "rev": "93e646243073d435890c02a5975422cc447f3fee",
         "type": "github"
       },
       "original": {
