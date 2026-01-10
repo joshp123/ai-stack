@@ -1,4 +1,4 @@
-{ lib, config, pkgs, aiStackInputs ? {}, ... }:
+{ lib, config, pkgs, aiStackInputs ? {}, inputs ? {}, ... }:
 let
   codexAgents = pkgs.concatTextFile {
     name = "codex-agents.md";
@@ -15,9 +15,15 @@ let
     ];
   };
 
-  clawdbotUpstreamAgents =
+  clawdbotInput =
     if aiStackInputs ? clawdbot
-    then "${aiStackInputs.clawdbot}/docs/reference/templates/AGENTS.md"
+    then aiStackInputs.clawdbot
+    else if inputs ? clawdbot
+    then inputs.clawdbot
+    else null;
+  clawdbotUpstreamAgents =
+    if clawdbotInput != null
+    then "${clawdbotInput}/docs/reference/templates/AGENTS.md"
     else null;
 
   clawdbotDocs =
