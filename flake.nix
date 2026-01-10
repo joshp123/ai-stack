@@ -23,13 +23,14 @@
   outputs = { self, nixpkgs, home-manager, clawdbot, nix-clawdbot, ubs, cass }:
     let
       aiStackOverlays = import ./overlays { inputs = { inherit ubs cass; }; };
-      module = { ... }: {
-        _module.args.aiStackInputs = {
-          inherit clawdbot nix-clawdbot ubs cass;
-        };
+      module = { ... }:
+        let
+          aiStackInputs = { inherit clawdbot nix-clawdbot ubs cass; };
+        in {
+        _module.args.aiStackInputs = aiStackInputs;
         imports = [
           nix-clawdbot.homeManagerModules.clawdbot
-          ./modules/ai-stack.nix
+          (import ./modules/ai-stack.nix { inherit aiStackInputs; })
         ];
         nixpkgs.overlays = [
           nix-clawdbot.overlays.default

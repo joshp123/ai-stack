@@ -1,6 +1,5 @@
-{ lib, config, pkgs, ... }:
+{ lib, config, pkgs, aiStackInputs, ... }:
 let
-  aiStackInputs = config._module.args.aiStackInputs or {};
   codexAgents = pkgs.concatTextFile {
     name = "codex-agents.md";
     files = [
