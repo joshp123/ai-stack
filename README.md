@@ -32,10 +32,10 @@ Use `AGENTS.md` as the index for how these repos split responsibilities:
 
 ## Core setup (private repo)
 
-Import this repo from your private flake:
+Import this repo from your private flake (Home Manager module):
 
 ```nix
-imports = [ ~/code/nix/ai-stack/modules/ai-stack.nix ];
+imports = [ inputs.ai-stack.homeManagerModules.ai-stack ];
 ```
 
 Private repo responsibilities:

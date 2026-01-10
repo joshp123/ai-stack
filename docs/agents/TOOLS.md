@@ -58,7 +58,8 @@ All tools support `--help` for full usage. Prefer CLI over MCP where possible.
 - **cm**: Robot-friendly cass wrapper. `cm search "query"` adds `--robot` automatically.
 
 ### Text-to-Speech
-- **edge-tts**: Microsoft Edge neural TTS. No API key. See `~/.clawdbot/agents.md` or the `xuezh` tool for Mandarin voice details.
+- **edge-tts**: Microsoft Edge neural TTS. No API key. See Clawdbot `TOOLS.md` in the active workspace
+  (e.g. `${CLAWDBOT_STATE_DIR:-~/.clawdbot}/workspace/TOOLS.md` or `~/.clawdbot-<instance>/workspace/TOOLS.md`).
 
 ### External AI
 - **oracle**: Use the oracle skill runbook.
