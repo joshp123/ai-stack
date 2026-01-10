@@ -15,6 +15,23 @@ let
     ];
   };
 
+  baseSkills = ../skills;
+  devBrowserSkill =
+    if inputs ? dev-browser
+    then
+      (if lib.hasAttrByPath [ "packages" pkgs.system "dev-browser-skill" ] inputs.dev-browser
+       then inputs.dev-browser.packages.${pkgs.system}.dev-browser-skill
+       else null)
+    else null;
+  extraSkills = lib.optionals (devBrowserSkill != null) [ devBrowserSkill ];
+  skillsDir =
+    if extraSkills == []
+    then baseSkills
+    else pkgs.symlinkJoin {
+      name = "ai-stack-skills";
+      paths = [ baseSkills ] ++ extraSkills;
+    };
+
   clawdbotInput =
     if inputs ? clawdbot
     then inputs.clawdbot
@@ -55,9 +72,9 @@ in
         ".claude/CLAUDE.md".source = claudeAgents;
         ".claude/CLAUDE.md".force = true;
 
-        ".codex/skills".source = ../skills;
+        ".codex/skills".source = skillsDir;
         ".codex/skills".force = true;
-        ".claude/skills".source = ../skills;
+        ".claude/skills".source = skillsDir;
         ".claude/skills".force = true;
       };
     }
