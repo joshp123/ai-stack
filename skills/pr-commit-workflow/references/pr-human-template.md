@@ -1,4 +1,4 @@
-# HUMAN WRITTEN INTENT (PASTE VERBATIM; DO NOT EDIT OR PARAPHRASE)
+# Human Intent
 <USER_TEXT_HERE>
 
 # Summary
@@ -26,4 +26,6 @@ Terminal: <value>
 System: <value>
 
 ## Prompts
-- <ISO-8601 timestamp> <prompt text>
+| ISO-8601 | Prompt |
+| --- | --- |
+| <timestamp> | `<prompt text>` |
