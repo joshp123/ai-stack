@@ -13,10 +13,12 @@
 ## Steps
 - Ensure branch is clean and only includes the intended commits.
 - Check for other open PRs that may conflict.
+- Ask the user whether to request reviewers; only request collaborators.
 - Build PR body using `references/pr-human-template.md`.
 - Fill non-human sections with factual, testable info.
 - Use `/tmp` + `gh pr edit --body-file` for updates.
 - Create PR with `gh pr create` if not already open.
+- Default PRs to draft until tests + review pass; ask user before marking ready.
 
 ## Prompt History Requirements
 - Include ISO-8601 timestamps with timezone.
