@@ -7,8 +7,9 @@
 ## Mandatory Human Intent Capture
 - Prompt the user for a human-written intent section.
 - Do not draft, rewrite, summarize, or paraphrase the intent.
-- Paste the intent verbatim at the very top of the PR body under the heading `Human Intent`.
-- Do not include instruction text (e.g., “paste verbatim”) in the PR body.
+ - Paste the intent verbatim at the very top of the PR body under the heading `Human written summary:`.
+ - Use the lead-in line `The intent of this change is, as written by a human:` and put the intent in a blockquote.
+ - Do not include instruction text (e.g., “paste verbatim”) in the PR body.
 - If intent is missing, stop and request it.
 
 ## Steps
