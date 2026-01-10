@@ -26,6 +26,7 @@ fi
 
 mkdir -p "$out_dir"
 cp -R "$src_dir"/. "$out_dir"/
+chmod -R u+w "$out_dir"
 
 if [ "$(head -n 1 "$upstream_agents")" = "---" ]; then
   end_line="$(awk 'NR>1 && $0=="---" {print NR; exit}' "$upstream_agents")"
