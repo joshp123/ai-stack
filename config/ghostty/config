@@ -1,6 +1,6 @@
 # Ghostty config matched to iTerm2 Default profile.
 
-font-family = Menlo
+font-family = "JetBrains Mono"
 font-size = 15
 term = xterm-256color
 
@@ -27,6 +27,6 @@ palette = 13=#e17ee1
 palette = 14=#60fdff
 palette = 15=#ffffff
 
-# Use Ghostty tip channel for updates (macOS).
+# Auto-update Ghostty (tip channel). This may drift from the Nix pin.
 auto-update = download
 auto-update-channel = tip
