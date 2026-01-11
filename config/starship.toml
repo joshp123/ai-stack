@@ -1,0 +1,45 @@
+format = "$directory$character"
+right_format = "$git_branch$git_status$cmd_duration$nix_shell"
+add_newline = false
+scan_timeout = 1000
+command_timeout = 1000
+
+[directory]
+style = "bold blue"
+truncation_length = 0          # show full path
+truncate_to_repo = false       # do not stop at repo root
+fish_style_pwd_dir_length = 0  # no per-segment shortening
+
+[character]
+success_symbol = "❯"
+error_symbol = "❯"
+vicmd_symbol = "❮"
+format = "$symbol "
+
+[git_branch]
+symbol = " "
+style = "bold green"
+format = " [$symbol$branch]($style)"
+
+[git_status]
+style = "yellow"
+format = " [$ahead_behind$stashed$staged$modified$renamed$deleted$untracked$conflicted]($style)"
+stashed = "⚑$count"
+staged = "+$count"
+modified = "~$count"
+renamed = "»$count"
+deleted = "✘$count"
+untracked = "?$count"
+conflicted = "✖$count"
+ahead = "⇡$count"
+behind = "⇣$count"
+diverged = "⇕$ahead_count/$behind_count"
+
+[cmd_duration]
+style = "yellow"
+min_time = 5000
+format = " [$duration]($style)"
+
+[nix_shell]
+format = " [nix:$name]($style)"
+style = "bright-black"

@@ -11,5 +11,7 @@ in
   home.file = {
     ".config/ghostty/config".source = ../config/ghostty/config;
     ".config/ghostty/config".force = true;
+  } // lib.optionalAttrs (pkgs.stdenv.isDarwin && ghosttyPkg != null) {
+    "Applications/Ghostty.app".source = "${ghosttyPkg}/Applications/Ghostty.app";
   };
 }
