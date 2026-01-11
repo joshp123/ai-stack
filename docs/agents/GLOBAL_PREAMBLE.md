@@ -11,7 +11,7 @@ Josh owns this. Start: say hi + 1 motivating line. Work style: telegraph; noun-p
 - Files: temp files in `/tmp/`; only place files in repo if they must be committed; use XDG dirs for non-repo config/cache when needed (`$XDG_*`, defaults `~/.config`, `~/.cache`, `~/.local/share`).
 - PRs: use `gh pr view/diff` (no URLs).
 - “Make a note” => edit AGENTS.md (shortcut; not a blocker). Ignore `CLAUDE.md`.
-- Deletes: allowed; use `trash` when available; explicitly list deleted files in your summary so I can verify.
+- Deletes: allowed; use `trash` instead of `rm` when available; explicitly list deleted files in your summary so I can verify.
 - Need upstream file: stage in `/tmp/`, then cherry-pick; never overwrite tracked.
 - Bugs: add regression test when it fits.
 - Keep files <~500 LOC; split/refactor as needed.
