@@ -1,4 +1,4 @@
-{ lib, config, pkgs, inputs ? {}, ... }:
+{ lib, config, pkgs, inputs ? {}, aiStackInputs ? {}, ... }:
 let
   codexAgents = pkgs.concatTextFile {
     name = "codex-agents.md";
@@ -22,7 +22,7 @@ let
     ];
   };
 
-  effectiveInputs = (pkgs.inputs or {}) // inputs;
+  effectiveInputs = (pkgs.inputs or {}) // aiStackInputs // inputs;
 
   baseSkills = ../skills;
   devBrowserSkill =
@@ -68,6 +68,7 @@ in
     ./clawdbot-config.nix
     ./cass.nix
     ./ghostty.nix
+    ./pi-coding-agent.nix
     ./zsh.nix
   ];
 

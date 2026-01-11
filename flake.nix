@@ -18,14 +18,18 @@
       url = "github:Dicklesworthstone/coding_agent_session_search";
       flake = false;
     };
+    dev-browser = {
+      url = "github:joshp123/dev-browser-mcp";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, clawdbot, nix-clawdbot, ubs, cass }:
+  outputs = { self, nixpkgs, home-manager, clawdbot, nix-clawdbot, ubs, cass, dev-browser }:
     let
-      aiStackOverlays = import ./overlays { inputs = { inherit ubs cass; }; };
+      aiStackOverlays = import ./overlays { inputs = { inherit ubs cass dev-browser; }; };
       module = { ... }:
         let
-          aiStackInputs = { inherit clawdbot nix-clawdbot ubs cass; };
+          aiStackInputs = { inherit clawdbot nix-clawdbot ubs cass dev-browser; };
         in {
         _module.args.aiStackInputs = aiStackInputs;
         imports = [
