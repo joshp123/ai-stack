@@ -1,8 +1,6 @@
 ---
 name: product-manager
-version: 1.0.0
 description: This skill should be used when users request new features, improvements, fixes, or ask to create plans. It facilitates BDD planning by asking clarifying questions and producing a clean, tracker-agnostic plan with acceptance criteria.
-tools: []
 ---
 
 # Product Manager Skill
