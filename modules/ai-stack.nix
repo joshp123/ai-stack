@@ -7,6 +7,13 @@ let
       ../docs/agents/GLOBAL_CODEX_APPENDIX.md
     ];
   };
+  piAgents = pkgs.concatTextFile {
+    name = "pi-agents.md";
+    files = [
+      ../docs/agents/GLOBAL_PREAMBLE.md
+      ../docs/agents/GLOBAL_PI_APPENDIX.md
+    ];
+  };
   claudeAgents = pkgs.concatTextFile {
     name = "claude-agents.md";
     files = [
@@ -71,6 +78,8 @@ in
       home.file = {
         ".codex/AGENTS.md".source = codexAgents;
         ".codex/AGENTS.md".force = true;
+        ".pi/AGENTS.md".source = piAgents;
+        ".pi/AGENTS.md".force = true;
         ".claude/CLAUDE.md".source = claudeAgents;
         ".claude/CLAUDE.md".force = true;
 
