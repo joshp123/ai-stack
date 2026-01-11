@@ -9,7 +9,7 @@ let
   handoff = "${pkgs.pi-coding-agent}/lib/node_modules/@mariozechner/pi-coding-agent/examples/extensions/handoff.ts";
 in
 {
-  home.activation.piCodingAgentExtensions = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  home.activation.piCodingAgentExtensions = lib.hm.dag.entryAfter [ "writeBoundary" "piCodingAgentSettings" ] ''
     set -euo pipefail
     settings="${settingsPath}"
     mkdir -p "$(dirname "$settings")"
