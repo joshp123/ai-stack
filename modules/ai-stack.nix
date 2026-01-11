@@ -78,13 +78,15 @@ in
       home.file = {
         ".codex/AGENTS.md".source = codexAgents;
         ".codex/AGENTS.md".force = true;
-        ".pi/AGENTS.md".source = piAgents;
-        ".pi/AGENTS.md".force = true;
+        ".pi/agent/AGENTS.md".source = piAgents;
+        ".pi/agent/AGENTS.md".force = true;
         ".claude/CLAUDE.md".source = claudeAgents;
         ".claude/CLAUDE.md".force = true;
 
         ".codex/skills".source = skillsDir;
         ".codex/skills".force = true;
+        ".pi/agent/skills".source = skillsDir;
+        ".pi/agent/skills".force = true;
         ".claude/skills".source = skillsDir;
         ".claude/skills".force = true;
       };
