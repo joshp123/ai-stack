@@ -1,76 +1,78 @@
-# ai-stack Agents
+# ai-stack
 
-## No PII (first rule)
+**Public AI development experience** — shareable with anyone.
 
-This repo is public. Do NOT add secrets, tokens, private URLs, personal paths, or user identifiers.
-If something is sensitive, it belongs in a private repo and should be linked in via Nix.
+Skills, agent docs, shell config, tool wiring for Claude, Codex, pi, Cursor, Clawdbot, etc.
 
-PII includes (not exhaustive):
-- Real names, usernames, or handles tied to a person
-- Home/work locations, cities, or timezones
-- Personal domains, subdomains, and private hostnames
-- Absolute paths containing a user name (e.g., `/Users/alice/...`)
-- Emails, phone numbers, IPs, MACs, or device names
-- API keys, tokens, cookies, and auth files
+```
+nixos-config (your system)
+├── imports: ai-stack ← you are here
+├── imports: nix-ai-tools (tool packages, Garnix-cached)
+├── imports: nix-clawdbot, nix-secrets, ...
+└── stacks/ai/ (private AI config wiring)
+```
 
-## Slicing & dicing index (source of truth)
+## Golden path
 
-Keep these boundaries strict:
+See `~/code/nix/AGENTS.md`. Always verify from nixos-config before committing here:
 
-- `ai-stack` (this repo)
-  - Public defaults and wiring
-  - Parameterized Clawdbot config (no secrets)
-  - Shared skills + public docs
+```bash
+cd ~/code/nix/nixos-config
+nix run .#build   # must pass — catches ai-stack breakage
+```
 
-- `nixos-config` (private)
-  - Secrets, allowlists, and PII
-  - Local plugin paths and machine‑specific settings
-  - Private overrides for Clawdbot instances
+If broken → fix ai-stack first, then re-verify.
 
-- `nix-clawdbot` (public)
-  - Packaging, launchers, batteries‑included defaults
-  - Plugin machinery and runtime wrappers
-  - Example configs (do not edit from here)
+## Core rules
 
-Rule of thumb: If it can identify a person or location, it does not live here.
+- **No PII** — this repo is public (see below)
+- **No inline scripts/content in Nix** — separate files + `readFile`
+- **Verify downstream** before committing
 
-## Repo structure (source of truth)
+## Repo layout
 
-- `documents/` — Clawdbot docs (AGENTS/SOUL/TOOLS) referenced by nix-clawdbot.
-- `docs/agents/` — Global agent guidance deployed to Codex/Claude.
-- `skills/` — Shared skills synced into `~/.codex/skills` and `~/.claude/skills`.
-- `modules/` — Home Manager modules wiring docs + skills + agent guidance.
-- `flake.nix` — Public module entrypoints. No secrets, no installs.
+```
+ai-stack/
+├── flake.nix        # public entrypoints (no secrets)
+├── skills/          # synced to ~/.codex/skills, ~/.claude/skills, ~/.pi/skills
+├── docs/agents/     # global guidance deployed to Codex/Claude/pi
+├── config/zsh/      # public shell config
+├── modules/         # Home Manager wiring
+│   ├── ai-stack.nix       # main module
+│   └── clawdbot-config.nix # Clawdbot defaults
+└── documents/       # Clawdbot docs (AGENTS/SOUL/TOOLS)
+```
 
-Clawdbot packaging (including UI assets) belongs in `nix-clawdbot`. Do not add
-Clawdbot build overlays here.
+**Where to put things:**
 
-## What this repo contains (and does NOT contain)
+| Type | Location |
+|------|----------|
+| Shareable skill | `skills/` |
+| Public shell aliases | `config/zsh/` |
+| Global agent guidance | `docs/agents/` |
+| Clawdbot public config | `modules/clawdbot-config.nix` |
+| Home Manager wiring | `modules/` |
 
-- ✅ Safe, public guidance + skill scaffolding
-- ✅ Wiring to deploy docs/skills via Home Manager
-- ❌ Secrets, tokens, or per-user config
-- ❌ Claude permission rules or sub-agent definitions
+**What does NOT belong here:**
 
-If you need private settings, keep them in your private repo and import this flake.
+| Type | Where instead |
+|------|---------------|
+| AI tool packages | `nix-ai-tools/pkgs/` |
+| Secrets, tokens | `nixos-config` (agenix) |
+| Private config | `nixos-config` |
+| Per-user overrides | `nixos-config` |
+| Clawdbot packaging | `nix-clawdbot` |
+| Clawdbot product code | `~/code/clawdbot` |
 
-Shell config split:
-- Public zsh defaults live here (`modules/zsh.nix`, `config/zsh/`).
-- Private, host/user-specific overrides belong in the private repo.
+**Rules of thumb:**
+- Tool packages → `nix-ai-tools`
+- Config, skills, public docs → here
+- Identifies a person, location, device, or contains secrets → `nixos-config`
 
-Clawdbot slicing:
-- Instance wiring and defaults live here (`modules/clawdbot-config.nix`).
-- Private repo provides secrets, allowlists, and local plugin paths via `programs.clawdbot.*`.
+## No PII (public repo)
 
-## Private repo wiring checklist
+No secrets, tokens, private URLs, personal paths, user identifiers.
 
-See `docs/agents/clawdbot-wiring-checklist.md` for required inputs and recommended
-settings. Builds should fail when required secrets are missing.
+Includes: real names, absolute paths with usernames, API keys, emails, IPs, device names.
 
-## Apply changes (no sudo)
-
-This repo is intended to apply via **Home Manager only**.
-
-- Recommended (from your private repo):
-  - `home-manager switch --flake "$HOME/code/nix/nixos-config#$(whoami)"`
-- Avoid full nix-darwin rebuilds unless you changed system-level config.
+If it identifies a person → doesn't live here.
