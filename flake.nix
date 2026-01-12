@@ -19,7 +19,7 @@
       flake = false;
     };
     dev-browser = {
-      url = "github:joshp123/dev-browser-mcp";
+      url = "github:joshp123/dev-browser-go";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
