@@ -5,13 +5,16 @@ let
   homeDir = config.home.homeDirectory or "/home/${user}";
   settingsPath = "${homeDir}/.pi/agent/settings.json";
   jq = "${pkgs.jq}/bin/jq";
+  # Extensions from upstream pi (update with pi)
   permissionGate = "${pkgs.pi-coding-agent}/lib/node_modules/@mariozechner/pi-coding-agent/examples/extensions/permission-gate.ts";
   handoff = "${pkgs.pi-coding-agent}/lib/node_modules/@mariozechner/pi-coding-agent/examples/extensions/handoff.ts";
   subagentExampleDir = "${pkgs.pi-coding-agent}/lib/node_modules/@mariozechner/pi-coding-agent/examples/extensions/subagent";
   subagentExtensionPath = "${homeDir}/.pi/agent/extensions/subagent/index.ts";
   subagentAgents = [ "scout.md" "planner.md" "reviewer.md" "worker.md" ];
   subagentPrompts = [ "implement.md" "implement-and-review.md" "scout-and-plan.md" ];
-  piExtensions = [ permissionGate handoff subagentExtensionPath ];
+  # Our extensions (Codex compatibility, custom tools)
+  todowriteExtensionPath = "${homeDir}/.pi/agent/extensions/todowrite.ts";
+  piExtensions = [ permissionGate handoff subagentExtensionPath todowriteExtensionPath ];
   extensionsJson = builtins.toJSON piExtensions;
   agentFiles = lib.genAttrs subagentAgents (agent: {
     source = "${subagentExampleDir}/agents/${agent}";
@@ -33,6 +36,11 @@ in
       };
       ".pi/agent/extensions/subagent/agents.ts" = {
         source = "${subagentExampleDir}/agents.ts";
+        force = true;
+      };
+      # Codex compatibility: todowrite tool
+      ".pi/agent/extensions/todowrite.ts" = {
+        source = ../extensions/todowrite.ts;
         force = true;
       };
     };

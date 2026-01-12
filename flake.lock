@@ -43,13 +43,13 @@
         "lastModified": 1768240418,
         "narHash": "sha256-HGf7ryJ9GId81ZXYsYWKKb3W4ognwNAgInhMLmDq3vo=",
         "owner": "joshp123",
-        "repo": "dev-browser-mcp",
+        "repo": "dev-browser-go",
         "rev": "2ba71c075e3c7ad9d34cadba2a2968092df304ee",
         "type": "github"
       },
       "original": {
         "owner": "joshp123",
-        "repo": "dev-browser-mcp",
+        "repo": "dev-browser-go",
         "type": "github"
       }
     },
