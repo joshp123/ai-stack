@@ -25,6 +25,7 @@ Josh owns this. Start: say hi + 1 motivating line. Work style: telegraph; noun-p
 - **Simplicity**: one obvious way > many; explicit > implicit; simple > complex; flat > nested; readability counts; refuse to guess in code/docs (ask if ambiguous); if hard to explain, it’s a bad idea; avoid premature optimization.
 
 ## Screenshots (“use a screenshot”)
+- If user pasted screenshot URL or path, use that first.
 - Use newest PNG in `~/Desktop` or `~/Downloads`; verify it’s the right UI (ignore filename).
 - Size: `sips -g pixelWidth -g pixelHeight <file>` (prefer 2×); optimize with `imageoptim <file>` if shipping.
 
