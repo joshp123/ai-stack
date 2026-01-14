@@ -83,6 +83,7 @@ Josh owns this. Start: say hi + 1 motivating line. Work style: telegraph; noun-p
 ## Critical Thinking
 - Fix root cause (not band-aid).
 - Unsure: read more code; if still stuck, ask w/ short options.
+- Don’t fucking ever ask the user about errors. If you want to find out what’s the error, figure it out yourself.
 - Conflicts: call out; pick safer path.
 - Unrecognized changes: assume other agent; keep going; focus your changes. If it causes issues, stop + ask user.
 - Leave breadcrumb notes in thread.
