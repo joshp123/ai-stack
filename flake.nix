@@ -1,6 +1,10 @@
 {
   description = "ai-stack: public, no-PII AI stack modules";
 
+  nixConfig = {
+    fallback = false;
+  };
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager.url = "github:nix-community/home-manager";
