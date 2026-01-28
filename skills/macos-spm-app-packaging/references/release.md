@@ -12,6 +12,7 @@
 - Install Sparkle tools so `generate_appcast` is on PATH.
 - Provide `SPARKLE_PRIVATE_KEY_FILE` (ed25519 key).
 - The appcast script uses your zip artifact to create an updated `appcast.xml`.
+- Sparkle compares `sparkle:version` (derived from `CFBundleVersion`), so bump `BUILD_NUMBER` for every release.
 
 ## Tag and GitHub release (optional)
 Use a versioned git tag and publish a GitHub release with the notarized zip (and appcast if you host it on GitHub Releases).
