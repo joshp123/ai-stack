@@ -2,7 +2,7 @@
 set -euo pipefail
 
 if [ "$#" -ne 4 ]; then
-  echo "usage: build-clawdbot-documents.sh <src_docs_dir> <upstream_agents> <josh_agents> <out_dir>" >&2
+  echo "usage: build-moltbot-documents.sh <src_docs_dir> <upstream_agents> <josh_agents> <out_dir>" >&2
   exit 1
 fi
 
