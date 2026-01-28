@@ -16,22 +16,6 @@
         "type": "github"
       }
     },
-    "clawdbot": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1768242251,
-        "narHash": "sha256-7LY7C2prohetyLhIYKwhalZSUxFtxYV+WPgLxdubglU=",
-        "owner": "clawdbot",
-        "repo": "clawdbot",
-        "rev": "1baf9f6a8354d788b1c64a4d1a4294d860953bb6",
-        "type": "github"
-      },
-      "original": {
-        "owner": "clawdbot",
-        "repo": "clawdbot",
-        "type": "github"
-      }
-    },
     "dev-browser": {
       "inputs": {
         "flake-utils": "flake-utils",
@@ -112,7 +96,7 @@
     "home-manager_2": {
       "inputs": {
         "nixpkgs": [
-          "nix-clawdbot",
+          "nix-moltbot",
           "nixpkgs"
         ]
       },
@@ -130,7 +114,23 @@
         "type": "github"
       }
     },
-    "nix-clawdbot": {
+    "moltbot": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1769548095,
+        "narHash": "sha256-x2TC+bKPSCfd2eaDRlPzwgmSRdUxpHMl7i81eAcPYx0=",
+        "owner": "moltbot",
+        "repo": "moltbot",
+        "rev": "2930ebfd43d0ed47bcf6c7fb0f2a792b055949a8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "moltbot",
+        "repo": "moltbot",
+        "type": "github"
+      }
+    },
+    "nix-moltbot": {
       "inputs": {
         "flake-utils": "flake-utils_2",
         "home-manager": "home-manager_2",
@@ -138,16 +138,16 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1768409229,
-        "narHash": "sha256-HZS2hdltGVIPkXx2OJeOqgKlb1f+IxsYSiQGAOPAEzI=",
-        "owner": "clawdbot",
-        "repo": "nix-clawdbot",
-        "rev": "72be0a9d4b95542f7cc40a41a0ae6012cd1c62d9",
+        "lastModified": 1769481403,
+        "narHash": "sha256-QvKRtICKNB/UZcEk1rX4DiD+RDo0MDLUb7XxTojKyYA=",
+        "owner": "moltbot",
+        "repo": "nix-moltbot",
+        "rev": "474ee3894509e0ad282ca7dc6959c234c412d5cb",
         "type": "github"
       },
       "original": {
-        "owner": "clawdbot",
-        "repo": "nix-clawdbot",
+        "owner": "moltbot",
+        "repo": "nix-moltbot",
         "type": "github"
       }
     },
@@ -156,15 +156,15 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1768399770,
-        "narHash": "sha256-PQDfBODJ/CZbodvo+rLVxhq4GYFzGyr5iSYXmzCz8xw=",
-        "owner": "clawdbot",
+        "lastModified": 1768673601,
+        "narHash": "sha256-n5+aU505rTI1sJGd3PDhfvJS00lLjiARckqjLxdG+XA=",
+        "owner": "moltbot",
         "repo": "nix-steipete-tools",
-        "rev": "7e0aef78a05ef0c51a10278d610b9d14ee840ea9",
+        "rev": "1ab855984e2581e35a76d57cbb97abf0693dad3b",
         "type": "github"
       },
       "original": {
-        "owner": "clawdbot",
+        "owner": "moltbot",
         "repo": "nix-steipete-tools",
         "type": "github"
       }
@@ -220,10 +220,10 @@
     "root": {
       "inputs": {
         "cass": "cass",
-        "clawdbot": "clawdbot",
         "dev-browser": "dev-browser",
         "home-manager": "home-manager",
-        "nix-clawdbot": "nix-clawdbot",
+        "moltbot": "moltbot",
+        "nix-moltbot": "nix-moltbot",
         "nixpkgs": "nixpkgs_3",
         "ubs": "ubs"
       }

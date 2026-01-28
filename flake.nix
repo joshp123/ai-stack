@@ -9,11 +9,11 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-    clawdbot = {
-      url = "github:clawdbot/clawdbot";
+    moltbot = {
+      url = "github:moltbot/moltbot";
       flake = false;
     };
-    nix-clawdbot.url = "github:clawdbot/nix-clawdbot";
+    nix-moltbot.url = "github:moltbot/nix-moltbot";
     ubs = {
       url = "github:Dicklesworthstone/ultimate_bug_scanner";
       flake = false;
@@ -28,20 +28,20 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, clawdbot, nix-clawdbot, ubs, cass, dev-browser }:
+  outputs = { self, nixpkgs, home-manager, moltbot, nix-moltbot, ubs, cass, dev-browser }:
     let
       aiStackOverlays = import ./overlays { inputs = { inherit ubs cass dev-browser; }; };
       module = { ... }:
         let
-          aiStackInputs = { inherit clawdbot nix-clawdbot ubs cass dev-browser; };
+          aiStackInputs = { inherit moltbot nix-moltbot ubs cass dev-browser; };
         in {
         _module.args.aiStackInputs = aiStackInputs;
         imports = [
-          nix-clawdbot.homeManagerModules.clawdbot
+          nix-moltbot.homeManagerModules.moltbot
           ./modules/ai-stack.nix
         ];
         nixpkgs.overlays = [
-          nix-clawdbot.overlays.default
+          nix-moltbot.overlays.default
           self.overlays.default
         ];
       };

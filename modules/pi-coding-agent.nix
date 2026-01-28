@@ -13,8 +13,7 @@ let
   subagentAgents = [ "scout.md" "planner.md" "reviewer.md" "worker.md" ];
   subagentPrompts = [ "implement.md" "implement-and-review.md" "scout-and-plan.md" ];
   # Our extensions (Codex compatibility, custom tools)
-  todowriteExtensionPath = "${homeDir}/.pi/agent/extensions/todowrite.ts";
-  piExtensions = [ permissionGate handoff subagentExtensionPath todowriteExtensionPath ];
+  piExtensions = [ permissionGate handoff subagentExtensionPath ];
   extensionsJson = builtins.toJSON piExtensions;
   agentFiles = lib.genAttrs subagentAgents (agent: {
     source = "${subagentExampleDir}/agents/${agent}";
@@ -38,11 +37,10 @@ in
         source = "${subagentExampleDir}/agents.ts";
         force = true;
       };
-      # Codex compatibility: todowrite tool
-      ".pi/agent/extensions/todowrite.ts" = {
-        source = ../extensions/todowrite.ts;
-        force = true;
-      };
+      # ".pi/agent/extensions/todowrite.ts" = {
+      #   source = ../extensions/todowrite.ts;
+      #   force = true;
+      # };
     };
 
   home.activation.piCodingAgentExtensions = lib.hm.dag.entryAfter [ "writeBoundary" "piCodingAgentSettings" ] ''

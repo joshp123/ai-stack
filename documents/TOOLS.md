@@ -3,28 +3,28 @@
 This file is managed by Nix. A plugin report is appended below.
 Most CLIs support `--help` for quick usage.
 
-## Clawdbot runtime controls (no sudo)
+## Moltbot runtime controls (no sudo)
 
-- `clawdbot-reload test` (default)
-- `clawdbot-reload prod`
-- `clawdbot-reload both`
+- `moltbot-reload test` (default)
+- `moltbot-reload prod`
+- `moltbot-reload both`
 - Gateway restart:
-  - `launchctl kickstart -k "gui/$UID/com.steipete.clawdbot.gateway.prod"`
+  - `launchctl kickstart -k "gui/$UID/com.steipete.moltbot.gateway.prod"`
 - UI restart:
-  - `osascript -e 'tell application "Clawdbot" to quit'`
-  - `open -a "@HOME@/Applications/Clawdbot.app"`
+  - `osascript -e 'tell application "Moltbot" to quit'`
+  - `open -a "@HOME@/Applications/Moltbot.app"`
 
 ## Smaug (Twitter/X bookmarks)
 
-- Run: `smaug-clawdbot run`
-- Fetch only: `smaug-clawdbot fetch 20`
+- Run: `smaug-moltbot run`
+- Fetch only: `smaug-moltbot fetch 20`
 - Archive root: `@HOME@/code/knowledge/twitter-bookmarks`
-- Workspace link: `@HOME@/.clawdbot/workspace/bookmarks/smaug`
+- Workspace link: `@HOME@/.moltbot/workspace/bookmarks/smaug`
 - Credentials:
   - env: `AUTH_TOKEN` + `CT0`
-  - or: `@HOME@/.clawdbot/credentials/smaug.env`
+  - or: `@HOME@/.moltbot/credentials/smaug.env`
   - optional config: `@HOME@/code/knowledge/twitter-bookmarks/smaug.config.json` (do not commit)
-- Requires `bird` in PATH (enable `programs.clawdbot.firstParty.bird` or install globally)
+- Requires `bird` in PATH (enable `programs.moltbot.firstParty.bird` or install globally)
 - Optional: `AUTO_INVOKE_CLAUDE=false`
 
 ## qmd (Local Search)

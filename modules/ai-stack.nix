@@ -41,21 +41,21 @@ let
       paths = [ baseSkills ] ++ extraSkills;
     };
 
-  clawdbotInput =
-    if effectiveInputs ? clawdbot
-    then effectiveInputs.clawdbot
+  moltbotInput =
+    if effectiveInputs ? moltbot
+    then effectiveInputs.moltbot
     else null;
-  clawdbotUpstreamAgents =
-    if clawdbotInput != null
-    then "${clawdbotInput}/docs/reference/templates/AGENTS.md"
+  moltbotUpstreamAgents =
+    if moltbotInput != null
+    then "${moltbotInput}/docs/reference/templates/AGENTS.md"
     else null;
 
-  clawdbotDocs =
-    if clawdbotUpstreamAgents != null then
-      pkgs.runCommand "clawdbot-documents" {} ''
-        bash ${../scripts/build-clawdbot-documents.sh} \
+  moltbotDocs =
+    if moltbotUpstreamAgents != null then
+      pkgs.runCommand "moltbot-documents" {} ''
+        bash ${../scripts/build-moltbot-documents.sh} \
           ${../documents} \
-          ${clawdbotUpstreamAgents} \
+          ${moltbotUpstreamAgents} \
           ${../documents/AGENTS.josh.md} \
           $out
       ''
@@ -65,7 +65,7 @@ in
 {
   imports = [
     ./codex-config.nix
-    ./clawdbot-config.nix
+    ./moltbot-config.nix
     ./cass.nix
     ./ghostty.nix
     ./pi-coding-agent.nix
@@ -74,7 +74,7 @@ in
 
   config = lib.mkMerge [
     {
-      programs.clawdbot.documents = lib.mkDefault clawdbotDocs;
+      programs.moltbot.documents = lib.mkDefault moltbotDocs;
 
       home.file = {
         ".codex/AGENTS.md".source = codexAgents;
@@ -92,10 +92,10 @@ in
         ".claude/skills".force = true;
       };
     }
-    (lib.mkIf (lib.hasAttrByPath [ "programs" "clawdbot" ] config) {
-      programs.clawdbot.reloadScript.enable = lib.mkDefault true;
+    (lib.mkIf (lib.hasAttrByPath [ "programs" "moltbot" ] config) {
+      programs.moltbot.reloadScript.enable = lib.mkDefault true;
       home.activation.oracleKeychainAccess =
-        lib.mkIf (config.programs.clawdbot.firstParty.oracle.enable or false)
+        lib.mkIf (config.programs.moltbot.firstParty.oracle.enable or false)
           (lib.hm.dag.entryAfter [ "writeBoundary" ]
             (builtins.readFile ../scripts/oracle-keychain-access.sh));
     })

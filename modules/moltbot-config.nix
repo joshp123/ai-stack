@@ -2,7 +2,7 @@
 let
   homeDir = config.home.homeDirectory or "~";
 
-  pluginSourcesOverride = config.programs.clawdbot.pluginSourcesOverride or {};
+  pluginSourcesOverride = config.programs.moltbot.pluginSourcesOverride or {};
   defaultPluginSources = {
     padel = "github:joshp123/padel-cli";
     gohome = "github:joshp123/gohome";
@@ -68,7 +68,7 @@ let
         }
       ];
       skillsLoad.extraDirs = [
-        "${homeDir}/.clawdbot-prod/workspace/skills"
+        "${homeDir}/.moltbot-prod/workspace/skills"
       ];
     };
   };
@@ -84,20 +84,20 @@ let
         }
       ];
       skillsLoad.extraDirs = [
-        "${homeDir}/.clawdbot-test/workspace/skills"
+        "${homeDir}/.moltbot-test/workspace/skills"
       ];
     };
   };
 in
 {
-  options.programs.clawdbot.pluginSourcesOverride = lib.mkOption {
+  options.programs.moltbot.pluginSourcesOverride = lib.mkOption {
     type = lib.types.attrsOf lib.types.str;
     default = {};
     description = "Override plugin sources by name (e.g. local dev paths).";
   };
 
-  config = lib.mkIf (lib.hasAttrByPath [ "programs" "clawdbot" ] config) {
-    programs.clawdbot = {
+  config = lib.mkIf (lib.hasAttrByPath [ "programs" "moltbot" ] config) {
+    programs.moltbot = {
       defaults.model = lib.mkDefault "anthropic/claude-opus-4-5";
       defaults.thinkingDefault = lib.mkDefault "high";
       installApp = lib.mkDefault false;

@@ -2,13 +2,13 @@
 
 **Public AI development experience** — shareable with anyone.
 
-Skills, agent docs, shell config, tool wiring for Claude, Codex, pi, Cursor, Clawdbot, etc.
+Skills, agent docs, shell config, tool wiring for Claude, Codex, pi, Cursor, Moltbot, etc.
 
 ```
 nixos-config (your system)
 ├── imports: ai-stack ← you are here
 ├── imports: nix-ai-tools (tool packages, Garnix-cached)
-├── imports: nix-clawdbot, nix-secrets, ...
+├── imports: nix-moltbot, nix-secrets, ...
 └── stacks/ai/ (private AI config wiring)
 ```
 
@@ -39,8 +39,8 @@ ai-stack/
 ├── config/zsh/      # public shell config
 ├── modules/         # Home Manager wiring
 │   ├── ai-stack.nix       # main module
-│   └── clawdbot-config.nix # Clawdbot defaults
-└── documents/       # Clawdbot docs (AGENTS/SOUL/TOOLS)
+│   └── moltbot-config.nix # Moltbot defaults
+└── documents/       # Moltbot docs (AGENTS/SOUL/TOOLS)
 ```
 
 **Where to put things:**
@@ -50,7 +50,7 @@ ai-stack/
 | Shareable skill | `skills/` |
 | Public shell aliases | `config/zsh/` |
 | Global agent guidance | `docs/agents/` |
-| Clawdbot public config | `modules/clawdbot-config.nix` |
+| Moltbot public config | `modules/moltbot-config.nix` |
 | Home Manager wiring | `modules/` |
 
 **What does NOT belong here:**
@@ -61,8 +61,8 @@ ai-stack/
 | Secrets, tokens | `nixos-config` (agenix) |
 | Private config | `nixos-config` |
 | Per-user overrides | `nixos-config` |
-| Clawdbot packaging | `nix-clawdbot` |
-| Clawdbot product code | `~/code/clawdbot` |
+| Moltbot packaging | `nix-moltbot` |
+| Moltbot product code | `~/code/moltbot` |
 
 **Rules of thumb:**
 - Tool packages → `nix-ai-tools`
