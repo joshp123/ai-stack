@@ -138,11 +138,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1769600177,
-        "narHash": "sha256-j3o2d6X+WeMU3OIwQzm97eQFHW4opX3rHcxTZzlGdfQ=",
+        "lastModified": 1769612994,
+        "narHash": "sha256-pP1jsmSQ42cswalpC1nsD6jnx5O3yur9O4/b4eZn8uc=",
         "owner": "moltbot",
         "repo": "nix-moltbot",
-        "rev": "126860e8518386841fa798fc320e54bdd8e1d09b",
+        "rev": "48930e35b27b0d752d404c32101f9960979eaf4c",
         "type": "github"
       },
       "original": {
