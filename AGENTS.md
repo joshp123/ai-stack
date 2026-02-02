@@ -2,13 +2,13 @@
 
 **Public AI development experience** — shareable with anyone.
 
-Skills, agent docs, shell config, tool wiring for Claude, Codex, pi, Cursor, Moltbot, etc.
+Skills, agent docs, shell config, tool wiring for Claude, Codex, pi, Cursor, Openclaw, etc.
 
 ```
 nixos-config (your system)
 ├── imports: ai-stack ← you are here
 ├── imports: nix-ai-tools (tool packages, Garnix-cached)
-├── imports: nix-moltbot, nix-secrets, ...
+├── imports: nix-openclaw, nix-secrets, ...
 └── stacks/ai/ (private AI config wiring)
 ```
 
@@ -38,9 +38,9 @@ ai-stack/
 ├── docs/agents/     # global guidance deployed to Codex/Claude/pi
 ├── config/zsh/      # public shell config
 ├── modules/         # Home Manager wiring
-│   ├── ai-stack.nix       # main module
-│   └── moltbot-config.nix # Moltbot defaults
-└── documents/       # Moltbot docs (AGENTS/SOUL/TOOLS)
+│   ├── ai-stack.nix        # main module
+│   └── openclaw-config.nix # Openclaw defaults
+└── documents/       # Openclaw docs (AGENTS/SOUL/TOOLS)
 ```
 
 **Where to put things:**
@@ -50,7 +50,7 @@ ai-stack/
 | Shareable skill | `skills/` |
 | Public shell aliases | `config/zsh/` |
 | Global agent guidance | `docs/agents/` |
-| Moltbot public config | `modules/moltbot-config.nix` |
+| Openclaw public config | `modules/openclaw-config.nix` |
 | Home Manager wiring | `modules/` |
 
 **What does NOT belong here:**
@@ -61,8 +61,8 @@ ai-stack/
 | Secrets, tokens | `nixos-config` (agenix) |
 | Private config | `nixos-config` |
 | Per-user overrides | `nixos-config` |
-| Moltbot packaging | `nix-moltbot` |
-| Moltbot product code | `~/code/moltbot` |
+| Openclaw packaging | `nix-openclaw` |
+| Openclaw product code | `~/code/openclaw` |
 
 **Rules of thumb:**
 - Tool packages → `nix-ai-tools`

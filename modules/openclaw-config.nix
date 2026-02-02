@@ -2,7 +2,7 @@
 let
   homeDir = config.home.homeDirectory or "~";
 
-  pluginSourcesOverride = config.programs.moltbot.pluginSourcesOverride or {};
+  pluginSourcesOverride = config.programs.openclaw.pluginSourcesOverride or {};
   defaultPluginSources = {
     padel = "github:joshp123/padel-cli";
     gohome = "github:joshp123/gohome";
@@ -32,76 +32,79 @@ let
 
   basePlugins = [ padelPlugin gohomePlugin picnicPlugin ];
 
-  baseInstance = {
-    enable = true;
-    providers.telegram = {
-      enable = true;
-      botTokenFile = lib.mkDefault "";
+  baseConfig = {
+    gateway = {
+      mode = "local";
+    };
+    channels.telegram = {
+      enabled = true;
       allowFrom = lib.mkDefault [ ];
       groups = { "*" = { requireMention = true; }; };
     };
-    providers.anthropic.apiKeyFile = lib.mkDefault "";
-    routing.queue = {
+    messages.queue = {
       mode = "interrupt";
-      byProvider = {
+      byChannel = {
         telegram = "interrupt";
         whatsapp = "interrupt";
         discord = "queue";
         webchat = "queue";
       };
     };
+    agents = {};
+  };
+
+  baseInstance = {
+    enable = true;
     plugins = lib.mkDefault basePlugins;
-    configOverrides = {
-      agents.defaults.maxConcurrent = 5;
-    };
     appDefaults.enable = false;
   };
 
   prodInstance = lib.recursiveUpdate baseInstance {
     gatewayPort = 18789;
-    configOverrides = {
+    config = {
       agents.list = [
         {
           id = "main";
           default = true;
+          model = "anthropic/claude-opus-4-5";
           identity = { name = "DJTBOT"; emoji = "🇺🇸"; };
         }
       ];
-      skillsLoad.extraDirs = [
-        "${homeDir}/.moltbot-prod/workspace/skills"
+      skills.load.extraDirs = [
+        "${homeDir}/.openclaw-prod/workspace/skills"
       ];
     };
   };
 
   testInstance = lib.recursiveUpdate baseInstance {
     gatewayPort = 18790;
-    configOverrides = {
+    config = {
       agents.list = [
         {
           id = "main";
           default = true;
+          model = "anthropic/claude-opus-4-5";
           identity = { name = "DJTBOT-TEST"; emoji = "🧪"; };
         }
       ];
-      skillsLoad.extraDirs = [
-        "${homeDir}/.moltbot-test/workspace/skills"
+      skills.load.extraDirs = [
+        "${homeDir}/.openclaw-test/workspace/skills"
       ];
     };
   };
 in
 {
-  options.programs.moltbot.pluginSourcesOverride = lib.mkOption {
+  options.programs.openclaw.pluginSourcesOverride = lib.mkOption {
     type = lib.types.attrsOf lib.types.str;
     default = {};
     description = "Override plugin sources by name (e.g. local dev paths).";
   };
 
-  config = lib.mkIf (lib.hasAttrByPath [ "programs" "moltbot" ] config) {
-    programs.moltbot = {
-      defaults.model = lib.mkDefault "anthropic/claude-opus-4-5";
-      defaults.thinkingDefault = lib.mkDefault "high";
+  config = lib.mkIf (lib.hasAttrByPath [ "programs" "openclaw" ] config) {
+    programs.openclaw = {
       installApp = lib.mkDefault false;
       firstParty.oracle.enable = lib.mkDefault true;
+      config = baseConfig;
       instances = {
         prod = prodInstance;
         test = testInstance;

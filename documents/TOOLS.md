@@ -3,28 +3,28 @@
 This file is managed by Nix. A plugin report is appended below.
 Most CLIs support `--help` for quick usage.
 
-## Moltbot runtime controls (no sudo)
+## Openclaw runtime controls (no sudo)
 
-- `moltbot-reload test` (default)
-- `moltbot-reload prod`
-- `moltbot-reload both`
+- `openclaw-reload test` (default)
+- `openclaw-reload prod`
+- `openclaw-reload both`
 - Gateway restart:
-  - `launchctl kickstart -k "gui/$UID/com.steipete.moltbot.gateway.prod"`
+  - `launchctl kickstart -k "gui/$UID/com.steipete.openclaw.gateway.prod"`
 - UI restart:
-  - `osascript -e 'tell application "Moltbot" to quit'`
-  - `open -a "@HOME@/Applications/Moltbot.app"`
+  - `osascript -e 'tell application "Openclaw" to quit'`
+  - `open -a "@HOME@/Applications/Openclaw.app"`
 
 ## Smaug (Twitter/X bookmarks)
 
 - Run: `smaug-moltbot run`
 - Fetch only: `smaug-moltbot fetch 20`
 - Archive root: `@HOME@/code/knowledge/twitter-bookmarks`
-- Workspace link: `@HOME@/.moltbot/workspace/bookmarks/smaug`
+- Workspace link: `@HOME@/.openclaw/workspace/bookmarks/smaug`
 - Credentials:
   - env: `AUTH_TOKEN` + `CT0`
-  - or: `@HOME@/.moltbot/credentials/smaug.env`
+  - or: `@HOME@/.openclaw/credentials/smaug.env`
   - optional config: `@HOME@/code/knowledge/twitter-bookmarks/smaug.config.json` (do not commit)
-- Requires `bird` in PATH (enable `programs.moltbot.firstParty.bird` or install globally)
+- Requires `bird` in PATH (enable `programs.openclaw.firstParty.bird` or install globally)
 - Optional: `AUTO_INVOKE_CLAUDE=false`
 
 ## qmd (Local Search)

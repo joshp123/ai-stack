@@ -1,7 +1,7 @@
 # ai-stack
 
 Public, no‑PII AI stack modules. This repo provides opinionated defaults and
-wiring for `nix-moltbot`, but contains **no secrets or user-specific data**.
+wiring for `nix-openclaw`, but contains **no secrets or user-specific data**.
 
 This repository is intentionally **not standalone**. It must be imported by a
 private repo (e.g., `nixos-config`) that supplies secrets, allowlists, and local
@@ -10,10 +10,10 @@ paths. If those inputs are missing, builds should fail with clear errors.
 ## What this repo is
 
 This repo is designed to be copyable by other users with a single agent prompt.
-The public defaults should describe a complete Moltbot setup once private inputs are provided.
+The public defaults should describe a complete Openclaw setup once private inputs are provided.
 
 - Public module layer imported from a private repo
-- Non‑PII defaults for Moltbot and AI tooling
+- Non‑PII defaults for Openclaw and AI tooling
 - Source of truth for public docs + skills
 
 ## What this repo is not
@@ -28,7 +28,7 @@ Use `AGENTS.md` as the index for how these repos split responsibilities:
 
 - `ai-stack`: public defaults + wiring (no PII)
 - `nixos-config`: private secrets + allowlists + local paths
-- `nix-moltbot`: packaging and batteries‑included defaults for Moltbot itself
+- `nix-openclaw`: packaging and batteries‑included defaults for Openclaw itself
 
 ## Core setup (private repo)
 
@@ -39,18 +39,18 @@ imports = [ inputs.ai-stack.homeManagerModules.ai-stack ];
 ```
 
 Private repo responsibilities:
-- Provide secrets and PII inputs to `programs.moltbot.*`
+- Provide secrets and PII inputs to `programs.openclaw.*`
 - Set Telegram allowlists and group modes
 - Optionally override plugin sources with local paths
 
-## Moltbot wiring
+## Openclaw wiring
 
-This repo sets public defaults for `programs.moltbot` (mirroring the full
-example config from `nix-moltbot`). Secrets are required for live plugins, and
+This repo sets public defaults for `programs.openclaw` (mirroring the full
+example config from `nix-openclaw`). Secrets are required for live plugins, and
 the build should fail if they’re missing.
 
 A short wiring guide lives at:
-- `docs/agents/moltbot-wiring-checklist.md`
+- `docs/agents/openclaw-wiring-checklist.md`
 
 ## Agent guidance (public, no‑PII)
 
@@ -90,7 +90,7 @@ This stack assumes a simple layout under `~/code/nix`:
   ai-stack/
   nixos-config/
   nix-secrets/
-  nix-moltbot/ (optional, dev only)
+  nix-openclaw/ (optional, dev only)
 ```
 
 Adjust paths in the private repo if your layout differs.
