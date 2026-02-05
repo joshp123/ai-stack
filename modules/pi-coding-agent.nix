@@ -6,14 +6,21 @@ let
   settingsPath = "${homeDir}/.pi/agent/settings.json";
   jq = "${pkgs.jq}/bin/jq";
   # Extensions from upstream pi (update with pi)
+  # (Keep these paths for cleanup/migration if we ever remove legacy extensions from settings.json)
   permissionGate = "${pkgs.pi-coding-agent}/lib/node_modules/@mariozechner/pi-coding-agent/examples/extensions/permission-gate.ts";
-  handoff = "${pkgs.pi-coding-agent}/lib/node_modules/@mariozechner/pi-coding-agent/examples/extensions/handoff.ts";
+  upstreamHandoff = "${pkgs.pi-coding-agent}/lib/node_modules/@mariozechner/pi-coding-agent/examples/extensions/handoff.ts";
+
+  # Managed extensions installed into ~/.pi/agent/extensions via home-manager
+  handoffExtensionPath = "${homeDir}/.pi/agent/extensions/handoff.ts";
+
   subagentExampleDir = "${pkgs.pi-coding-agent}/lib/node_modules/@mariozechner/pi-coding-agent/examples/extensions/subagent";
   subagentExtensionPath = "${homeDir}/.pi/agent/extensions/subagent/index.ts";
   subagentAgents = [ "scout.md" "planner.md" "reviewer.md" "worker.md" ];
   subagentPrompts = [ "implement.md" "implement-and-review.md" "scout-and-plan.md" ];
-  # Our extensions (Codex compatibility, custom tools)
-  piExtensions = [ permissionGate handoff subagentExtensionPath ];
+
+  # We install our extensions into ~/.pi/agent/extensions (auto-discovered by pi).
+  # Keep settings.json extension mutations only for cleanup/migration of legacy example extensions.
+  piExtensions = [ ];
   extensionsJson = builtins.toJSON piExtensions;
   agentFiles = lib.genAttrs subagentAgents (agent: {
     source = "${subagentExampleDir}/agents/${agent}";
@@ -37,6 +44,11 @@ in
         source = "${subagentExampleDir}/agents.ts";
         force = true;
       };
+      ".pi/agent/extensions/handoff.ts" = {
+        source = ../extensions/handoff.ts;
+        force = true;
+      };
+
       # ".pi/agent/extensions/todowrite.ts" = {
       #   source = ../extensions/todowrite.ts;
       #   force = true;
@@ -61,7 +73,15 @@ in
     fi
 
     ${jq} --argjson exts '${extensionsJson}' '
-      .extensions = ($exts + (.extensions // [])) |
+      .extensions = (
+        ((.extensions // [])
+          | map(select(
+              (test("examples/extensions/permission-gate\\.ts$") | not)
+              and (test("examples/extensions/handoff\\.ts$") | not)
+            ))
+        )
+        + $exts
+      ) |
       .extensions |= unique
     ' "$tmp" > "$tmp.cfg"
     mv "$tmp.cfg" "$tmp"
