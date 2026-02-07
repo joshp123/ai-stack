@@ -31,22 +31,41 @@
   outputs = { self, nixpkgs, home-manager, openclaw, nix-openclaw, ubs, cass, dev-browser }:
     let
       aiStackOverlays = import ./overlays { inputs = { inherit ubs cass dev-browser; }; };
-      module = { ... }:
+
+      mkAiStackModule = extraImports: { ... }:
         let
           aiStackInputs = { inherit openclaw nix-openclaw ubs cass dev-browser; };
         in {
-        _module.args.aiStackInputs = aiStackInputs;
-        imports = [
-          nix-openclaw.homeManagerModules.openclaw
-          ./modules/ai-stack.nix
-        ];
-        nixpkgs.overlays = [
-          nix-openclaw.overlays.default
-          self.overlays.default
-        ];
-      };
+          _module.args.aiStackInputs = aiStackInputs;
+          imports = [
+            nix-openclaw.homeManagerModules.openclaw
+            ./modules/ai-stack.nix
+          ] ++ extraImports;
+          nixpkgs.overlays = [
+            nix-openclaw.overlays.default
+            self.overlays.default
+          ];
+        };
+
+      aiStackModule = mkAiStackModule [ ];
+      djtbotGatewayModule = mkAiStackModule [ ./modules/bots/djtbot-gateway.nix ];
+      djtbotMacNodeModule = mkAiStackModule [ ./modules/bots/djtbot-mac-node.nix ];
+
     in {
       overlays.default = nixpkgs.lib.composeManyExtensions aiStackOverlays;
-      homeManagerModules.ai-stack = module;
+
+      homeManagerModules = {
+        ai-stack = aiStackModule;
+
+        # Bot roles (opt-in)
+        djtbot-gateway = djtbotGatewayModule;
+        djtbot-mac-node = djtbotMacNodeModule;
+
+        # Raw role modules (for advanced composition)
+        bots = {
+          djtbot-gateway = import ./modules/bots/djtbot-gateway.nix;
+          djtbot-mac-node = import ./modules/bots/djtbot-mac-node.nix;
+        };
+      };
     };
 }
