@@ -69,6 +69,11 @@ in {
               }
             ];
             defaults = {
+              # IMPORTANT: OpenClaw defaults the agent workspace to ~/.openclaw/workspace
+              # unless you override it. For profile/instance isolation we want the
+              # workspace to live alongside the instance stateDir.
+              workspace = "${homeDir}/.openclaw-prod/workspace";
+
               maxConcurrent = 4;
               subagents.maxConcurrent = 8;
 

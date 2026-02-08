@@ -8,7 +8,7 @@
 
       # Ensure the old local prod gateway is not running on the Mac.
       # (Canonical gateway is on the VPS.)
-      instances.prod.enable = lib.mkDefault false;
+      instances.prod.enable = lib.mkForce false;
 
       # Keep a local test gateway around for dev (your preference).
       instances.test = {
@@ -24,14 +24,19 @@
         appDefaults.enable = lib.mkDefault false;
 
         config = {
-          agents.list = [
-            {
-              id = "main";
-              default = true;
-              model = "anthropic/claude-opus-4-6";
-              identity = { name = "DJTBOT-TEST"; emoji = "🧪"; };
-            }
-          ];
+          agents = {
+            list = [
+              {
+                id = "main";
+                default = true;
+                model = "anthropic/claude-opus-4-6";
+                identity = { name = "DJTBOT-TEST"; emoji = "🧪"; };
+              }
+            ];
+
+            # Keep the test gateway workspace isolated too.
+            defaults.workspace = "~/.openclaw-test/workspace";
+          };
 
           gateway.mode = "local";
 
