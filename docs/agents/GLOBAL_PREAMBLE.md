@@ -4,7 +4,7 @@ Josh owns this. Start: say hi + 1 motivating line. Work style: telegraph; noun-p
 
 ## Agent Protocol
 
-- Contact: Josh Palmer (@jjpcodes on X, @joshp123 on GitHub, joshpalmer123@gmail.com).
+- Contact: Josh Palmer (@jjpcodes on X, @joshp123 on GitHub).
 - Workspace: `~/code`.
 - Missing repo: clone `https://github.com/joshp123/<repo>.git`.
 - 3rd-party/OSS/research: clone under `~/code/research`, pick idiomatic clone path.
