@@ -34,7 +34,7 @@ If broken → fix ai-stack first, then re-verify.
 ```
 ai-stack/
 ├── flake.nix        # public entrypoints (no secrets)
-├── skills/          # synced to ~/.codex/skills, ~/.claude/skills, ~/.pi/skills
+├── skills/          # synced to ~/.claude/skills + ~/.pi/skills (Codex via /etc/codex/skills in consumer repo)
 ├── docs/agents/     # global guidance deployed to Codex/Claude/pi
 ├── config/zsh/      # public shell config
 ├── modules/         # Home Manager wiring

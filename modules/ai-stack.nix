@@ -64,7 +64,6 @@ let
 in
 {
   imports = [
-    ./codex-config.nix
     ./openclaw-config.nix
     ./cass.nix
     ./ghostty.nix
@@ -84,8 +83,6 @@ in
         ".claude/CLAUDE.md".source = claudeAgents;
         ".claude/CLAUDE.md".force = true;
 
-        ".codex/skills".source = skillsDir;
-        ".codex/skills".force = true;
         ".pi/agent/skills".source = skillsDir;
         ".pi/agent/skills".force = true;
         ".claude/skills".source = skillsDir;

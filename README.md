@@ -58,7 +58,8 @@ This repo ships public guidance and skills only:
 
 - `docs/agents/GLOBAL_PREAMBLE.md` + `docs/agents/GLOBAL_CODEX_APPENDIX.md` → `~/.codex/AGENTS.md`
 - `docs/agents/GLOBAL_PREAMBLE.md` + `docs/agents/GLOBAL_CLAUDE_APPENDIX.md` → `~/.claude/CLAUDE.md`
-- `skills/` → `~/.codex/skills` and `~/.claude/skills`
+- `skills/` → `~/.claude/skills` and `~/.pi/agent/skills`
+- Codex defaults/skills should be wired by the consumer repo under `/etc/codex/{config.toml,skills}` so `~/.codex` stays writable
 
 Not included here:
 - Claude permissions or `settings.json`
@@ -66,7 +67,7 @@ Not included here:
 
 ## Skills included
 
-Synced into both Codex and Claude:
+Synced into Claude/pi (and available to Codex when consumer wires `/etc/codex/skills`):
 - `ask-questions-if-underspecified`
 - `frontend-design`
 - `markdown-converter`
