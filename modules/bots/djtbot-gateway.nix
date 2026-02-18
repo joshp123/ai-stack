@@ -64,7 +64,7 @@ in {
               {
                 id = "main";
                 default = true;
-                model = "anthropic/claude-opus-4-6";
+                model = "anthropic/claude-sonnet-4-6";
                 identity = { name = "DJTBOT"; emoji = "🇺🇸"; };
               }
             ];
@@ -78,6 +78,7 @@ in {
               subagents.maxConcurrent = 8;
 
               models = {
+                "anthropic/claude-sonnet-4-6" = { alias = "sonnet"; };
                 "anthropic/claude-opus-4-6" = { alias = "opus"; };
                 "openai-codex/gpt-5.3-codex" = { alias = "codex"; };
               };
