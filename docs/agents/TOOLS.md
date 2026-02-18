@@ -23,7 +23,6 @@ All tools support `--help` for full usage. Prefer CLI over MCP where possible.
 - **camsnap**: RTSP/ONVIF camera capture CLI.
 - **bird**: Twitter/X CLI.
 - **mcporter**: MCP runtime/CLI wrapper (Homebrew; see “Other” for usage).
-- **oracle**: Multi-model review CLI (see oracle skill runbook).
 - **poltergeist**: Screenshots + OCR/vision helpers.
 - **sag**: Screenshot/annotation CLI.
 - **sonoscli**: Sonos speaker control CLI.
@@ -60,9 +59,6 @@ All tools support `--help` for full usage. Prefer CLI over MCP where possible.
 ### Text-to-Speech
 - **edge-tts**: Microsoft Edge neural TTS. No API key. See Openclaw `TOOLS.md` in the active workspace
   (e.g. `${OPENCLAW_STATE_DIR:-~/.openclaw}/workspace/TOOLS.md` or `~/.openclaw-<instance>/workspace/TOOLS.md`).
-
-### External AI
-- **oracle**: Use the oracle skill runbook.
 
 ### iOS Simulator
 - **axe**: Accessibility-based simulator automation. `axe tap`, `axe swipe`, `axe type`, `axe screenshot`. Uses Apple Accessibility APIs, no external server.

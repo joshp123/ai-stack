@@ -25,11 +25,12 @@ let
   effectiveInputs = (pkgs.inputs or {}) // aiStackInputs // inputs;
 
   baseSkills = ../skills;
+  system = pkgs.stdenv.hostPlatform.system;
   devBrowserSkill =
     if effectiveInputs ? dev-browser
     then
-      (if lib.hasAttrByPath [ "packages" pkgs.system "dev-browser-skill" ] effectiveInputs.dev-browser
-       then effectiveInputs.dev-browser.packages.${pkgs.system}.dev-browser-skill
+      (if lib.hasAttrByPath [ "packages" system "dev-browser-skill" ] effectiveInputs.dev-browser
+       then effectiveInputs.dev-browser.packages.${system}.dev-browser-skill
        else null)
     else null;
   extraSkills = lib.optionals (devBrowserSkill != null) [ devBrowserSkill ];
@@ -91,10 +92,6 @@ in
     }
     (lib.mkIf (lib.hasAttrByPath [ "programs" "openclaw" ] config) {
       programs.openclaw.reloadScript.enable = lib.mkDefault true;
-      home.activation.oracleKeychainAccess =
-        lib.mkIf (config.programs.openclaw.firstParty.oracle.enable or false)
-          (lib.hm.dag.entryAfter [ "writeBoundary" ]
-            (builtins.readFile ../scripts/oracle-keychain-access.sh));
     })
   ];
 }

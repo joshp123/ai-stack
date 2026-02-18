@@ -14,11 +14,6 @@
       # Default: headless installs don’t ship the macOS app.
       installApp = lib.mkDefault false;
 
-      # Keep oracle available by default (skill/tooling); safe, no secrets.
-      # NOTE: we intentionally use the legacy option name `firstParty` here because
-      # ai-stack may be consumed with older nix-openclaw pins.
-      firstParty.oracle.enable = lib.mkDefault true;
-
       # Minimal shared config; instances are defined by role modules.
       config.gateway.mode = lib.mkDefault "local";
     };

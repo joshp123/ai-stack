@@ -44,7 +44,7 @@ in {
     programs.openclaw = {
       installApp = lib.mkDefault false;
 
-      # Compose plugins the idiomatic way (so bundledPlugins/firstParty still work).
+      # Compose plugins the idiomatic way (so bundledPlugins/customPlugins stay composable).
       customPlugins = lib.mkDefault basePlugins;
 
       # Canonical gateway: VPS.

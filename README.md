@@ -72,7 +72,6 @@ Synced into Claude/pi (and available to Codex when consumer wires `/etc/codex/sk
 - `frontend-design`
 - `markdown-converter`
 - `nanobanana`
-- `oracle`
 - `product-manager`
 - `rfc-adr-authoring` (examples sanitized)
 - `skill-creator`

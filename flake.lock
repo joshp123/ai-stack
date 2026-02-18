@@ -3,11 +3,11 @@
     "cass": {
       "flake": false,
       "locked": {
-        "lastModified": 1768240524,
-        "narHash": "sha256-zeAGKPGlgQJeLoSI54mt8c0iRYZLQAMcFA8R6bgBhvQ=",
+        "lastModified": 1771377704,
+        "narHash": "sha256-4ftwmIY0NqFSQhCEEk7cV5QgT+Zr2vV3/O7RescETWU=",
         "owner": "Dicklesworthstone",
         "repo": "coding_agent_session_search",
-        "rev": "f93cb4120b0b9d197212df4f1ecafd286db6a234",
+        "rev": "42e94bed0141621183786151b692d3ed60a4641d",
         "type": "github"
       },
       "original": {
@@ -122,11 +122,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1770043420,
-        "narHash": "sha256-y18W3EK3wOg48AQpTit30xjdwb63sLQ8UbW0oXmqW7A=",
+        "lastModified": 1771371739,
+        "narHash": "sha256-Asz5JsTlJYyem/ayNtNYuFlSDuFkjfWTEID4hgyAPNk=",
         "owner": "openclaw",
         "repo": "nix-openclaw",
-        "rev": "8beca4861101877d4dd7362fd34147df895e74ee",
+        "rev": "c93f90ad8a747cbcf4c0cdef906bd8add81d7704",
         "type": "github"
       },
       "original": {
@@ -140,11 +140,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1769863704,
-        "narHash": "sha256-3EaknO793/3rOlGyiJcc4b+wBVFt9JkoqlNU7J5va2M=",
+        "lastModified": 1771225034,
+        "narHash": "sha256-wBQWNm+m5532KFZPz4q41NVGP7Ixak8X2vqFggNoSOY=",
         "owner": "openclaw",
         "repo": "nix-steipete-tools",
-        "rev": "562e9b6e6aceb72970724c5c62b943feaab51974",
+        "rev": "b668498d7d2e8e7d5bc74133fb82f5cd48288ac4",
         "type": "github"
       },
       "original": {
@@ -204,11 +204,11 @@
     "openclaw": {
       "flake": false,
       "locked": {
-        "lastModified": 1770037915,
-        "narHash": "sha256-T4GU5s+6pQ8LPJlV14XG4WGBlsYXGzLk3/wK21sVXpM=",
+        "lastModified": 1771379980,
+        "narHash": "sha256-j4FXflTR0IhUDDuEc027YHb2GGVFOmGckWN3zjg3FTU=",
         "owner": "openclaw",
         "repo": "openclaw",
-        "rev": "f9fae2c439bbbe6fcd4305cd2cb2958df5a45473",
+        "rev": "81db05962752ae152c9fe3c4946e81b13237ba14",
         "type": "github"
       },
       "original": {
@@ -261,11 +261,11 @@
     "ubs": {
       "flake": false,
       "locked": {
-        "lastModified": 1767996398,
-        "narHash": "sha256-PvodDC00N3c7NP56XhmJcfinHGQ9RGCdIXOXN7+GMY8=",
+        "lastModified": 1771095969,
+        "narHash": "sha256-+Odv4wyuICdLratq/Offhligge6TXkzAhwIDPdQmA6E=",
         "owner": "Dicklesworthstone",
         "repo": "ultimate_bug_scanner",
-        "rev": "93e646243073d435890c02a5975422cc447f3fee",
+        "rev": "18a1448571acbccf5af9be68e2f2f46578675298",
         "type": "github"
       },
       "original": {

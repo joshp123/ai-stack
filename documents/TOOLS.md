@@ -24,7 +24,7 @@ Most CLIs support `--help` for quick usage.
   - env: `AUTH_TOKEN` + `CT0`
   - or: `@HOME@/.openclaw/credentials/smaug.env`
   - optional config: `@HOME@/code/knowledge/twitter-bookmarks/smaug.config.json` (do not commit)
-- Requires `bird` in PATH (enable `programs.openclaw.firstParty.bird` or install globally)
+- Requires `bird` in PATH (enable `programs.openclaw.bundledPlugins.bird` or install globally)
 - Optional: `AUTO_INVOKE_CLAUDE=false`
 
 ## qmd (Local Search)

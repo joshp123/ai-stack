@@ -50,9 +50,6 @@ When closing work or claiming progress, show proof of **working software**:
 - **No irrelevant detail** unless it changes outcome or risk.
 - **No vague hand-offs** ("your call") without a recommendation.
 
-### Oracle Discipline
-Follow the oracle skill runbook.
-
 ## Autonomy Rule
 
 Do not claim background monitoring or follow-ups unless the runtime explicitly supports it. Default assumption: no background monitoring or scheduled follow-ups.
