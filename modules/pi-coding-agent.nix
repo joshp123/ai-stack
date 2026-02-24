@@ -13,23 +13,23 @@ let
   # Managed extensions installed into ~/.pi/agent/extensions via home-manager
   handoffExtensionPath = "${homeDir}/.pi/agent/extensions/handoff.ts";
 
-  subagentExampleDir = "${pkgs.pi-coding-agent}/lib/node_modules/@mariozechner/pi-coding-agent/examples/extensions/subagent";
+  subagentDir = ../extensions/subagent;
   subagentExtensionPath = "${homeDir}/.pi/agent/extensions/subagent/index.ts";
-  subagentAgents = [ "scout.md" "planner.md" "reviewer.md" "worker.md" ];
-  subagentPrompts = [ "implement.md" "implement-and-review.md" "scout-and-plan.md" ];
+  subagentAgents = [ "scout.md" "worker.md" "verifier.md" ];
+  subagentPrompts = [ "implement.md" "implement-and-review.md" ];
 
   # We install our extensions into ~/.pi/agent/extensions (auto-discovered by pi).
   # Keep settings.json extension mutations only for cleanup/migration of legacy example extensions.
   piExtensions = [ ];
   extensionsJson = builtins.toJSON piExtensions;
-  agentFiles = lib.genAttrs subagentAgents (agent: {
-    source = "${subagentExampleDir}/agents/${agent}";
+  agentFiles = lib.listToAttrs (map (agent: lib.nameValuePair ".pi/agent/agents/${agent}" {
+    source = "${subagentDir}/agents/${agent}";
     force = true;
-  });
-  promptFiles = lib.genAttrs subagentPrompts (prompt: {
-    source = "${subagentExampleDir}/prompts/${prompt}";
+  }) subagentAgents);
+  promptFiles = lib.listToAttrs (map (prompt: lib.nameValuePair ".pi/agent/prompts/${prompt}" {
+    source = "${subagentDir}/prompts/${prompt}";
     force = true;
-  });
+  }) subagentPrompts);
 in
 {
   home.file =
@@ -37,11 +37,11 @@ in
     // promptFiles
     // {
       ".pi/agent/extensions/subagent/index.ts" = {
-        source = "${subagentExampleDir}/index.ts";
+        source = "${subagentDir}/index.ts";
         force = true;
       };
       ".pi/agent/extensions/subagent/agents.ts" = {
-        source = "${subagentExampleDir}/agents.ts";
+        source = "${subagentDir}/agents.ts";
         force = true;
       };
       ".pi/agent/extensions/handoff.ts" = {
