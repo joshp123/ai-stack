@@ -1,14 +1,15 @@
 # Commit Workflow
 
 ## Preconditions
-- Read `~/code/nix/ai-stack/docs/agents/PROCESS.md`.
 - If the repo has `AGENTS.md`, read it for repo-specific rules.
 
 ## Steps
 - Ensure one logical change per commit; avoid unrelated files.
 - Stage surgically; never use `git add .` or sweeping adds.
 - Use surgical commits only; partials ok, bulk commits not ok.
-- Amend HEAD for feedback on the same logical change; new commit only for distinct changes.
+- Commit when the change is coherent, reviewable, and verified enough to keep.
+- Do not commit speculative WIP unless the user asks for checkpoints.
+- Amend only when the user explicitly asks or the repo requires it; otherwise make a new commit for a new logical change.
 - Run the full test suite (or repo gate) before committing.
 - Capture evidence of tests (command + outcome).
 - Write the commit message using `references/commit-format.md`.

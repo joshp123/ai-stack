@@ -1,7 +1,6 @@
 # PR Workflow
 
 ## Preconditions
-- Read `~/code/nix/ai-stack/docs/agents/PROCESS.md`.
 - If the repo has `AGENTS.md`, read it for repo-specific rules.
 
 ## Mandatory Human Intent Capture

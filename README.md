@@ -67,15 +67,9 @@ Not included here:
 
 ## Skills included
 
-Synced into Claude/pi (and available to Codex when consumer wires `/etc/codex/skills`):
-- `ask-questions-if-underspecified`
-- `frontend-design`
-- `markdown-converter`
-- `nanobanana`
-- `product-manager`
-- `rfc-adr-authoring` (examples sanitized)
-- `skill-creator`
-- `summarize-youtube`
+Custom cross-agent skills live in `skills/`.
+
+Codex also ships built-in system skills under `~/.codex/skills/.system`, so avoid duplicating built-ins in `ai-stack/skills/` unless a custom variant adds real local policy, assets, or tooling.
 
 ## No‑sudo rule
 

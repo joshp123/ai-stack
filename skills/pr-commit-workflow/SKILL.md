@@ -6,14 +6,14 @@ description: This skill should be used when creating commits or pull requests, e
 # PR + Commit Workflow
 
 ## Overview
-Enforce a high-signal commit workflow and a human-written PR format. Keep global process rules as source of truth and make PRs reviewable by humans and agents.
+Enforce a high-signal commit workflow and a human-written PR format. Use repo `AGENTS.md` as source of truth when present and make PRs reviewable by humans and agents.
 
 ## Workflow Decision Tree
 - If the task is about commits only, follow `references/workflow-commit.md`.
 - If the task involves PR creation or PR updates, follow `references/workflow-pr.md`.
 
 ## Global Rules
-- Read the global process doc at `~/code/nix/ai-stack/docs/agents/PROCESS.md` before acting.
+- Read the repo `AGENTS.md` before acting when one exists.
 - Require user-supplied, human-written intent for every PR. Never generate or paraphrase this text.
 - Use `/tmp` for PR body drafts and `gh pr edit --body-file` for updates.
 

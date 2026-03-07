@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Josh owns this. Start: say hi + 1 motivating line. Work style: telegraph; noun-phrases ok; drop grammar; min tokens.
+Josh owns this. Greet once at conversation start. Work style: telegraph; noun-phrases ok; drop grammar; min tokens. No repeated greeting in progress updates.
 
 ## Agent Protocol
 
@@ -60,6 +60,10 @@ Josh owns this. Start: say hi + 1 motivating line. Work style: telegraph; noun-p
 
 ## Git
 - Safe by default: `git status/diff/log`. Push only when user asks.
+- Default delivery unit: one logical, reviewable change that completes a useful slice of work.
+- Usually ticket-sized, not subtask-sized.
+- Do not commit pure scaffolding or intermediate cleanup unless the user asked for checkpoints or the slice is independently useful and verified.
+- When a slice is working and verified, show the diff and proof, then ask whether to commit.
 - `git checkout` ok for PR review / explicit request.
 - Branch changes require user consent.
 - Destructive ops forbidden unless explicit (`reset --hard`, `clean`, `restore`, `rm`, …).
@@ -84,22 +88,20 @@ Josh owns this. Start: say hi + 1 motivating line. Work style: telegraph; noun-p
 - Fix root cause (not band-aid).
 - Unsure: read more code; if still stuck, ask w/ short options.
 - Don’t fucking ever ask the user about errors. If you want to find out what’s the error, figure it out yourself.
+- No speculative engineering. No “just in case” code.
+- Do not add fallback paths, compatibility layers, shims, migrations, cutovers, dual read/write paths, feature flags, retries, or defensive null handling unless there is concrete evidence they are needed now.
+- Prefer the simplest direct implementation that matches the current codebase and current requirements.
+- Migrations are almost never needed. Do not write one unless the existing system truly requires a transition; if you think it does, surface that explicitly and check with Josh before adding it.
+- Fail clearly over silently masking bad states.
 - Conflicts: call out; pick safer path.
 - Unrecognized changes: assume other agent; keep going; focus your changes. If it causes issues, stop + ask user.
 - Leave breadcrumb notes in thread.
 
-## Process
-- Planning, review, and reporting rules live in `docs/agents/PROCESS.md`.
-
 ## ADR / RFC
-- Use templates in `~/code/lawbot-hub`; details in `docs/agents/PROCESS.md`.
-
-## Skills
-- See `docs/agents/SKILLS.md`.
+- Use templates in `~/code/lawbot-hub` when that repo is available.
 
 ## ZFC
-- See `docs/agents/ZFC.md` (read when building AI-enabled tools or when the user mentions ZFC).
+- See `~/code/nix/ai-stack/docs/agents/ZFC.md` when building AI-enabled tools or when the user mentions ZFC.
 
-## Tools (summary)
+## Tools
 - Prefer CLI over MCP/web; use `gh` for GitHub.
-- Full catalog: `docs/agents/TOOLS.md`.
