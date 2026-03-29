@@ -33,7 +33,10 @@ let
        then effectiveInputs.dev-browser.packages.${system}.dev-browser-skill
        else null)
     else null;
-  extraSkills = lib.optionals (devBrowserSkill != null) [ devBrowserSkill ];
+  piAutoresearchSkills =
+    lib.optionals (builtins.hasAttr "pi-autoresearch" pkgs)
+      [ "${pkgs.pi-autoresearch}/share/pi-autoresearch/skills" ];
+  extraSkills = lib.optionals (devBrowserSkill != null) [ devBrowserSkill ] ++ piAutoresearchSkills;
   skillsDir =
     if extraSkills == []
     then baseSkills
