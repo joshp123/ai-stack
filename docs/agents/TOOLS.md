@@ -8,6 +8,8 @@ All tools support `--help` for full usage. Prefer CLI over MCP where possible.
 - **devenv.sh**: Per-project isolated environments. `devenv init` creates `devenv.nix` + `.envrc`.
   - Add `direnv allow` for auto-activation on cd. Commit `devenv.lock`.
   - Commands: `devenv shell`, `devenv up` (services), `devenv search <pkg>`. Never install globally.
+  - On Josh's workstation, global `pip`, `pip3`, bare `uv`, `virtualenv`, and `python -m pip` / `python -m ensurepip` / `python -m venv` are blocked in normal shells, including versioned system aliases such as `python3.13 -m ...`.
+  - Use `devenv shell` for real work. `uvx` stays available only for rare one-off commands; do not treat it as the default repo workflow.
 
 ### Documentation
 - **Dash MCP**: Query local Dash docsets. `mcp__dash__search_documentation`, `mcp__dash__list_installed_docsets`.

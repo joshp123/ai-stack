@@ -31,7 +31,7 @@ When communicating with a human:
 - Prefer end-to-end verify; if blocked, say what’s missing.
 - Web: prefer native commands (e.g., `gh` for GitHub links), `curl`/`wget` for links, cloning repos, over web search.
 - Sudo: avoid by default. OK to prompt for Nix rebuilds when relevant. Sudo prompts must be from a foreground blocking terminal (Apple Watch approvals are flaky). Approvals often break after ~22:45 (sleep mode), so avoid late sudo prompts. Sudo for unrelated/“random” tasks is discouraged.
-- **Installs**: use `devenv` per repo; no global installs or ad‑hoc `npm/pip/venv` unless explicitly asked.
+- **Installs**: use `devenv` per repo. On this workstation, global `pip`, `pip3`, bare `uv`, `virtualenv`, and `python -m pip` / `python -m ensurepip` / `python -m venv` are blocked on purpose, including versioned system aliases such as `python3.13 -m ...`; add dependencies to `devenv.nix` instead. `uvx` is the lone one-off escape hatch, not the normal path.
 - **Simplicity**: one obvious way > many; explicit > implicit; simple > complex; flat > nested; readability counts; refuse to guess in code/docs (ask if ambiguous); if hard to explain, it’s a bad idea; avoid premature optimization.
 
 ## Screenshots (“use a screenshot”)
