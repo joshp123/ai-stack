@@ -41,6 +41,7 @@ All tools support `--help` for full usage. Prefer CLI over MCP where possible.
     - Assess: what’s good, what’s weak/risky (contrast, affordance, density, hierarchy), and whether it matches the user’s intent.
     - If mismatch, propose concrete fixes or next actions.
   - Skip the UI verification pass for non-UI automation (e.g., login flows, third-party sites) unless the user explicitly asks.
+- **playwright**: Official Playwright CLI from nixpkgs (`playwright-test` package). Good for simple screenshots/PDFs and for supplying the JS module/runtime used by `js_repl`.
 
 
 ### Code Quality

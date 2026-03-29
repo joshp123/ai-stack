@@ -18,7 +18,7 @@ Generate an HTML template, screenshot it, convert to 1-bit, upload:
 
 ```bash
 # 1. Screenshot HTML at 800x480
-npx playwright screenshot template.html raw.png --viewport-size=800,480
+playwright screenshot template.html raw.png --viewport-size=800,480
 
 # 2. Convert to 1-bit monochrome
 magick raw.png -monochrome -colors 2 -depth 1 -strip png:output.png
