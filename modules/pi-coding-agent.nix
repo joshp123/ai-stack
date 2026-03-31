@@ -17,10 +17,19 @@ let
   subagentExtensionPath = "${homeDir}/.pi/agent/extensions/subagent/index.ts";
   subagentAgents = [ "scout.md" "worker.md" "verifier.md" ];
   subagentPrompts = [ "implement.md" "implement-and-review.md" ];
+  piDiffReviewEnabled = builtins.hasAttr "pi-diff-review" pkgs && pkgs.stdenv.isDarwin;
+  piDiffReviewRoot = "${pkgs.pi-diff-review}/lib/node_modules/pi-diff-review";
   piAutoresearchExtension =
     lib.optionalAttrs (builtins.hasAttr "pi-autoresearch" pkgs) {
       ".pi/agent/extensions/pi-autoresearch" = {
         source = "${pkgs.pi-autoresearch}/share/pi-autoresearch/extensions/pi-autoresearch";
+        force = true;
+      };
+    };
+  piDiffReviewExtension =
+    lib.optionalAttrs piDiffReviewEnabled {
+      ".pi/agent/extensions/pi-diff-review" = {
+        source = piDiffReviewRoot;
         force = true;
       };
     };
@@ -38,6 +47,7 @@ let
     force = true;
   }) subagentPrompts);
 in
+lib.mkMerge [
 {
   home.file =
     agentFiles
@@ -61,7 +71,8 @@ in
       #   force = true;
       # };
     }
-    // piAutoresearchExtension;
+    // piAutoresearchExtension
+    // piDiffReviewExtension;
 
   home.activation.piCodingAgentExtensions = lib.hm.dag.entryAfter [ "writeBoundary" "piCodingAgentSettings" ] ''
     set -euo pipefail
@@ -98,3 +109,14 @@ in
     chmod 600 "$settings"
   '';
 }
+(lib.mkIf piDiffReviewEnabled {
+  home.sessionVariables = {
+    GLIMPSE_BINARY_PATH = "${homeDir}/.cache/pi-diff-review/glimpse";
+  };
+
+  home.activation.piDiffReviewGlimpse = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    set -euo pipefail
+    ${pkgs.bash}/bin/bash ${../scripts/build-glimpse-host.sh} "${piDiffReviewRoot}" "${pkgs.nodejs}/bin/node"
+  '';
+})
+]
