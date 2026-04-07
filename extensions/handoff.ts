@@ -103,8 +103,15 @@ export default function (pi: ExtensionAPI) {
 
 				const doGenerate = async () => {
 					let apiKey: string;
+					let headers: Record<string, string> | undefined;
 					try {
-						apiKey = await ctx.modelRegistry.getApiKey(ctx.model!);
+						const auth = await ctx.modelRegistry.getApiKeyAndHeaders(ctx.model!);
+						if (!auth.ok || !auth.apiKey) {
+							lastError = `Handoff failed: ${auth.ok ? `No API key for ${ctx.model!.provider}` : auth.error}`;
+							return null;
+						}
+						apiKey = auth.apiKey;
+						headers = auth.headers;
 					} catch (e) {
 						lastError = `Handoff failed (missing/invalid auth?): ${formatError(e)}`;
 						return null;
@@ -124,7 +131,7 @@ export default function (pi: ExtensionAPI) {
 					const response = await complete(
 						ctx.model!,
 						{ systemPrompt: SYSTEM_PROMPT, messages: [userMessage] },
-						{ apiKey, signal: loader.signal },
+						{ apiKey, headers, signal: loader.signal },
 					);
 
 					if (response.stopReason === "aborted") {
