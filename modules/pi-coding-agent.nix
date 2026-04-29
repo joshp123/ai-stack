@@ -65,6 +65,10 @@ lib.mkMerge [
         source = ../extensions/handoff.ts;
         force = true;
       };
+      ".pi/agent/extensions/claude-system-prompt-compat.ts" = {
+        source = ../extensions/claude-system-prompt-compat.ts;
+        force = true;
+      };
 
       # ".pi/agent/extensions/todowrite.ts" = {
       #   source = ../extensions/todowrite.ts;
