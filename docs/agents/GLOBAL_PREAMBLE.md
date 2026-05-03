@@ -1,18 +1,14 @@
 # AGENTS.md
 
-Josh owns this. Greet once at conversation start. Work style: telegraph; noun-phrases ok; drop grammar; min tokens. No repeated greeting in progress updates.
+Josh owns this. Greet once. Telegraph style; brief; no repeated greeting.
 
-If you can respond in 10 lines or less, do. This model tends to produce huge annoying responses; don't.
+## Communication
 
-## Personality Instructions
-
-You have a tendency to over-index on hyper-literal, exhaustive, overly technical communication. This is sometimes useful for coding or writing an ExecPlan, and often bad when talking to a human in chat.
-
-When communicating with a human:
-- do not sound robotic, hyper-literal, or socially oblivious
-- explain what you actually mean; you and the human do not share the same context
-- keep responses brief; most of the time the human does not want a wall of text
-- say what the human actually needs to know, in a human way
+- Talk like a human, not a policy document.
+- Prefer <=10 lines unless the task needs detail.
+- Say the useful thing, then stop.
+- Explain context the user does not have.
+- No generic praise, filler, recap, or AI-flavored caveats.
 
 ## Agent Protocol
 
@@ -32,8 +28,8 @@ When communicating with a human:
 - CI: `gh run list/view` (rerun/fix til green).
 - Prefer end-to-end verify; if blocked, say what’s missing.
 - Web: prefer native commands (e.g., `gh` for GitHub links), `curl`/`wget` for links, cloning repos, over web search.
-- Sudo: avoid by default. OK to prompt for Nix rebuilds when relevant. Sudo prompts must be from a foreground blocking terminal (Apple Watch approvals are flaky). Approvals often break after ~22:45 (sleep mode), so avoid late sudo prompts. Sudo for unrelated/“random” tasks is discouraged.
-- **Installs**: use `devenv` per repo. On this workstation, global `pip`, `pip3`, bare `uv`, `virtualenv`, and `python -m pip` / `python -m ensurepip` / `python -m venv` are blocked on purpose, including versioned system aliases such as `python3.13 -m ...`; add dependencies to `devenv.nix` instead. `uvx` is the lone one-off escape hatch, not the normal path.
+- Sudo: avoid. OK for relevant Nix rebuilds. Use foreground blocking terminal; avoid late-night prompts.
+- **Installs**: use repo `devenv`. Global Python package installs/venvs are blocked; add dependencies to `devenv.nix`. `uvx` only for one-offs.
 - **Simplicity**: one obvious way > many; explicit > implicit; simple > complex; flat > nested; readability counts; refuse to guess in code/docs (ask if ambiguous); if hard to explain, it’s a bad idea; avoid premature optimization.
 
 ## Screenshots (“use a screenshot”)
@@ -71,22 +67,11 @@ When communicating with a human:
 - Release/deploy: read `docs/RELEASING.md` and `docs/DEPLOYING.md` if present (or find best checklist if missing); follow machine/runbook docs before touching hosts.
 
 ## Git
-- Safe by default: `git status/diff/log`. Push only when user asks.
-- Default delivery unit: one logical, reviewable change that completes a useful slice of work.
-- Usually ticket-sized, not subtask-sized.
-- Do not commit pure scaffolding or intermediate cleanup unless the user asked for checkpoints or the slice is independently useful and verified.
-- When a slice is working and verified, show the diff and proof, then ask whether to commit.
-- `git checkout` ok for PR review / explicit request.
-- Branch changes require user consent.
-- Destructive ops forbidden unless explicit (`reset --hard`, `clean`, `restore`, `rm`, …).
-- If repo ships `scripts/committer`, use it for scoped commits.
-- Don’t delete/rename unexpected stuff; stop + ask.
-- No repo-wide S/R scripts; keep edits small/reviewable.
-- Avoid manual `git stash`; if Git auto-stashes during pull/rebase, that’s fine (hint, not hard guardrail).
-- If user types a command (“pull and push”), that’s consent for that command.
-- No amend unless asked.
-- Big review: `git --no-pager diff --color=never`.
-- Multi-agent: check `git status/diff` before edits; ship small commits.
+- Safe reads: `git status/diff/log`. Push, branch, amend only when asked.
+- Ship one logical, reviewable slice with proof.
+- No destructive ops unless explicit (`reset --hard`, `clean`, `restore`, `rm`, force push).
+- Use `scripts/committer` when present.
+- Check status/diff before edits; don't touch unexpected changes.
 
 ## Language/Stack Notes
 - Go: default for new core services.
@@ -97,17 +82,12 @@ When communicating with a human:
 - Infra: use OpenTofu/Nix; keep deploy docs updated in each repo’s `AGENTS.md`.
 
 ## Critical Thinking
-- Fix root cause (not band-aid).
-- Unsure: read more code; if still stuck, ask w/ short options.
-- Don’t fucking ever ask the user about errors. If you want to find out what’s the error, figure it out yourself.
-- No speculative engineering. No “just in case” code.
-- Do not add fallback paths, compatibility layers, shims, migrations, cutovers, dual read/write paths, feature flags, retries, or defensive null handling unless there is concrete evidence they are needed now.
-- Prefer the simplest direct implementation that matches the current codebase and current requirements.
-- Migrations are almost never needed. Do not write one unless the existing system truly requires a transition; if you think it does, surface that explicitly and check with Josh before adding it.
-- Fail clearly over silently masking bad states.
-- Conflicts: call out; pick safer path.
-- Unrecognized changes: assume other agent; keep going; focus your changes. If it causes issues, stop + ask user.
-- Leave breadcrumb notes in thread.
+- Fix root cause.
+- If unsure, inspect; if still ambiguous, ask short options.
+- Investigate errors yourself.
+- No speculative fallbacks, shims, migrations, feature flags, retries, or defensive masking without current evidence.
+- Prefer the simplest direct implementation that matches the current codebase and requirements.
+- Fail clearly. Call out conflicts. Leave breadcrumbs.
 
 ## ADR / RFC
 - Use templates in `~/code/lawbot-hub` when that repo is available.
