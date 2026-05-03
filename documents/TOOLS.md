@@ -14,19 +14,6 @@ Most CLIs support `--help` for quick usage.
   - `osascript -e 'tell application "Openclaw" to quit'`
   - `open -a "@HOME@/Applications/Openclaw.app"`
 
-## Smaug (Twitter/X bookmarks)
-
-- Run: `smaug-moltbot run`
-- Fetch only: `smaug-moltbot fetch 20`
-- Archive root: `@HOME@/code/knowledge/twitter-bookmarks`
-- Workspace link: `@HOME@/.openclaw/workspace/bookmarks/smaug`
-- Credentials:
-  - env: `AUTH_TOKEN` + `CT0`
-  - or: `@HOME@/.openclaw/credentials/smaug.env`
-  - optional config: `@HOME@/code/knowledge/twitter-bookmarks/smaug.config.json` (do not commit)
-- Requires `bird` in PATH (enable `programs.openclaw.bundledPlugins.bird` or install globally)
-- Optional: `AUTO_INVOKE_CLAUDE=false`
-
 ## qmd (Local Search)
 
 Use qmd to search LORE.md for random flavor during Trump bot conversations:

@@ -184,8 +184,7 @@
         "home-manager": "home-manager",
         "nix-openclaw": "nix-openclaw",
         "nixpkgs": "nixpkgs_3",
-        "openclaw": "openclaw",
-        "ubs": "ubs"
+        "openclaw": "openclaw"
       }
     },
     "systems": {
@@ -200,22 +199,6 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default",
-        "type": "github"
-      }
-    },
-    "ubs": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1771095969,
-        "narHash": "sha256-+Odv4wyuICdLratq/Offhligge6TXkzAhwIDPdQmA6E=",
-        "owner": "Dicklesworthstone",
-        "repo": "ultimate_bug_scanner",
-        "rev": "18a1448571acbccf5af9be68e2f2f46578675298",
-        "type": "github"
-      },
-      "original": {
-        "owner": "Dicklesworthstone",
-        "repo": "ultimate_bug_scanner",
         "type": "github"
       }
     }

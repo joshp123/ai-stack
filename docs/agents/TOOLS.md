@@ -20,14 +20,6 @@ All tools support `--help` for full usage. Prefer CLI over MCP where possible.
 - **@Browser**: Built-in Codex Browser plugin for local browser automation, screenshots, and visual QA. Use it for localhost, file URLs, and iterative UI debugging.
 
 
-### Code Quality
-- **ubs**: Fast bug scanner for agents. Run on changed files before commits.
-  - `ubs $(git diff --name-only)`. Exit 0 = safe, >0 = fix & re-run.
-  - First run: `ubs doctor` to initialize.
-
-### Git
-- **zagi**: Git-compatible CLI with compact output + guardrails; `git` is aliased to zagi and agent launchers set `ZAGI_AGENT` so commits require `--prompt` and destructive ops (reset --hard/clean -f/restore ./push -f/stash clear/branch -D) are blocked.
-
 ### Search
 - **cass**: Cross-agent conversation search. Indexes Codex, Claude, Cursor sessions.
   - Always `--robot` or `--json`, never bare TUI. Filter: `--workspace "$PWD"`, `--days N`, `--agent`.

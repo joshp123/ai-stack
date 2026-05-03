@@ -14,23 +14,19 @@
       flake = false;
     };
     nix-openclaw.url = "github:openclaw/nix-openclaw";
-    ubs = {
-      url = "github:Dicklesworthstone/ultimate_bug_scanner";
-      flake = false;
-    };
     cass = {
       url = "github:Dicklesworthstone/coding_agent_session_search";
       flake = false;
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, openclaw, nix-openclaw, ubs, cass }:
+  outputs = { self, nixpkgs, home-manager, openclaw, nix-openclaw, cass }:
     let
-      aiStackOverlays = import ./overlays { inputs = { inherit ubs cass; }; };
+      aiStackOverlays = import ./overlays { inputs = { inherit cass; }; };
 
       mkAiStackModule = extraImports: { ... }:
         let
-          aiStackInputs = { inherit openclaw nix-openclaw ubs cass; };
+          aiStackInputs = { inherit openclaw nix-openclaw cass; };
         in {
           _module.args.aiStackInputs = aiStackInputs;
           imports = [
