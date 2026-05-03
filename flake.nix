@@ -22,19 +22,15 @@
       url = "github:Dicklesworthstone/coding_agent_session_search";
       flake = false;
     };
-    dev-browser = {
-      url = "github:joshp123/dev-browser-go";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
-  outputs = { self, nixpkgs, home-manager, openclaw, nix-openclaw, ubs, cass, dev-browser }:
+  outputs = { self, nixpkgs, home-manager, openclaw, nix-openclaw, ubs, cass }:
     let
-      aiStackOverlays = import ./overlays { inputs = { inherit ubs cass dev-browser; }; };
+      aiStackOverlays = import ./overlays { inputs = { inherit ubs cass; }; };
 
       mkAiStackModule = extraImports: { ... }:
         let
-          aiStackInputs = { inherit openclaw nix-openclaw ubs cass dev-browser; };
+          aiStackInputs = { inherit openclaw nix-openclaw ubs cass; };
         in {
           _module.args.aiStackInputs = aiStackInputs;
           imports = [

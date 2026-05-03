@@ -14,7 +14,7 @@ Use these as best-in-class examples while acknowledging they still miss key thin
 
 3) **Testing pyramid is under-specified**
    - RFCs rarely enforce a progressive testing sequence: API → CLI → UI.
-   - UI validation must use `dev-browser` with full screenshots, detailed visual QA, and iterative fixes tied to user intent.
+   - UI validation must use the Browser plugin with full screenshots, detailed visual QA, and iterative fixes tied to user intent.
 
 ## Per-RFC improvement notes
 

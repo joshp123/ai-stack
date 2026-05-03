@@ -58,7 +58,7 @@ If the request to write or revise an RFC/ADR is underspecified, **invoke** the `
 These are recurring failure modes. Call them out and fix them in every RFC/ADR:
 - **UI-facing RFCs are still weak**: Agents often reach ~80–85% and need follow-up prompts for UI work. Be explicit about UI semantics, flows, states, and visual expectations.
 - **Foreseeable fidelity gaps**: RFCs miss obvious requirements (e.g., Tado metrics in a gohome RFC). Enumerate must-have fidelity details.
-- **Testing pyramid under-specified**: Require progressive validation (API → CLI → UI). UI testing must include `dev-browser` screenshots, detailed visual QA, and iterative fixes tied to user intent.
+- **Testing pyramid under-specified**: Require progressive validation (API → CLI → UI). UI testing must include Browser plugin screenshots, detailed visual QA, and iterative fixes tied to user intent.
 
 ## ADR Quality Checklist (must pass)
 

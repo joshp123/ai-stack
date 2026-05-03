@@ -25,18 +25,10 @@ let
   effectiveInputs = (pkgs.inputs or {}) // aiStackInputs // inputs;
 
   baseSkills = ../skills;
-  system = pkgs.stdenv.hostPlatform.system;
-  devBrowserSkill =
-    if effectiveInputs ? dev-browser
-    then
-      (if lib.hasAttrByPath [ "packages" system "dev-browser-skill" ] effectiveInputs.dev-browser
-       then effectiveInputs.dev-browser.packages.${system}.dev-browser-skill
-       else null)
-    else null;
   piAutoresearchSkills =
     lib.optionals (builtins.hasAttr "pi-autoresearch" pkgs)
       [ "${pkgs.pi-autoresearch}/share/pi-autoresearch/skills" ];
-  extraSkills = lib.optionals (devBrowserSkill != null) [ devBrowserSkill ] ++ piAutoresearchSkills;
+  extraSkills = piAutoresearchSkills;
   skillsDir =
     if extraSkills == []
     then baseSkills

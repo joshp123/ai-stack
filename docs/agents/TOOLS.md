@@ -1,7 +1,5 @@
 # Tools
 
-## Tools
-
 All tools support `--help` for full usage. Prefer CLI over MCP where possible.
 
 ### Dev Environments
@@ -18,32 +16,8 @@ All tools support `--help` for full usage. Prefer CLI over MCP where possible.
 ### Printable Markdown (pandoc)
 - HTML print: `pandoc --from gfm+hard_line_breaks --to html5 --standalone --embed-resources --lua-filter $HOME/code/nix/ai-stack/docs/agents/print-list-fix.lua --css $HOME/code/nix/ai-stack/docs/agents/print.css -o out.html in.md`
 
-### Steipete Tap Tools
-- **codexbar**: Codex/Claude usage menu bar monitor (cask).
-- **peekaboo**: macOS screenshots + AI vision CLI.
-- **gogcli**: Google Suite CLI (Gmail, Calendar, Drive).
-- **camsnap**: RTSP/ONVIF camera capture CLI.
-- **bird**: Twitter/X CLI.
-- **mcporter**: MCP runtime/CLI wrapper (Homebrew; see “Other” for usage).
-- **poltergeist**: Screenshots + OCR/vision helpers.
-- **sag**: Screenshot/annotation CLI.
-- **sonoscli**: Sonos speaker control CLI.
-- **wacli**: WhatsApp CLI built on whatsmeow.
-- **summarize**: URL → clean text → summary.
-- **tmuxwatch**: Tmux session monitor.
-
 ### Browser Automation
-- **dev-browser** (preferred): Long-lived daemon owns browser. Safe to retry/kill without losing state.
-  - **CLI, not MCP**: invoke directly as a shell command (`dev-browser ...`). Do not look for it in MCP tool lists.
-  - Workflow: `goto <url>` → `snapshot` → `click-ref eN` / `fill-ref eN "text"`.
-  - For shadow DOM/iframes: `snapshot --engine aria`. For batching: `dev-browser actions` (JSON).
-  - **UI verification pass (dev tasks only)**: After any dev-browser interaction that changes UI state, take a screenshot and do a quick visual QA:
-    - Capture: `dev-browser screenshot --full-page` (or `--annotate-refs` if it helps).
-    - Describe what you see (layout, hierarchy, visible text, key controls, states).
-    - Assess: what’s good, what’s weak/risky (contrast, affordance, density, hierarchy), and whether it matches the user’s intent.
-    - If mismatch, propose concrete fixes or next actions.
-  - Skip the UI verification pass for non-UI automation (e.g., login flows, third-party sites) unless the user explicitly asks.
-- **playwright**: Official Playwright CLI from nixpkgs (`playwright-test` package). Good for simple screenshots/PDFs and for supplying the JS module/runtime used by `js_repl`.
+- **@Browser**: Built-in Codex Browser plugin for local browser automation, screenshots, and visual QA. Use it for localhost, file URLs, and iterative UI debugging.
 
 
 ### Code Quality
@@ -64,12 +38,16 @@ All tools support `--help` for full usage. Prefer CLI over MCP where possible.
   (e.g. `${OPENCLAW_STATE_DIR:-~/.openclaw}/workspace/TOOLS.md` or `~/.openclaw-<instance>/workspace/TOOLS.md`).
 
 ### iOS Simulator
-- **xcodebuildmcp** (CLI-first): Apple platform build/test/run/debug/log/UI automation CLI. Prefer `xcodebuildmcp` over raw `xcodebuild`/`simctl` when available.
+- **@build-ios-apps** / **@build-macos-apps**: Built-in Codex app plugins for Apple platform build/test/run/debug/UI automation.
+- **xcodebuildmcp** (CLI-first fallback): Apple platform build/test/run/debug/log/UI automation CLI. Prefer plugin skills when available, then use the CLI for direct shell workflows.
   - Quick checks: `xcodebuildmcp --version`, `xcodebuildmcp tools`, `xcodebuildmcp simulator list`.
 - **axe**: Accessibility-based simulator automation. `axe tap`, `axe swipe`, `axe type`, `axe screenshot`. Uses Apple Accessibility APIs, no external server.
 
+### Web Apps
+- **@build-web-apps**: Built-in Codex web app plugin for frontend implementation, app-builder workflows, shadcn, Stripe, and Supabase guidance.
+
 ### Other
-- **nanobanana**: Gemini image edit CLI. `nanobanana <image> "<prompt>" [out]` (uses `GEMINI_API_KEY` from `/run/agenix/gemini-api-key`).
+- **imagegen**: Built-in Codex skill/tool for image generation and editing. Prefer it over local image-edit CLIs.
 - **mcporter**: MCP server wrapper for ad-hoc servers (Homebrew: `steipete/tap/mcporter`). `mcporter list`, `mcporter call namespace.tool`.
   - Config: `~/.mcporter-local/mcporter.json`. Set `MCPORTER_CONFIG` env when invoking. Avoid unless the user explicitly instructs.
 - **Research repos**: Clone sources to `~/code/research/<topic>/src/<repo>`, examples to `/examples/`.
