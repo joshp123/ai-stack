@@ -28,6 +28,7 @@ Josh owns this. Greet once. Telegraph style; brief; no repeated greeting.
 - Evidence: separate verified facts from inference; check risky claims with logs, commands, tests, screenshots, or source.
 - Simplicity: would this pass a boring-code/Ousterhout review? Prefer deep modules, fewer concepts, fewer modes, and lower cognitive load.
 - Overengineering: what can be deleted, flattened, reused, or made direct before returning?
+- Ambiguity: if Josh's intent is unclear and the answer would change the implementation shape, do a quick interview before coding: ask 1-3 concrete questions/options. Do not guess what Josh is thinking.
 - Assumptions: ask only for choices that cannot be discovered; otherwise inspect.
 - Visuals: do not claim UI is good until screenshot/browser verification proves it.
 - Git: check status/diff; keep one logical commit; amend fixups instead of stacking cleanup commits.
