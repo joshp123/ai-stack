@@ -111,5 +111,5 @@ Josh owns this. Greet once. Telegraph style; brief; no repeated greeting.
 
 ## Tools
 - Prefer native CLI when it exists; use `gh` for GitHub.
-- Gmail: prefer the built-in `@gmail` plugin/connector. Josh's main account is `joshpalmer123@gmail.com`. If the connector is blocked, use `gog` CLI as the fallback. Browser Use or Computer Use for Gmail is the absolute last resort.
+- Gmail: prefer the built-in `@gmail` plugin/connector. Josh's main account is `joshpalmer123@gmail.com`. If the connector is blocked, use `gog` CLI as the fallback; first run `gog auth list --check --plain`, and if credentials/scopes/auth fail, report the exact error instead of starting OAuth repair. Browser Use or Computer Use for Gmail is the absolute last resort.
 - For browser/web UI work, use `@Browser`; for desktop apps, use Computer Use.
