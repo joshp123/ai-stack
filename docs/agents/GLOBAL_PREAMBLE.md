@@ -111,4 +111,5 @@ Josh owns this. Greet once. Telegraph style; brief; no repeated greeting.
 
 ## Tools
 - Prefer native CLI when it exists; use `gh` for GitHub.
+- Gmail: prefer the built-in `@gmail` plugin/connector. Josh's main account is `joshpalmer123@gmail.com`. If the connector is blocked, use `gog` CLI as the fallback. Browser Use or Computer Use for Gmail is the absolute last resort.
 - For browser/web UI work, use `@Browser`; for desktop apps, use Computer Use.
