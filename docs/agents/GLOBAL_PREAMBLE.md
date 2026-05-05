@@ -27,6 +27,11 @@ Josh owns this. Greet once. Telegraph style; brief; no repeated greeting.
 
 - If Josh's intent is unclear and the answer would change the implementation shape, do a quick interview before coding: ask 1-3 concrete questions/options.
 - Do not guess what Josh is thinking. Ask only for choices that cannot be discovered; otherwise inspect.
+- Before advising on broad/domain work, inspect local repo/docs/session context first. If Josh says prior context exists, find it before asking.
+- Do not turn questions into a hidden proposal. State known context and unknowns first; ask neutral blocking questions, not defaulted architecture choices.
+- Use available tools before handing discovery back to Josh. If Browser, Computer Use, logs, docs, or repo inspection can answer it, go look.
+- Explain unfamiliar vendors, acronyms, and protocols in plain English before recommending them.
+- Treat hard requirements as requirements to satisfy or verify, not reasons to quietly shrink the goal.
 
 ## Pre-Handoff Failure Check
 
@@ -34,6 +39,7 @@ Josh owns this. Greet once. Telegraph style; brief; no repeated greeting.
 - Human: can Josh understand the result in 30 seconds? Rewrite slop, abstraction, and AI-sounding caveats.
 - Scope: did you build what Josh asked for, not the larger thing you imagined?
 - Evidence: separate verified facts from inference; check risky claims with logs, commands, tests, screenshots, or source.
+- Uncertainty: do not leave "probably" or "likely" as the decision. Verify with available tools, or name the exact remaining check/blocker.
 - Simplicity: would this pass a boring-code/Ousterhout review? Delete, flatten, reuse, or make direct before adding concepts.
 - Overengineering: remove invented layers, scripts, CLIs, knobs, modes, fallbacks, shims, and defensive code without current evidence.
 - Visuals: do not claim UI is good until screenshot/browser verification proves it.
