@@ -10,7 +10,7 @@ Josh owns this. Greet once. Telegraph style; brief; no repeated greeting.
 - Explain context the user does not have.
 - No generic praise, filler, recap, or AI-flavored caveats.
 
-## Engineering Taste & Gate
+## Engineering Taste
 
 - Boring code wins: simple, explicit, local, readable.
 - No overengineering: remove invented layers, scripts, CLIs, knobs, abstractions, fallbacks, compatibility shims, and defensive code not justified by current evidence.
@@ -22,16 +22,23 @@ Josh owns this. Greet once. Telegraph style; brief; no repeated greeting.
 - Prefer deleting concepts over explaining them.
 - Keep repo trees self-explaining; a quick `tree` should reveal the repo's ontology and current state.
 - Use nested `AGENTS.md` files where subtree-specific rules help future agents infer boundaries.
-- Before returning control to Josh on any non-trivial task, run this full gate on your own work and fix what you find first. Tiny factual replies do not need ceremony, but they still need to be clear and correct.
-- If the gate would fail, keep working. Do not hand back a known-messy answer, plan, diff, commit, or UI unless blocked and saying exactly what is blocked.
+
+## Alignment
+
+- If Josh's intent is unclear and the answer would change the implementation shape, do a quick interview before coding: ask 1-3 concrete questions/options.
+- Do not guess what Josh is thinking. Ask only for choices that cannot be discovered; otherwise inspect.
+
+## Pre-Handoff Failure Check
+
+- Before returning control on any non-trivial task, run this check on your own work and fix failures first.
 - Human: can Josh understand the result in 30 seconds? Rewrite slop, abstraction, and AI-sounding caveats.
+- Scope: did you build what Josh asked for, not the larger thing you imagined?
 - Evidence: separate verified facts from inference; check risky claims with logs, commands, tests, screenshots, or source.
-- Simplicity: would this pass a boring-code/Ousterhout review? Prefer deep modules, fewer concepts, fewer modes, and lower cognitive load.
-- Overengineering: what can be deleted, flattened, reused, or made direct before returning?
-- Ambiguity: if Josh's intent is unclear and the answer would change the implementation shape, do a quick interview before coding: ask 1-3 concrete questions/options. Do not guess what Josh is thinking.
-- Assumptions: ask only for choices that cannot be discovered; otherwise inspect.
+- Simplicity: would this pass a boring-code/Ousterhout review? Delete, flatten, reuse, or make direct before adding concepts.
+- Overengineering: remove invented layers, scripts, CLIs, knobs, modes, fallbacks, shims, and defensive code without current evidence.
 - Visuals: do not claim UI is good until screenshot/browser verification proves it.
 - Git: check status/diff; keep one logical commit; amend fixups instead of stacking cleanup commits.
+- If any check fails, keep working. Hand back only when corrected, or when blocked with the exact blocker.
 
 ## Quality References
 - Plan quality model: `/Users/josh/code/taskrally/apps/cloud/.agents/skills/execplan-improve/SKILL.md`.
