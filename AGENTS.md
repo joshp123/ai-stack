@@ -23,8 +23,27 @@ See `~/code/nix/AGENTS.md`. Always verify from nixos-config before committing he
 ```bash
 cd ~/code/nix/nixos-config
 AI_STACK="$HOME/code/nix/ai-stack"
-nix run .#build --override-input ai-stack "path:$AI_STACK"
+nix run .#build -- --override-input ai-stack "path:$AI_STACK"   # catches the local ai-stack checkout, not the pinned input
 ```
+
+For `docs/agents/*` edits, source changes are not enough. After the build, apply and verify the deployed Codex file before judging prompt quality:
+
+```bash
+cd ~/code/nix/nixos-config
+AI_STACK="$HOME/code/nix/ai-stack"
+activation=$(nix build --no-link --print-out-paths --impure --override-input ai-stack "path:$AI_STACK" .#homeConfigurations.josh-aarch64-darwin-base.activationPackage)
+"$activation/activate"
+diff -u <(cat "$AI_STACK/docs/agents/GLOBAL_PREAMBLE.md" "$AI_STACK/docs/agents/GLOBAL_CODEX_APPENDIX.md") ~/.codex/AGENTS.md
+```
+
+The override is deliberate but narrow:
+
+- Use it only to validate local ai-stack edits before `nixos-config` pins the new commit.
+- It does not edit `flake.lock`; it substitutes one known checkout so build/apply tests the files being reviewed.
+- Do not use it for arbitrary branches or unrelated inputs.
+- Do not use `nix run .#hm-apply-base --override-input ...` for this check; that wrapper re-enters the flake and can silently use the pinned input instead.
+
+New Codex sessions only see the changed prompt after this deployed file matches the source. Also verify one fresh Codex session actually injects the new wording before judging behavior.
 
 If broken → fix ai-stack first, then re-verify.
 
