@@ -1,4 +1,11 @@
-{ lib, config, pkgs, inputs ? {}, aiStackInputs ? {}, ... }:
+{
+  lib,
+  config,
+  pkgs,
+  inputs ? { },
+  aiStackInputs ? { },
+  ...
+}:
 let
   codexAgents = pkgs.concatTextFile {
     name = "codex-agents.md";
@@ -22,39 +29,53 @@ let
     ];
   };
 
-  effectiveInputs = (pkgs.inputs or {}) // aiStackInputs // inputs;
+  effectiveInputs = (pkgs.inputs or { }) // aiStackInputs // inputs;
 
   baseSkills = ../skills;
-  piAutoresearchSkills =
-    lib.optionals (builtins.hasAttr "pi-autoresearch" pkgs)
-      [ "${pkgs.pi-autoresearch}/share/pi-autoresearch/skills" ];
+  piAutoresearchSkills = lib.optionals (builtins.hasAttr "pi-autoresearch" pkgs) [
+    "${pkgs.pi-autoresearch}/share/pi-autoresearch/skills"
+  ];
   extraSkills = piAutoresearchSkills;
   skillsDir =
-    if extraSkills == []
-    then baseSkills
-    else pkgs.symlinkJoin {
-      name = "ai-stack-skills";
-      paths = [ baseSkills ] ++ extraSkills;
-    };
+    if extraSkills == [ ] then
+      baseSkills
+    else
+      pkgs.symlinkJoin {
+        name = "ai-stack-skills";
+        paths = [ baseSkills ] ++ extraSkills;
+      };
 
-  openclawInput =
-    if effectiveInputs ? openclaw
-    then effectiveInputs.openclaw
-    else null;
+  openclawInput = if effectiveInputs ? openclaw then effectiveInputs.openclaw else null;
   openclawUpstreamAgents =
-    if openclawInput != null
-    then "${openclawInput}/docs/reference/templates/AGENTS.md"
-    else null;
+    if openclawInput != null then "${openclawInput}/docs/reference/templates/AGENTS.md" else null;
+  substituteScript =
+    replacements: path:
+    lib.replaceStrings (map (replacement: replacement.from) replacements) (map (
+      replacement: replacement.to
+    ) replacements) (builtins.readFile path);
 
   openclawDocs =
     if openclawUpstreamAgents != null then
-      pkgs.runCommand "openclaw-documents" {} ''
-        bash ${../scripts/build-openclaw-documents.sh} \
-          ${../documents} \
-          ${openclawUpstreamAgents} \
-          ${../documents/AGENTS.josh.md} \
-          $out
-      ''
+      pkgs.runCommand "openclaw-documents" { } (
+        substituteScript [
+          {
+            from = "@buildOpenclawDocuments@";
+            to = "${../scripts/build-openclaw-documents.sh}";
+          }
+          {
+            from = "@documentsDir@";
+            to = "${../documents}";
+          }
+          {
+            from = "@openclawUpstreamAgents@";
+            to = openclawUpstreamAgents;
+          }
+          {
+            from = "@joshAgents@";
+            to = "${../documents/AGENTS.josh.md}";
+          }
+        ] ../scripts/build-openclaw-documents-derivation.sh
+      )
     else
       ../documents;
 in

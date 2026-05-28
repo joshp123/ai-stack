@@ -1,27 +1,19 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 let
-  cassIndexerPkg = pkgs.writeShellScriptBin "cass-indexer" ''
-    set -euo pipefail
-
-    cass_bin="${pkgs.cass}/bin/cass"
-    jq_bin="${pkgs.jq}/bin/jq"
-
-    export CODING_AGENT_SEARCH_NO_UPDATE_PROMPT=1
-
-    status_json="$($cass_bin status --json 2>/dev/null || true)"
-    needs_full_index="$(
-      echo "$status_json" | "$jq_bin" -r '
-        ( (.database.exists // false) and (.index.exists // false) ) | not
-      ' 2>/dev/null || echo true
-    )"
-
-    if [[ "$needs_full_index" == "true" ]]; then
-      "$cass_bin" index --full
-    fi
-
-    exec "$cass_bin" index --watch
-  '';
+  cassIndexerPkg = pkgs.writeShellApplication {
+    name = "cass-indexer";
+    runtimeInputs = [
+      pkgs.cass
+      pkgs.jq
+    ];
+    text = builtins.readFile ../scripts/cass-indexer.sh;
+  };
 
 in
 {
@@ -31,7 +23,8 @@ in
   };
 
   home.packages = lib.optionals pkgs.stdenv.isDarwin [ cassIndexerPkg ];
-} // lib.optionalAttrs pkgs.stdenv.isDarwin {
+}
+// lib.optionalAttrs pkgs.stdenv.isDarwin {
   # Keep cass indexed automatically (zero-maintenance). Works cross-agent and cross-repo.
   #
   # - First run: performs a full index build if DB/index missing.
@@ -55,7 +48,8 @@ in
       };
     };
   };
-} // lib.optionalAttrs pkgs.stdenv.isLinux {
+}
+// lib.optionalAttrs pkgs.stdenv.isLinux {
   systemd.user.services.cass-indexer = {
     Unit = {
       Description = "cass indexer (watch mode)";

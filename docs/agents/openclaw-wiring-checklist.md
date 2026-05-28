@@ -1,4 +1,4 @@
-# Openclaw wiring checklist (private repo)
+# OpenClaw wiring checklist (private repo)
 
 Use this as a quick wiring guide when importing ai‑stack into a private repo.
 

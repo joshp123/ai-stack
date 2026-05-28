@@ -26,7 +26,7 @@ All tools support `--help` for full usage. Prefer CLI over MCP where possible.
 - **cm**: Robot-friendly cass wrapper. `cm search "query"` adds `--robot` automatically.
 
 ### Text-to-Speech
-- **edge-tts**: Microsoft Edge neural TTS. No API key. See Openclaw `TOOLS.md` in the active workspace
+- **edge-tts**: Microsoft Edge neural TTS. No API key. See OpenClaw `TOOLS.md` in the active workspace
   (e.g. `${OPENCLAW_STATE_DIR:-~/.openclaw}/workspace/TOOLS.md` or `~/.openclaw-<instance>/workspace/TOOLS.md`).
 
 ### iOS Simulator

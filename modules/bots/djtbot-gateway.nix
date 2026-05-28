@@ -1,6 +1,7 @@
 { config, lib, ... }:
 let
-  # Public defaults only. Secrets + PII live in nixos-config.
+  # Public defaults only. Secrets, PII, and live host topology live in nixos-config.
+  # This is a transitional DJTBOT/OpenClaw profile, not the target gateway owner.
   #
   # Expected private overlay responsibilities:
   # - channels.telegram.* (tokenFile, allowFrom, groups)
@@ -8,7 +9,7 @@ let
   # - plugin secret files under /run/agenix (padel-auth, xuezh keys, ...)
   homeDir = config.home.homeDirectory or "~";
 
-  pluginSourcesOverride = config.programs.openclaw.pluginSourcesOverride or {};
+  pluginSourcesOverride = config.programs.openclaw.pluginSourcesOverride or { };
   # Pin plugin sources (pure flakes). Override in private repo for local dev.
   defaultPluginSources = {
     padel = "github:joshp123/padel-cli?rev=0022bb42bca7847d1856e24f2b3307defa00237c&narHash=sha256-vGNYZyriTXkvW77TBuJl0otDCpmVzTF/p3kU/THIzGs=";
@@ -37,9 +38,14 @@ let
     };
   };
 
-  basePlugins = [ padelPlugin gohomePlugin xuezhPlugin ];
+  basePlugins = [
+    padelPlugin
+    gohomePlugin
+    xuezhPlugin
+  ];
 
-in {
+in
+{
   config = {
     programs.openclaw = {
       installApp = lib.mkDefault false;
@@ -47,7 +53,7 @@ in {
       # Compose plugins the idiomatic way (so bundledPlugins/customPlugins stay composable).
       customPlugins = lib.mkDefault basePlugins;
 
-      # Canonical gateway: VPS.
+      # Transitional gateway profile. The private repo decides which host runs it.
       instances.prod = {
         enable = lib.mkDefault true;
 
@@ -65,7 +71,10 @@ in {
                 id = "main";
                 default = true;
                 model = "anthropic/claude-sonnet-4-6";
-                identity = { name = "DJTBOT"; emoji = "🇺🇸"; };
+                identity = {
+                  name = "DJTBOT";
+                  emoji = "🇺🇸";
+                };
               }
             ];
             defaults = {
@@ -78,9 +87,15 @@ in {
               subagents.maxConcurrent = 8;
 
               models = {
-                "anthropic/claude-sonnet-4-6" = { alias = "sonnet"; };
-                "anthropic/claude-opus-4-6" = { alias = "opus"; };
-                "openai-codex/gpt-5.3-codex" = { alias = "codex"; };
+                "anthropic/claude-sonnet-4-6" = {
+                  alias = "sonnet";
+                };
+                "anthropic/claude-opus-4-6" = {
+                  alias = "opus";
+                };
+                "openai-codex/gpt-5.3-codex" = {
+                  alias = "codex";
+                };
               };
             };
           };

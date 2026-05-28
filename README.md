@@ -10,10 +10,10 @@ paths. If those inputs are missing, builds should fail with clear errors.
 ## What this repo is
 
 This repo is designed to be copyable by other users with a single agent prompt.
-The public defaults should describe a complete Openclaw setup once private inputs are provided.
+The public defaults should describe a complete OpenClaw setup once private inputs are provided.
 
 - Public module layer imported from a private repo
-- Non‑PII defaults for Openclaw and AI tooling
+- Non‑PII defaults for OpenClaw and AI tooling
 - Source of truth for public docs + skills
 
 ## What this repo is not
@@ -21,14 +21,21 @@ The public defaults should describe a complete Openclaw setup once private input
 - A complete, runnable bot config
 - A home for secrets, tokens, or allowlists
 - A place to wire private tool paths
+- The source of truth for which host runs which service
+- The package owner for OpenClaw or OpenClaw-adjacent tools
 
 ## Slicing & dicing (repo boundaries)
 
 Use `AGENTS.md` as the index for how these repos split responsibilities:
 
 - `ai-stack`: public defaults + wiring (no PII)
-- `nixos-config`: private secrets + allowlists + local paths
-- `nix-openclaw`: packaging and batteries‑included defaults for Openclaw itself
+- `nixos-config`: private secrets + allowlists + local paths + host topology
+- `nix-ai-tools`: generic AI CLI packages
+- `nix-openclaw`: packaging, module behavior, and reusable lifecycle for OpenClaw itself
+- `nix-openclaw-tools`: OpenClaw-adjacent plugin/tool packages consumed through `nix-openclaw`
+- `opentofu-infra`: provider-side cloud resources
+
+Architecture notes live in `docs/architecture/ontology.md`.
 
 ## Core setup (private repo)
 
@@ -43,7 +50,7 @@ Private repo responsibilities:
 - Set Telegram allowlists and group modes
 - Optionally override plugin sources with local paths
 
-## Openclaw wiring
+## OpenClaw wiring
 
 This repo sets public defaults for `programs.openclaw` (mirroring the full
 example config from `nix-openclaw`). Secrets are required for live plugins, and
@@ -82,9 +89,11 @@ This stack assumes a simple layout under `~/code/nix`:
 ```text
 ~/code/nix/
   ai-stack/
+  nix-ai-tools/
   nixos-config/
   nix-secrets/
   nix-openclaw/ (optional, dev only)
+  nix-openclaw-tools/ (optional, dev only)
 ```
 
 Adjust paths in the private repo if your layout differs.
