@@ -1,6 +1,7 @@
-# DJTBOT (Gateway on VPS + Mac node)
+# DJTBOT / OpenClaw Transitional Profiles
 
-This doc is the entrypoint for “add X to the bot” / “fix Y on the bot”.
+This doc covers the public DJTBOT/OpenClaw profiles that are still imported by
+the private repo. It is not the source of truth for live host topology.
 
 ## TL;DR: where to change things
 
@@ -8,13 +9,13 @@ This doc is the entrypoint for “add X to the bot” / “fix Y on the bot”.
 
 Repo: `~/code/nix/ai-stack`
 
-- **VPS gateway role module:** `ai-stack/modules/bots/djtbot-gateway.nix`
+- **Gateway role profile:** `ai-stack/modules/bots/djtbot-gateway.nix`
   - model defaults
   - gateway bind defaults (`tailnet`)
   - plugins list (non-secret wiring)
   - safe defaults (telegram disabled by default)
 
-- **Mac node + local test module:** `ai-stack/modules/bots/djtbot-mac-node.nix`
+- **macOS node + local test profile:** `ai-stack/modules/bots/djtbot-mac-node.nix`
   - installs OpenClaw.app
   - disables local prod gateway
   - keeps local `test` gateway (optional)
@@ -32,34 +33,40 @@ Repo: `~/code/nix/nixos-config`
 - `OPENCLAW_GATEWAY_TOKEN` secret (agenix)
 - Tailscale auth keys (agenix)
 - Host firewall rules / port exposure
+- Which host is the current gateway
 
 Rule: **ai-stack never contains chat IDs, allowFrom lists, tokens, or keys.**
 
-## Operational model (mental)
+## Transitional deployed model
 
-- **VPS** runs the canonical OpenClaw **Gateway** (Telegram lands here).
-- **Mac** runs the OpenClaw **app in node-mode** and connects to the Gateway over Tailscale.
-- Gateway routes execution:
-  - Linux-capable tools run on VPS
-  - macOS-only workflows execute on the Mac node (screen/canvas/system)
+Private consumers may still have a legacy gateway role and a macOS node role
+during cutover. Check `nixos-config` and live host state before assuming which
+host is active.
+
+Do not treat this as target architecture. New reusable lifecycle behavior
+belongs in `nix-openclaw`; active gateway ownership belongs in `nixos-config`
+until proven and decommissioned cleanly.
 
 ## Meals migration (runtime data)
 
 `meals/` lives in the OpenClaw workspace (runtime data). Pragmatic mode:
 
 - Source (old local): `~/.openclaw-prod/workspace/meals/`
-- Target (VPS): `/home/djtbot/.openclaw-prod/workspace/meals/` (typical)
+- Target: the active gateway host path in the private repo.
 
 We do **not** Nix-manage this directory yet.
 
 ## Common tasks
 
-### Add a new plugin / tool (public)
+### Add a new plugin / tool
 
-Edit: `ai-stack/modules/bots/djtbot-gateway.nix`
+Do not start here by default.
 
-- add the plugin to `basePlugins`
-- keep secret file paths as `/run/agenix/...` references only
+- Packaged/reusable OpenClaw plugin tools belong in `nix-openclaw-tools` or
+  `nix-openclaw`.
+- Private enablement, env files, and secret paths belong in `nixos-config`.
+- Add to `ai-stack/modules/bots/djtbot-gateway.nix` only for public no-secret
+  profile defaults that remain useful after the host topology changes.
 
 ### Enable Telegram (private)
 
@@ -76,6 +83,6 @@ Edit: `ai-stack/modules/bots/djtbot-gateway.nix` → `agents.list[0].model` + `a
 
 ## Smoke checks (minimal)
 
-- VPS gateway reachable over tailnet (no public bind)
-- Mac node paired (`openclaw nodes pending/approve/status` from the VPS)
-- A mac-only action succeeds via node (screen snapshot / system.run)
+- Gateway reachable over tailnet (no public bind)
+- macOS node paired (`openclaw nodes pending/approve/status` from the gateway)
+- A macOS-only action succeeds via node (screen snapshot / system.run)

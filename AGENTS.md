@@ -2,7 +2,7 @@
 
 **Public AI development experience** — shareable with anyone.
 
-Skills, agent docs, shell config, tool wiring for Claude, Codex, pi, Cursor, Openclaw, etc.
+Skills, agent docs, shell config, tool wiring for Claude, Codex, pi, Cursor, OpenClaw, etc.
 
 ```
 nixos-config (your system)
@@ -12,13 +12,18 @@ nixos-config (your system)
 └── stacks/ai/ (private AI config wiring)
 ```
 
+This repo owns public, no-secret defaults. It does not own live host topology.
+If a doc here says a VPS, Mac, or mini server is canonical, that doc is stale;
+the private consumer repo chooses which host runs which profile.
+
 ## Golden path
 
 See `~/code/nix/AGENTS.md`. Always verify from nixos-config before committing here:
 
 ```bash
 cd ~/code/nix/nixos-config
-nix run .#build   # must pass — catches ai-stack breakage
+AI_STACK="$HOME/code/nix/ai-stack"
+nix run .#build --override-input ai-stack "path:$AI_STACK"
 ```
 
 If broken → fix ai-stack first, then re-verify.
@@ -39,8 +44,11 @@ ai-stack/
 ├── config/zsh/      # public shell config
 ├── modules/         # Home Manager wiring
 │   ├── ai-stack.nix        # main module
-│   └── openclaw-config.nix # Openclaw defaults
-└── documents/       # Openclaw docs (AGENTS/SOUL/TOOLS)
+│   ├── openclaw-config.nix # OpenClaw defaults
+│   └── bots/               # transitional DJTBOT role profiles
+├── documents/       # OpenClaw workspace docs (AGENTS/SOUL/TOOLS)
+├── extensions/      # pi coding-agent extensions
+└── scripts/         # helper scripts called from Nix/Home Manager
 ```
 
 **Where to put things:**
@@ -50,8 +58,10 @@ ai-stack/
 | Shareable skill | `skills/` |
 | Public shell aliases | `config/zsh/` |
 | Global agent guidance | `docs/agents/` |
-| Openclaw public config | `modules/openclaw-config.nix` |
+| OpenClaw public config | `modules/openclaw-config.nix` |
 | Home Manager wiring | `modules/` |
+| OpenClaw workspace docs | `documents/` |
+| pi coding-agent extensions | `extensions/` |
 
 **What does NOT belong here:**
 
@@ -61,13 +71,18 @@ ai-stack/
 | Secrets, tokens | `nixos-config` (agenix) |
 | Private config | `nixos-config` |
 | Per-user overrides | `nixos-config` |
-| Openclaw packaging | `nix-openclaw` |
-| Openclaw product code | `~/code/openclaw` |
+| Live host topology/deploy choices | `nixos-config` |
+| Provider-side cloud resources | `~/code/opentofu-infra` |
+| OpenClaw packaging/module behavior | `nix-openclaw` |
+| OpenClaw-adjacent tool/plugin packages | `nix-openclaw-tools` via `nix-openclaw` |
+| OpenClaw product code | `~/code/openclaw` |
 
 **Rules of thumb:**
 - Tool packages → `nix-ai-tools`
 - Config, skills, public docs → here
 - Identifies a person, location, device, or contains secrets → `nixos-config`
+- Reusable OpenClaw install/lifecycle behavior → `nix-openclaw`
+- Cloud project/IAM/API-key resources → `opentofu-infra`
 
 ## No PII (public repo)
 

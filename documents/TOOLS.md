@@ -3,7 +3,7 @@
 This file is managed by Nix. A plugin report is appended below.
 Most CLIs support `--help` for quick usage.
 
-## Openclaw runtime controls (no sudo)
+## OpenClaw runtime controls (no sudo)
 
 - `openclaw-reload test` (default)
 - `openclaw-reload prod`
@@ -11,8 +11,8 @@ Most CLIs support `--help` for quick usage.
 - Gateway restart:
   - `launchctl kickstart -k "gui/$UID/com.steipete.openclaw.gateway.prod"`
 - UI restart:
-  - `osascript -e 'tell application "Openclaw" to quit'`
-  - `open -a "@HOME@/Applications/Openclaw.app"`
+  - `osascript -e 'tell application "OpenClaw" to quit'`
+  - `open -a "@HOME@/Applications/OpenClaw.app"`
 
 ## qmd (Local Search)
 

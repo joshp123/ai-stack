@@ -1,11 +1,12 @@
 { config, lib, ... }:
 {
   # Public, generic OpenClaw defaults.
-  # Bot-specific roles (DJTBOT, etc.) live in `modules/bots/*`.
+  # Transitional bot-specific profiles (DJTBOT, etc.) live in `modules/bots/*`.
+  # Host topology and reusable OpenClaw lifecycle behavior do not belong here.
 
   options.programs.openclaw.pluginSourcesOverride = lib.mkOption {
     type = lib.types.attrsOf lib.types.str;
-    default = {};
+    default = { };
     description = "Override plugin sources by name (e.g. local dev paths).";
   };
 

@@ -1,11 +1,11 @@
-# Openclaw wiring checklist (private repo)
+# OpenClaw wiring checklist (private repo)
 
 Use this as a quick wiring guide when importing ai‑stack into a private repo.
 
 Related entrypoint:
 - `ai-stack/docs/agents/DJTBOT.md`
 
-## Required (prod gateway)
+## Required (gateway profile)
 
 ### Gateway auth
 
@@ -19,7 +19,7 @@ Related entrypoint:
 
 ### Telegram (if you enable it)
 
-ai-stack disables Telegram by default. If you want Telegram on prod, set in private repo:
+ai-stack disables Telegram by default. If you want Telegram on the gateway profile, set in private repo:
 
 - `programs.openclaw.instances.prod.config.channels.telegram.enabled = true;`
 - `programs.openclaw.instances.prod.config.channels.telegram.tokenFile = "/run/agenix/<token>";`

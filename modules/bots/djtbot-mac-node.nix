@@ -2,12 +2,15 @@
 {
   config = {
     programs.openclaw = {
+      # Transitional macOS node/test profile used by the private repo.
+      # Reusable OpenClaw app/lifecycle behavior belongs in nix-openclaw.
+      #
       # We want the macOS app available for node-mode.
       # Force: ai-stack base sets installApp=false by default.
       installApp = lib.mkForce true;
 
-      # Ensure the old local prod gateway is not running on the Mac.
-      # (Canonical gateway is on the VPS.)
+      # Ensure the local prod-profile gateway is not running from this public profile.
+      # The private repo owns the active host choice during cutover.
       instances.prod.enable = lib.mkForce false;
 
       # Keep a local test gateway around for dev (your preference).
@@ -30,7 +33,10 @@
                 id = "main";
                 default = true;
                 model = "anthropic/claude-opus-4-6";
-                identity = { name = "DJTBOT-TEST"; emoji = "🧪"; };
+                identity = {
+                  name = "DJTBOT-TEST";
+                  emoji = "🧪";
+                };
               }
             ];
 
@@ -48,7 +54,7 @@
     };
 
     # Operational note:
-    # - The macOS app will be configured (in-app) to connect to the VPS gateway
-    #   over Tailscale and expose node capabilities (screen/canvas/system).
+    # - The private repo configures the macOS app's active remote gateway.
+    # - This public profile only ensures node/test defaults are available.
   };
 }
