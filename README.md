@@ -5,7 +5,8 @@ wiring for `nix-openclaw`, but contains **no secrets or user-specific data**.
 
 This repository is intentionally **not standalone**. It must be imported by a
 private repo (e.g., `nixos-config`) that supplies secrets, allowlists, and local
-paths. If those inputs are missing, builds should fail with clear errors.
+paths. Private consumers own the assertions that fail live deploys when required
+secrets or host paths are missing.
 
 ## What this repo is
 
@@ -53,8 +54,8 @@ Private repo responsibilities:
 ## OpenClaw wiring
 
 This repo sets public defaults for `programs.openclaw` (mirroring the full
-example config from `nix-openclaw`). Secrets are required for live plugins, and
-the build should fail if they’re missing.
+example config from `nix-openclaw`). Secrets are required for live plugins, but
+they belong in the private consumer layer.
 
 A short wiring guide lives at:
 - `docs/agents/openclaw-wiring-checklist.md`

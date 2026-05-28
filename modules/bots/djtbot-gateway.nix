@@ -57,7 +57,7 @@ in
       instances.prod = {
         enable = lib.mkDefault true;
 
-        # VPS: systemd user service.
+        # Linux gateway role: systemd user service.
         systemd.enable = lib.mkDefault true;
         launchd.enable = lib.mkDefault false;
         appDefaults.enable = lib.mkDefault false;

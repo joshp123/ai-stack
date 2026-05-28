@@ -3,9 +3,6 @@
 This doc covers the public DJTBOT/OpenClaw profiles that are still imported by
 the private repo. It is not the source of truth for live host topology.
 
-Current private state: `djtbot-1` is the live VPS gateway today, and the Mac
-mini replacement/decommission decision belongs in `nixos-config`.
-
 ## TL;DR: where to change things
 
 ### Public behavior (no secrets, no PII)
@@ -40,16 +37,14 @@ Repo: `~/code/nix/nixos-config`
 
 Rule: **ai-stack never contains chat IDs, allowFrom lists, tokens, or keys.**
 
-## Current deployed model
+## Transitional deployed model
 
-- **VPS** currently runs the OpenClaw **Gateway** (Telegram lands here).
-- **Mac** runs the OpenClaw **app in node-mode** and connects to the Gateway over Tailscale.
-- Gateway routes execution:
-  - Linux-capable tools run on VPS
-  - macOS-only workflows execute on the Mac node (screen/canvas/system)
+Private consumers may still have a legacy gateway role and a macOS node role
+during cutover. Check `nixos-config` and live host state before assuming which
+host is active.
 
 Do not treat this as target architecture. New reusable lifecycle behavior
-belongs in `nix-openclaw`; Mac mini gateway ownership belongs in `nixos-config`
+belongs in `nix-openclaw`; active gateway ownership belongs in `nixos-config`
 until proven and decommissioned cleanly.
 
 ## Meals migration (runtime data)
@@ -57,7 +52,7 @@ until proven and decommissioned cleanly.
 `meals/` lives in the OpenClaw workspace (runtime data). Pragmatic mode:
 
 - Source (old local): `~/.openclaw-prod/workspace/meals/`
-- Target (VPS): `/home/djtbot/.openclaw-prod/workspace/meals/` (typical)
+- Target: the active gateway host path in the private repo.
 
 We do **not** Nix-manage this directory yet.
 
@@ -88,6 +83,6 @@ Edit: `ai-stack/modules/bots/djtbot-gateway.nix` → `agents.list[0].model` + `a
 
 ## Smoke checks (minimal)
 
-- VPS gateway reachable over tailnet (no public bind)
-- Mac node paired (`openclaw nodes pending/approve/status` from the VPS)
-- A mac-only action succeeds via node (screen snapshot / system.run)
+- Gateway reachable over tailnet (no public bind)
+- macOS node paired (`openclaw nodes pending/approve/status` from the gateway)
+- A macOS-only action succeeds via node (screen snapshot / system.run)

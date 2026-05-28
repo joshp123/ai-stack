@@ -9,8 +9,8 @@
       # Force: ai-stack base sets installApp=false by default.
       installApp = lib.mkForce true;
 
-      # Ensure the local prod gateway is not running from this public profile.
-      # The private repo owns the active prod gateway host.
+      # Ensure the local prod-profile gateway is not running from this public profile.
+      # The private repo owns the active host choice during cutover.
       instances.prod.enable = lib.mkForce false;
 
       # Keep a local test gateway around for dev (your preference).

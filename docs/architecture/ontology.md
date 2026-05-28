@@ -9,8 +9,8 @@ not a complete deployable system.
 
 | Path | Owns | Does not own |
 | --- | --- | --- |
-| `modules/` | public Home Manager modules and defaults | host topology, secrets, launchd/systemd lifecycle APIs |
-| `modules/bots/` | transitional DJTBOT OpenClaw profiles still consumed by the private repo | new host architecture or long-term gateway ownership |
+| `modules/` | public Home Manager modules and defaults | host topology, secrets, final service enablement |
+| `modules/bots/` | transitional OpenClaw role profiles still consumed by private repos | named current hosts, new host architecture, or long-term gateway ownership |
 | `docs/agents/` | global agent guidance deployed by consumers | private runbooks and host facts |
 | `documents/` | OpenClaw workspace documents that are safe to publish | live runtime state or credentials |
 | `skills/` | shareable custom skills | built-in Codex skills or private workflows |
@@ -33,9 +33,8 @@ not a complete deployable system.
 ## Current Transition
 
 The `modules/bots/djtbot-*` profiles are active compatibility surfaces, not the
-target architecture. They exist because the private repo still imports them
-while OpenClaw gateway ownership is being reconciled between `djtbot-1` and the
-Mac mini.
+target architecture. They exist because private consumers still import them
+while OpenClaw gateway ownership is being reconciled outside this repo.
 
 Do not add new topology decisions to those profiles. If behavior is reusable,
 move it into `nix-openclaw`; if it is a private host choice, put it in
