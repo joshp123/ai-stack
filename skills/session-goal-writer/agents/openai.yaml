@@ -1,0 +1,4 @@
+interface:
+  display_name: "Session Goal Writer"
+  short_description: "Write aligned, reviewable Codex goals"
+  default_prompt: "Use $session-goal-writer to write and set a Codex session goal that captures my vision, ExecPlan boundary, review cadence, deliverable, alignment gates, and completion proof."
