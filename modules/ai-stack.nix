@@ -7,13 +7,11 @@
   ...
 }:
 let
-  codexAgents = pkgs.concatTextFile {
-    name = "codex-agents.md";
-    files = [
-      ../docs/agents/GLOBAL_PREAMBLE.md
-      ../docs/agents/GLOBAL_CODEX_APPENDIX.md
-    ];
-  };
+  # Temporary vanilla Codex trial requested in Codex thread
+  # 019e88ac-5d8e-73a3-a101-84735a0fc85e. This normally concatenates
+  # GLOBAL_PREAMBLE.md plus GLOBAL_CODEX_APPENDIX.md; keep the deployed
+  # ~/.codex/AGENTS.md minimal until the global prompt is restored.
+  codexAgents = pkgs.writeText "codex-agents.md" "this user is Josh\n";
   piAgents = pkgs.concatTextFile {
     name = "pi-agents.md";
     files = [
