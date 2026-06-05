@@ -1,3 +1,7 @@
+---
+written_by: ai
+---
+
 # ai-stack
 
 **Public AI development experience** — shareable with anyone.
@@ -42,6 +46,14 @@ The override is deliberate but narrow:
 - It does not edit `flake.lock`; it substitutes one known checkout so build/apply tests the files being reviewed.
 - Do not use it for arbitrary branches or unrelated inputs.
 - Do not use `nix run .#hm-apply-base --override-input ...` for this check; that wrapper re-enters the flake and can silently use the pinned input instead.
+
+Default apply rule: a request to apply, switch, deploy, or make ai-stack changes
+live means publish this repo and consume it declaratively from `nixos-config`.
+Do not run `build-switch`, `hm-apply-*`, direct activation, or deploy commands
+with `--override-input ai-stack path:$AI_STACK` unless Josh explicitly says to
+apply that local override. The normal deploy path is: commit ai-stack, push it,
+update the `ai-stack` input in `nixos-config`, commit `flake.lock`, build, and
+switch without overrides.
 
 New Codex sessions only see the changed prompt after this deployed file matches the source. Also verify one fresh Codex session actually injects the new wording before judging behavior.
 
