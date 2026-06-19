@@ -93,7 +93,7 @@ in
                 "anthropic/claude-opus-4-6" = {
                   alias = "opus";
                 };
-                "openai-codex/gpt-5.3-codex" = {
+                "openai-codex/gpt-5.5" = {
                   alias = "codex";
                 };
               };
