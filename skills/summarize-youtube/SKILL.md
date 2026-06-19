@@ -1,12 +1,14 @@
 ---
 name: summarize-youtube
-description: High-quality YouTube video summarization using the local summarize CLI with yt-dlp + whisper.cpp transcription and Claude CLI by default. Use when asked to summarize a YouTube video, extract a transcript from audio (not captions), or run a repeatable best-quality video summary workflow.
+description: High-quality YouTube transcription from audio using yt-dlp + whisper.cpp through the local summarize CLI. Use when captions are unavailable/untrusted or the user explicitly wants audio transcription. For summarize.sh markdownified YouTube transcripts, use the summarize skill instead.
 ---
 
 # Summarize YouTube
 
 ## Overview
 Produce best-quality summaries from YouTube videos by transcribing audio with yt-dlp + whisper.cpp and summarizing with Claude CLI. This avoids caption-track errors and keeps the workflow reproducible.
+
+Do not use this skill for tweet-style markdownified YouTube transcripts from caption tracks. Use the `summarize` skill and run `summarize --extract --format md --markdown-mode llm ...` for that path.
 
 ## Quick Start
 1. Run the script with the video URL:
