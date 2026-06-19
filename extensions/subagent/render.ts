@@ -1,5 +1,5 @@
-import { getMarkdownTheme } from "@mariozechner/pi-coding-agent";
-import { Container, Markdown, Spacer, Text } from "@mariozechner/pi-tui";
+import { getMarkdownTheme } from "@earendil-works/pi-coding-agent";
+import { Container, Markdown, Spacer, Text } from "@earendil-works/pi-tui";
 import type { AgentScope } from "./agents.js";
 import { formatToolCall, formatUsageStats, getDisplayItems, getFinalOutput } from "./format.js";
 import type { DisplayItem, SingleResult, SubagentDetails } from "./types.js";

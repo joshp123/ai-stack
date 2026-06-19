@@ -1,5 +1,5 @@
 import * as os from "node:os";
-import type { Message } from "@mariozechner/pi-ai";
+import type { Message } from "@earendil-works/pi-ai";
 import type { DisplayItem } from "./types.js";
 
 function formatTokens(count: number): string {

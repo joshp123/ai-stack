@@ -2,12 +2,12 @@ import { spawn } from "node:child_process";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { Message } from "@mariozechner/pi-ai";
+import type { Message } from "@earendil-works/pi-ai";
 import type { AgentConfig } from "./agents.js";
 import { getFinalOutput } from "./format.js";
 import type { AgentOverrides, OnUpdateCallback, SingleResult, SubagentDetails } from "./types.js";
 
-const DEFAULT_SUBAGENT_MODEL = "openai-codex/gpt-5.3-codex";
+const DEFAULT_SUBAGENT_MODEL = "openai-codex/gpt-5.5";
 
 export async function mapWithConcurrencyLimit<TIn, TOut>(
 	items: TIn[],

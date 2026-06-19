@@ -6,7 +6,7 @@
  * reviewable on its own.
  */
 
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { type AgentConfig, type AgentScope, discoverAgents } from "./agents.js";
 import { getFinalOutput } from "./format.js";
 import { renderCall, renderResult } from "./render.js";
@@ -24,7 +24,7 @@ export default function (pi: ExtensionAPI) {
 		description: [
 			"Delegate tasks to specialized subagents with isolated context.",
 			"Modes: single (agent + task), parallel (tasks array), chain (sequential with {previous} placeholder).",
-			"Default model is openai-codex/gpt-5.3-codex unless overridden.",
+			"Default model is openai-codex/gpt-5.5 unless overridden.",
 			"Optional overrides: model, thinking, tools, systemPrompt (top-level and per-step).",
 			'Default agent scope is "user" (from ~/.pi/agent/agents).',
 			'To enable project-local agents in .pi/agents, set agentScope: "both" (or "project").',
