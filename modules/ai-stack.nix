@@ -97,6 +97,10 @@ in
         ".pi/agent/AGENTS.md".force = true;
         ".claude/CLAUDE.md".source = claudeAgents;
         ".claude/CLAUDE.md".force = true;
+        ".config/ai/rules.md".source = ../docs/agents/rules.md;
+        ".config/ai/rules.md".force = true;
+        ".config/ai/models.md".source = ../docs/agents/models.md;
+        ".config/ai/models.md".force = true;
 
         ".pi/agent/skills".source = skillsDir;
         ".pi/agent/skills".force = true;

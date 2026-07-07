@@ -66,6 +66,8 @@ This repo ships public guidance and skills only:
 
 - `docs/agents/GLOBAL_PREAMBLE.md` + `docs/agents/GLOBAL_CODEX_APPENDIX.md` → `~/.codex/AGENTS.md`
 - `docs/agents/GLOBAL_PREAMBLE.md` + `docs/agents/GLOBAL_CLAUDE_APPENDIX.md` → `~/.claude/CLAUDE.md`
+- `docs/agents/rules.md` → `~/.config/ai/rules.md`
+- `docs/agents/models.md` → `~/.config/ai/models.md`
 - `skills/` → `~/.claude/skills` and `~/.pi/agent/skills`
 - Codex defaults/skills should be wired by the consumer repo under `/etc/codex/{config.toml,skills}` so `~/.codex` stays writable
 
