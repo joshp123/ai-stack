@@ -1,0 +1,6 @@
+interface:
+  display_name: "Grill Me"
+  short_description: "Clarify tasks before action"
+  default_prompt: "Use $grill-me to pressure-test this task before you start."
+policy:
+  allow_implicit_invocation: false
