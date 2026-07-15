@@ -1,4 +1,4 @@
 interface:
   display_name: "Anti-slop output"
-  short_description: "Clear, concrete agent writing"
-  default_prompt: "Use $anti-slop-output to write this in British GOV.UK-style plain English."
+  short_description: "Clear public, product and external copy"
+  default_prompt: "Use $anti-slop-output to polish this public documentation for a cold reader."
