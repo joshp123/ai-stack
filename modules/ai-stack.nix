@@ -30,6 +30,9 @@ let
   effectiveInputs = (pkgs.inputs or { }) // aiStackInputs // inputs;
 
   baseSkills = ../skills;
+  availableSkillNames = builtins.attrNames (
+    lib.filterAttrs (_: type: type == "directory") (builtins.readDir baseSkills)
+  );
   piAutoresearchSkills = lib.optionals (builtins.hasAttr "pi-autoresearch" pkgs) [
     "${pkgs.pi-autoresearch}/share/pi-autoresearch/skills"
   ];
@@ -42,6 +45,17 @@ let
         name = "ai-stack-skills";
         paths = [ baseSkills ] ++ extraSkills;
       };
+  piSkillNames = config.programs.aiStack.piSkillNames;
+  piSkillsDir =
+    if piSkillNames == null then
+      skillsDir
+    else
+      pkgs.linkFarm "ai-stack-pi-skills" (
+        map (name: {
+          inherit name;
+          path = "${baseSkills}/${name}";
+        }) piSkillNames
+      );
 
   openclawInput = if effectiveInputs ? openclaw then effectiveInputs.openclaw else null;
   openclawUpstreamAgents =
@@ -78,6 +92,21 @@ let
       ../documents;
 in
 {
+  options.programs.aiStack.piSkillNames = lib.mkOption {
+    type = lib.types.nullOr (lib.types.listOf (lib.types.enum availableSkillNames));
+    default = null;
+    example = [
+      "ask-questions-if-underspecified"
+      "skill-creator"
+    ];
+    description = ''
+      Names from ai-stack's public skill directory to expose to Pi. The default
+      null value preserves the complete shared skill tree. Set a list, including
+      an empty list, to give Pi an explicit allowlist without changing the
+      Claude or Codex skill sources.
+    '';
+  };
+
   imports = [
     ./openclaw-config.nix
     ./cass.nix
@@ -102,7 +131,7 @@ in
         ".config/ai/models.md".source = ../docs/agents/models.md;
         ".config/ai/models.md".force = true;
 
-        ".pi/agent/skills".source = skillsDir;
+        ".pi/agent/skills".source = piSkillsDir;
         ".pi/agent/skills".force = true;
         ".claude/skills".source = skillsDir;
         ".claude/skills".force = true;

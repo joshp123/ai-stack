@@ -7,13 +7,17 @@ const REPLACEMENTS: Array<[string, string]> = [
 	],
 	["follow .md cross-references", "follow markdown cross-references"],
 	["read pi .md files", "read pi markdown files"],
+	[
+		"Here is some useful information about the environment you are running in:",
+		"Environment context you are running in:",
+	],
 ];
 
 function isAnthropicClaude(model: { id: string; provider: string }): boolean {
 	return model.provider === "anthropic" && model.id.includes("claude");
 }
 
-function applyClaudePromptCompat(systemPrompt: string): string {
+export function applyClaudePromptCompat(systemPrompt: string): string {
 	let next = systemPrompt;
 	for (const [from, to] of REPLACEMENTS) {
 		next = next.replace(from, to);

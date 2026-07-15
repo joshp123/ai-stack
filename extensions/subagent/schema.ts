@@ -1,45 +1,45 @@
 import { StringEnum } from "@earendil-works/pi-ai";
-import { Type } from "@sinclair/typebox";
+import { Type } from "typebox";
 
-const ThinkingSchema = StringEnum(["off", "minimal", "low", "medium", "high", "xhigh"] as const, {
-	description: "Thinking level override for subagent run.",
-});
+const ThinkingSchema = StringEnum(
+	["off", "minimal", "low", "medium", "high", "xhigh", "max"] as const,
+	{
+		description: "Required Pi thinking level for this disposable run.",
+	},
+);
 
-const OverrideSchema = {
-	model: Type.Optional(Type.String({ description: "Model override for subagent run." })),
-	thinking: Type.Optional(ThinkingSchema),
-	tools: Type.Optional(Type.Array(Type.String(), { description: "Override tools for subagent run." })),
-	systemPrompt: Type.Optional(Type.String({ description: "Append system prompt override for subagent run." })),
-};
-
-const TaskItem = Type.Object({
-	agent: Type.String({ description: "Name of the agent to invoke" }),
-	task: Type.String({ description: "Task to delegate to the agent" }),
-	cwd: Type.Optional(Type.String({ description: "Working directory for the agent process" })),
-	...OverrideSchema,
-});
-
-const ChainItem = Type.Object({
-	agent: Type.String({ description: "Name of the agent to invoke" }),
-	task: Type.String({ description: "Task with optional {previous} placeholder for prior output" }),
-	cwd: Type.Optional(Type.String({ description: "Working directory for the agent process" })),
-	...OverrideSchema,
-});
-
-const AgentScopeSchema = StringEnum(["user", "project", "both"] as const, {
-	description: 'Which agent directories to use. Default: "user". Use "both" to include project-local agents.',
-	default: "user",
+const WorkItemSchema = Type.Object({
+	task: Type.String({
+		minLength: 1,
+		pattern: "\\S",
+		description: "Concrete task for the child Pi process.",
+	}),
+	context: Type.String({
+		minLength: 1,
+		pattern: "\\S",
+		description:
+			"Caller-supplied context, constraints, and completion evidence for the task.",
+	}),
+	model: Type.String({
+		minLength: 1,
+		pattern: "^\\S+$",
+		description:
+			"Required Pi model selector. Passed through to pi --model after non-empty validation.",
+	}),
+	thinking: ThinkingSchema,
+	cwd: Type.Optional(
+		Type.String({
+			minLength: 1,
+			description: "Working directory for this child process.",
+		}),
+	),
 });
 
 export const SubagentParams = Type.Object({
-	agent: Type.Optional(Type.String({ description: "Name of the agent to invoke (for single mode)" })),
-	task: Type.Optional(Type.String({ description: "Task to delegate (for single mode)" })),
-	tasks: Type.Optional(Type.Array(TaskItem, { description: "Array of {agent, task} for parallel execution" })),
-	chain: Type.Optional(Type.Array(ChainItem, { description: "Array of {agent, task} for sequential execution" })),
-	agentScope: Type.Optional(AgentScopeSchema),
-	confirmProjectAgents: Type.Optional(
-		Type.Boolean({ description: "Prompt before running project-local agents. Default: true.", default: true }),
-	),
-	cwd: Type.Optional(Type.String({ description: "Working directory for the agent process (single mode)" })),
-	...OverrideSchema,
+	tasks: Type.Array(WorkItemSchema, {
+		minItems: 1,
+		maxItems: 3,
+		description:
+			"One to three independent disposable tasks. Tasks never receive output from other tasks.",
+	}),
 });

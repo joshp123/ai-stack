@@ -1,13 +1,22 @@
 import { spawn } from "node:child_process";
-import * as fs from "node:fs";
-import * as os from "node:os";
-import * as path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { Message } from "@earendil-works/pi-ai";
-import type { AgentConfig } from "./agents.js";
 import { getFinalOutput } from "./format.js";
-import type { AgentOverrides, OnUpdateCallback, SingleResult, SubagentDetails } from "./types.js";
+import type {
+	OnUpdateCallback,
+	SubagentDetails,
+	TaskResult,
+	WorkItem,
+} from "./types.js";
 
-const DEFAULT_SUBAGENT_MODEL = "openai-codex/gpt-5.5";
+interface PiJsonEvent {
+	type?: string;
+	message?: Message;
+}
+
+const claudePromptCompatExtension = fileURLToPath(
+	new URL("../claude-system-prompt-compat.ts", import.meta.url),
+);
 
 export async function mapWithConcurrencyLimit<TIn, TOut>(
 	items: TIn[],
@@ -29,176 +38,144 @@ export async function mapWithConcurrencyLimit<TIn, TOut>(
 	return results;
 }
 
-function writePromptToTempFile(agentName: string, prompt: string): { dir: string; filePath: string } {
-	const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "pi-subagent-"));
-	const safeName = agentName.replace(/[^\w.-]+/g, "_");
-	const filePath = path.join(tmpDir, `prompt-${safeName}.md`);
-	fs.writeFileSync(filePath, prompt, { encoding: "utf-8", mode: 0o600 });
-	return { dir: tmpDir, filePath };
+function taskPrompt(item: WorkItem): string {
+	return `Task:\n${item.task.trim()}\n\nContext:\n${item.context.trim()}`;
 }
 
-
-export async function runSingleAgent(
+export async function runTask(
 	defaultCwd: string,
-	agents: AgentConfig[],
-	agentName: string,
-	task: string,
-	cwd: string | undefined,
-	step: number | undefined,
-	overrides: AgentOverrides,
+	item: WorkItem,
+	index: number,
 	signal: AbortSignal | undefined,
 	onUpdate: OnUpdateCallback | undefined,
-	makeDetails: (results: SingleResult[]) => SubagentDetails,
-): Promise<SingleResult> {
-	const agent = agents.find((a) => a.name === agentName);
-
-	if (!agent) {
-		const available = agents.map((a) => `"${a.name}"`).join(", ") || "none";
-		return {
-			agent: agentName,
-			agentSource: "unknown",
-			task,
-			exitCode: 1,
-			messages: [],
-			stderr: `Unknown agent: "${agentName}". Available agents: ${available}.`,
-			usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, cost: 0, contextTokens: 0, turns: 0 },
-			step,
-		};
-	}
-
-	const effectiveModel = overrides.model ?? DEFAULT_SUBAGENT_MODEL;
-	const effectiveTools = overrides.tools ?? agent.tools;
-	const effectiveSystemPrompt = overrides.systemPrompt ?? agent.systemPrompt;
-
-	const args: string[] = ["--mode", "json", "-p", "--no-session"];
-	if (effectiveModel) args.push("--model", effectiveModel);
-	if (overrides.thinking) args.push("--thinking", overrides.thinking);
-	if (effectiveTools && effectiveTools.length > 0) args.push("--tools", effectiveTools.join(","));
-
-	let tmpPromptDir: string | null = null;
-	let tmpPromptPath: string | null = null;
-
-	const currentResult: SingleResult = {
-		agent: agentName,
-		agentSource: agent.source,
-		task,
+	makeDetails: (results: TaskResult[]) => SubagentDetails,
+): Promise<TaskResult> {
+	const model = item.model.trim();
+	const currentResult: TaskResult = {
+		...item,
+		model,
+		index,
 		exitCode: 0,
 		messages: [],
 		stderr: "",
-		usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, cost: 0, contextTokens: 0, turns: 0 },
-		model: effectiveModel,
-		step,
+		usage: {
+			input: 0,
+			output: 0,
+			cacheRead: 0,
+			cacheWrite: 0,
+			cost: 0,
+			contextTokens: 0,
+			turns: 0,
+		},
 	};
+
+	const args = [
+		"--mode",
+		"json",
+		"--no-extensions",
+		"--extension",
+		claudePromptCompatExtension,
+		"--no-skills",
+		"--no-prompt-templates",
+		"-p",
+		"--no-session",
+		"--model",
+		model,
+		"--thinking",
+		item.thinking,
+		taskPrompt(item),
+	];
 
 	const emitUpdate = () => {
-		if (onUpdate) {
-			onUpdate({
-				content: [{ type: "text", text: getFinalOutput(currentResult.messages) || "(running...)" }],
-				details: makeDetails([currentResult]),
-			});
-		}
+		onUpdate?.({
+			content: [
+				{
+					type: "text",
+					text: getFinalOutput(currentResult.messages) || "(running...)",
+				},
+			],
+			details: makeDetails([currentResult]),
+		});
 	};
 
-	try {
-		if (effectiveSystemPrompt?.trim()) {
-			const tmp = writePromptToTempFile(agent.name, effectiveSystemPrompt);
-			tmpPromptDir = tmp.dir;
-			tmpPromptPath = tmp.filePath;
-			args.push("--append-system-prompt", tmpPromptPath);
-		}
+	let wasAborted = false;
+	const exitCode = await new Promise<number>((resolve) => {
+		const proc = spawn("pi", args, {
+			cwd: item.cwd ?? defaultCwd,
+			shell: false,
+			stdio: ["ignore", "pipe", "pipe"],
+		});
+		let buffer = "";
 
-		args.push(`Task: ${task}`);
-		let wasAborted = false;
-
-		const exitCode = await new Promise<number>((resolve) => {
-			const proc = spawn("pi", args, { cwd: cwd ?? defaultCwd, shell: false, stdio: ["ignore", "pipe", "pipe"] });
-			let buffer = "";
-
-			const processLine = (line: string) => {
-				if (!line.trim()) return;
-				let event: any;
-				try {
-					event = JSON.parse(line);
-				} catch {
-					return;
-				}
-
-				if (event.type === "message_end" && event.message) {
-					const msg = event.message as Message;
-					currentResult.messages.push(msg);
-
-					if (msg.role === "assistant") {
-						currentResult.usage.turns++;
-						const usage = msg.usage;
-						if (usage) {
-							currentResult.usage.input += usage.input || 0;
-							currentResult.usage.output += usage.output || 0;
-							currentResult.usage.cacheRead += usage.cacheRead || 0;
-							currentResult.usage.cacheWrite += usage.cacheWrite || 0;
-							currentResult.usage.cost += usage.cost?.total || 0;
-							currentResult.usage.contextTokens = usage.totalTokens || 0;
-						}
-						if (!currentResult.model && msg.model) currentResult.model = msg.model;
-						if (msg.stopReason) currentResult.stopReason = msg.stopReason;
-						if (msg.errorMessage) currentResult.errorMessage = msg.errorMessage;
-					}
-					emitUpdate();
-				}
-
-				if (event.type === "tool_result_end" && event.message) {
-					currentResult.messages.push(event.message as Message);
-					emitUpdate();
-				}
-			};
-
-			proc.stdout.on("data", (data) => {
-				buffer += data.toString();
-				const lines = buffer.split("\n");
-				buffer = lines.pop() || "";
-				for (const line of lines) processLine(line);
-			});
-
-			proc.stderr.on("data", (data) => {
-				currentResult.stderr += data.toString();
-			});
-
-			proc.on("close", (code) => {
-				if (buffer.trim()) processLine(buffer);
-				resolve(code ?? 0);
-			});
-
-			proc.on("error", () => {
-				resolve(1);
-			});
-
-			if (signal) {
-				const killProc = () => {
-					wasAborted = true;
-					proc.kill("SIGTERM");
-					setTimeout(() => {
-						if (!proc.killed) proc.kill("SIGKILL");
-					}, 5000);
-				};
-				if (signal.aborted) killProc();
-				else signal.addEventListener("abort", killProc, { once: true });
+		const processLine = (line: string) => {
+			if (!line.trim()) return;
+			let event: PiJsonEvent;
+			try {
+				event = JSON.parse(line) as PiJsonEvent;
+			} catch {
+				return;
 			}
+
+			if (event.type === "message_end" && event.message) {
+				const message = event.message;
+				currentResult.messages.push(message);
+				if (message.role === "assistant") {
+					currentResult.usage.turns++;
+					const usage = message.usage;
+					if (usage) {
+						currentResult.usage.input += usage.input || 0;
+						currentResult.usage.output += usage.output || 0;
+						currentResult.usage.cacheRead += usage.cacheRead || 0;
+						currentResult.usage.cacheWrite += usage.cacheWrite || 0;
+						currentResult.usage.cost += usage.cost?.total || 0;
+						currentResult.usage.contextTokens = usage.totalTokens || 0;
+					}
+					if (message.stopReason) currentResult.stopReason = message.stopReason;
+					if (message.errorMessage)
+						currentResult.errorMessage = message.errorMessage;
+				}
+				emitUpdate();
+			}
+
+			if (event.type === "tool_result_end" && event.message) {
+				currentResult.messages.push(event.message);
+				emitUpdate();
+			}
+		};
+
+		proc.stdout.on("data", (data) => {
+			buffer += data.toString();
+			const lines = buffer.split("\n");
+			buffer = lines.pop() || "";
+			for (const line of lines) processLine(line);
+		});
+		proc.stderr.on("data", (data) => {
+			currentResult.stderr += data.toString();
+		});
+		proc.on("close", (code) => {
+			if (buffer.trim()) processLine(buffer);
+			resolve(code ?? 0);
+		});
+		proc.on("error", (error) => {
+			currentResult.errorMessage = error.message;
+			resolve(1);
 		});
 
-		currentResult.exitCode = exitCode;
-		if (wasAborted) throw new Error("Subagent was aborted");
-		return currentResult;
-	} finally {
-		if (tmpPromptPath)
-			try {
-				fs.unlinkSync(tmpPromptPath);
-			} catch {
-				/* ignore */
-			}
-		if (tmpPromptDir)
-			try {
-				fs.rmdirSync(tmpPromptDir);
-			} catch {
-				/* ignore */
+		const abort = () => {
+			wasAborted = true;
+			proc.kill("SIGTERM");
+			setTimeout(() => {
+				if (proc.exitCode === null) proc.kill("SIGKILL");
+			}, 5000);
+		};
+		if (signal?.aborted) abort();
+		else signal?.addEventListener("abort", abort, { once: true });
+	});
+
+	currentResult.exitCode = exitCode;
+	if (wasAborted) {
+		currentResult.stopReason = "aborted";
+		currentResult.errorMessage = "Subagent was aborted";
 	}
-}
+	return currentResult;
 }
