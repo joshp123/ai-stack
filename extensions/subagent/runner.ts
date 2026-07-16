@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import type { Message } from "@earendil-works/pi-ai";
+import { getAgentDir } from "@earendil-works/pi-coding-agent";
 import { getFinalOutput } from "./format.js";
 import type {
 	OnUpdateCallback,
@@ -14,8 +15,10 @@ interface PiJsonEvent {
 	message?: Message;
 }
 
-const claudePromptCompatExtension = fileURLToPath(
-	new URL("../claude-system-prompt-compat.ts", import.meta.url),
+const claudePromptCompatExtension = join(
+	getAgentDir(),
+	"extensions",
+	"claude-system-prompt-compat.ts",
 );
 
 export async function mapWithConcurrencyLimit<TIn, TOut>(
