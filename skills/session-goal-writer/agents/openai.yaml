@@ -1,4 +1,0 @@
-interface:
-  display_name: "Session Goal Writer"
-  short_description: "Write intent-preserving Codex goals"
-  default_prompt: "Use $session-goal-writer to write or update a durable Codex session goal that preserves my vision and north star, aligns on success criteria, separates goal/ExecPlan/RFC/temporary CTO brief boundaries when relevant, and encodes adversarial review and completion proof."
