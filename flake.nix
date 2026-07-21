@@ -24,24 +24,32 @@
     let
       aiStackOverlays = import ./overlays { inputs = { inherit cass; }; };
 
-      mkAiStackModule = extraImports: { ... }:
+      mkAiStackModule = { withOpenclaw ? false, extraImports ? [ ] }: { ... }:
         let
-          aiStackInputs = { inherit openclaw nix-openclaw cass; };
+          aiStackInputs = { inherit cass; }
+            // nixpkgs.lib.optionalAttrs withOpenclaw { inherit openclaw nix-openclaw; };
         in {
           _module.args.aiStackInputs = aiStackInputs;
-          imports = [
-            nix-openclaw.homeManagerModules.openclaw
-            ./modules/ai-stack.nix
-          ] ++ extraImports;
-          nixpkgs.overlays = [
-            nix-openclaw.overlays.default
-            self.overlays.default
-          ];
+          imports = [ ./modules/ai-stack.nix ]
+            ++ nixpkgs.lib.optionals withOpenclaw [
+              nix-openclaw.homeManagerModules.openclaw
+              ./modules/openclaw-config.nix
+              ./modules/openclaw-documents.nix
+            ]
+            ++ extraImports;
+          nixpkgs.overlays = [ self.overlays.default ]
+            ++ nixpkgs.lib.optionals withOpenclaw [ nix-openclaw.overlays.default ];
         };
 
-      aiStackModule = mkAiStackModule [ ];
-      djtbotGatewayModule = mkAiStackModule [ ./modules/bots/djtbot-gateway.nix ];
-      djtbotMacNodeModule = mkAiStackModule [ ./modules/bots/djtbot-mac-node.nix ];
+      aiStackModule = mkAiStackModule { };
+      djtbotGatewayModule = mkAiStackModule {
+        withOpenclaw = true;
+        extraImports = [ ./modules/bots/djtbot-gateway.nix ];
+      };
+      djtbotMacNodeModule = mkAiStackModule {
+        withOpenclaw = true;
+        extraImports = [ ./modules/bots/djtbot-mac-node.nix ];
+      };
 
     in {
       overlays.default = nixpkgs.lib.composeManyExtensions aiStackOverlays;

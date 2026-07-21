@@ -74,8 +74,9 @@ ai-stack/
 ├── docs/agents/     # global guidance deployed to Codex/Claude/pi
 ├── config/zsh/      # public shell config
 ├── modules/         # Home Manager wiring
-│   ├── ai-stack.nix        # main module
+│   ├── ai-stack.nix        # OpenClaw-free main module
 │   ├── openclaw-config.nix # OpenClaw defaults
+│   ├── openclaw-documents.nix # OpenClaw workspace documents
 │   └── bots/               # transitional DJTBOT role profiles
 ├── documents/       # OpenClaw workspace docs (AGENTS/SOUL/TOOLS)
 ├── extensions/      # pi coding-agent extensions

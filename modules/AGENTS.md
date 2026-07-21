@@ -4,8 +4,9 @@ Public Home Manager module layer.
 
 ## Boundary
 
-- `ai-stack.nix`: main public module, global agent docs, skills, OpenClaw docs.
+- `ai-stack.nix`: main public module, global agent docs and skills. It must not import OpenClaw.
 - `openclaw-config.nix`: generic OpenClaw defaults only.
+- `openclaw-documents.nix`: OpenClaw workspace documents, imported only by OpenClaw profiles.
 - `bots/`: transitional DJTBOT/OpenClaw role profiles consumed by private config.
 - `darwin/`: public macOS Homebrew defaults only.
 

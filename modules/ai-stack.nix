@@ -2,8 +2,6 @@
   lib,
   config,
   pkgs,
-  inputs ? { },
-  aiStackInputs ? { },
   ...
 }:
 let
@@ -26,8 +24,6 @@ let
       ../docs/agents/GLOBAL_CLAUDE_APPENDIX.md
     ];
   };
-
-  effectiveInputs = (pkgs.inputs or { }) // aiStackInputs // inputs;
 
   baseSkills = ../skills;
   availableSkillNames = builtins.attrNames (
@@ -57,39 +53,6 @@ let
         }) piSkillNames
       );
 
-  openclawInput = if effectiveInputs ? openclaw then effectiveInputs.openclaw else null;
-  openclawUpstreamAgents =
-    if openclawInput != null then "${openclawInput}/docs/reference/templates/AGENTS.md" else null;
-  substituteScript =
-    replacements: path:
-    lib.replaceStrings (map (replacement: replacement.from) replacements) (map (
-      replacement: replacement.to
-    ) replacements) (builtins.readFile path);
-
-  openclawDocs =
-    if openclawUpstreamAgents != null then
-      pkgs.runCommand "openclaw-documents" { } (
-        substituteScript [
-          {
-            from = "@buildOpenclawDocuments@";
-            to = "${../scripts/build-openclaw-documents.sh}";
-          }
-          {
-            from = "@documentsDir@";
-            to = "${../documents}";
-          }
-          {
-            from = "@openclawUpstreamAgents@";
-            to = openclawUpstreamAgents;
-          }
-          {
-            from = "@joshAgents@";
-            to = "${../documents/AGENTS.josh.md}";
-          }
-        ] ../scripts/build-openclaw-documents-derivation.sh
-      )
-    else
-      ../documents;
 in
 {
   options.programs.aiStack.piSkillNames = lib.mkOption {
@@ -108,7 +71,6 @@ in
   };
 
   imports = [
-    ./openclaw-config.nix
     ./cass.nix
     ./ghostty.nix
     ./pi-coding-agent.nix
@@ -117,8 +79,6 @@ in
 
   config = lib.mkMerge [
     {
-      programs.openclaw.documents = lib.mkDefault openclawDocs;
-
       home.file = {
         ".codex/AGENTS.md".source = codexAgents;
         ".codex/AGENTS.md".force = true;
@@ -137,8 +97,5 @@ in
         ".claude/skills".force = true;
       };
     }
-    (lib.mkIf (lib.hasAttrByPath [ "programs" "openclaw" ] config) {
-      programs.openclaw.reloadScript.enable = lib.mkDefault true;
-    })
   ];
 }
