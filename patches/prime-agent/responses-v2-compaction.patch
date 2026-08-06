@@ -1,0 +1,62 @@
+diff --git a/packages/ai/src/providers/openai-codex-responses.ts b/packages/ai/src/providers/openai-codex-responses.ts
+--- a/packages/ai/src/providers/openai-codex-responses.ts
++++ b/packages/ai/src/providers/openai-codex-responses.ts
+@@ -3,6 +3,7 @@ import type {
+ 	Tool as OpenAITool,
+ 	ResponseCreateParamsStreaming,
+ 	ResponseInput,
++	ResponseOutputItem,
+ 	ResponseStreamEvent,
+ } from "openai/resources/responses/responses.js";
+ 
+@@ -68,6 +69,7 @@ const CODEX_RESPONSE_STATUSES = new Set<CodexResponseStatus>([
+ // ============================================================================
+ 
+ export interface OpenAICodexResponsesOptions extends StreamOptions {
++	onOutputItemDone?: (item: Readonly<ResponseOutputItem>) => void;
+ 	reasoningEffort?: "none" | "minimal" | "low" | "medium" | "high" | "xhigh" | "max";
+ 	reasoningSummary?: "auto" | "concise" | "detailed" | "off" | "on" | null;
+ 	serviceTier?: ResponseCreateParamsStreaming["service_tier"];
+@@ -455,6 +457,7 @@ async function processStream(
+ 	options?: OpenAICodexResponsesOptions,
+ ): Promise<void> {
+ 	await processResponsesStream(mapCodexEvents(parseSSE(response)), output, stream, model, {
++		onOutputItemDone: options?.onOutputItemDone,
+ 		serviceTier: options?.serviceTier,
+ 		resolveServiceTier: resolveCodexServiceTier,
+ 		applyServiceTierPricing: (usage, serviceTier) => applyServiceTierPricing(usage, serviceTier, model),
+@@ -1190,6 +1193,7 @@ async function processWebSocketStream(
+ 			stream,
+ 			model,
+ 			{
++				onOutputItemDone: options?.onOutputItemDone,
+ 				serviceTier: options?.serviceTier,
+ 				resolveServiceTier: resolveCodexServiceTier,
+ 				applyServiceTierPricing: (usage, serviceTier) => applyServiceTierPricing(usage, serviceTier, model),
+diff --git a/packages/ai/src/providers/openai-responses-shared.ts b/packages/ai/src/providers/openai-responses-shared.ts
+--- a/packages/ai/src/providers/openai-responses-shared.ts
++++ b/packages/ai/src/providers/openai-responses-shared.ts
+@@ -9,6 +9,7 @@ import type {
+ 	ResponseInputImage,
+ 	ResponseInputText,
+ 	ResponseOutputMessage,
++	ResponseOutputItem,
+ 	ResponseReasoningItem,
+ 	ResponseStreamEvent,
+ } from "openai/resources/responses/responses.js";
+@@ -65,6 +66,7 @@ function parseTextSignature(
+ }
+ 
+ export interface OpenAIResponsesStreamOptions {
++	onOutputItemDone?: (item: Readonly<ResponseOutputItem>) => void;
+ 	serviceTier?: ResponseCreateParamsStreaming["service_tier"];
+ 	resolveServiceTier?: (
+ 		responseServiceTier: ResponseCreateParamsStreaming["service_tier"] | undefined,
+@@ -486,6 +488,7 @@ export async function processResponsesStream<TApi extends Api>(
+ 				currentBlock = null;
+ 				stream.push({ type: "toolcall_end", contentIndex: blockIndex(), toolCall, partial: output });
+ 			}
++			options?.onOutputItemDone?.(item);
+ 		} else if (event.type === "response.completed") {
+ 			const response = event.response;
+ 			if (response?.id) {

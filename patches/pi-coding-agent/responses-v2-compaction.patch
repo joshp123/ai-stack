@@ -1,0 +1,52 @@
+--- a/packages/ai/src/api/openai-responses-shared.ts
++++ b/packages/ai/src/api/openai-responses-shared.ts
+@@ -103,6 +103,7 @@
+ }
+ 
+ export interface OpenAIResponsesStreamOptions {
++	onOutputItemDone?: (item: Readonly<ResponseOutputItem>) => void;
+ 	serviceTier?: ResponseCreateParamsStreaming["service_tier"];
+ 	grammarToolInputProperties?: ReadonlyMap<string, string>;
+ 	resolveServiceTier?: (
+@@ -717,6 +718,7 @@
+ 				});
+ 				outputSlots.delete(event.output_index);
+ 			}
++			options?.onOutputItemDone?.(item);
+ 		} else if (event.type === "response.completed" || event.type === "response.incomplete") {
+ 			finalizeResponse(event.response);
+ 		} else if (event.type === "error") {
+--- a/packages/ai/src/api/openai-codex-responses.ts
++++ b/packages/ai/src/api/openai-codex-responses.ts
+@@ -4,6 +4,7 @@
+ 	Tool as OpenAITool,
+ 	ResponseCreateParamsStreaming,
+ 	ResponseInput,
++	ResponseOutputItem,
+ 	ResponseStreamEvent,
+ } from "openai/resources/responses/responses.js";
+ 
+@@ -84,6 +85,7 @@
+ // ============================================================================
+ 
+ export interface OpenAICodexResponsesOptions extends StreamOptions {
++	onOutputItemDone?: (item: Readonly<ResponseOutputItem>) => void;
+ 	reasoningEffort?: "none" | "minimal" | "low" | "medium" | "high" | "xhigh" | "max";
+ 	reasoningSummary?: "auto" | "concise" | "detailed" | "off" | "on" | null;
+ 	serviceTier?: ResponseCreateParamsStreaming["service_tier"];
+@@ -663,6 +665,7 @@
+ 	options?: OpenAICodexResponsesOptions,
+ ): Promise<void> {
+ 	await processResponsesStream(mapCodexEvents(parseSSE(response, options?.signal)), output, stream, model, {
++		onOutputItemDone: options?.onOutputItemDone,
+ 		serviceTier: options?.serviceTier,
+ 		grammarToolInputProperties,
+ 		resolveServiceTier: resolveCodexServiceTier,
+@@ -1511,6 +1514,7 @@
+ 			stream,
+ 			model,
+ 			{
++				onOutputItemDone: options?.onOutputItemDone,
+ 				serviceTier: options?.serviceTier,
+ 				grammarToolInputProperties,
+ 				resolveServiceTier: resolveCodexServiceTier,
