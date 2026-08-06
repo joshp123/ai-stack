@@ -74,6 +74,7 @@ in
     ./cass.nix
     ./ghostty.nix
     ./pi-coding-agent.nix
+    ./prime-agent.nix
     ./zsh.nix
   ];
 
@@ -84,6 +85,8 @@ in
         ".codex/AGENTS.md".force = true;
         ".pi/agent/AGENTS.md".source = piAgents;
         ".pi/agent/AGENTS.md".force = true;
+        ".prime/agent/AGENTS.md".source = piAgents;
+        ".prime/agent/AGENTS.md".force = true;
         ".claude/CLAUDE.md".source = claudeAgents;
         ".claude/CLAUDE.md".force = true;
         ".config/ai/rules.md".source = ../docs/agents/rules.md;
@@ -93,6 +96,8 @@ in
 
         ".pi/agent/skills".source = piSkillsDir;
         ".pi/agent/skills".force = true;
+        ".prime/agent/skills".source = piSkillsDir;
+        ".prime/agent/skills".force = true;
         ".claude/skills".source = skillsDir;
         ".claude/skills".force = true;
       };

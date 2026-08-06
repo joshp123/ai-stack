@@ -1,0 +1,6 @@
+diff --git a/packages/ai/package.json b/packages/ai/package.json
+--- a/packages/ai/package.json
++++ b/packages/ai/package.json
+@@ -63 +63 @@
+-		"build": "npm run generate-models && tsgo -p tsconfig.build.json",
++		"build": "tsgo -p tsconfig.build.json",

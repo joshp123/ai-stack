@@ -18,11 +18,15 @@
       url = "github:Dicklesworthstone/coding_agent_session_search";
       flake = false;
     };
+    prime-agent-src = {
+      url = "github:PrimeIntellect-ai/prime-agent/v0.7.0";
+      flake = false;
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, openclaw, nix-openclaw, cass }:
+  outputs = { self, nixpkgs, home-manager, openclaw, nix-openclaw, cass, prime-agent-src }:
     let
-      aiStackOverlays = import ./overlays { inputs = { inherit cass; }; };
+      aiStackOverlays = import ./overlays { inputs = { inherit cass prime-agent-src; }; };
 
       mkAiStackModule = { withOpenclaw ? false, extraImports ? [ ] }: { ... }:
         let
@@ -53,6 +57,16 @@
 
     in {
       overlays.default = nixpkgs.lib.composeManyExtensions aiStackOverlays;
+
+      packages = nixpkgs.lib.genAttrs [ "aarch64-darwin" "x86_64-linux" ] (system:
+        let
+          pkgs = import nixpkgs {
+            inherit system;
+            overlays = [ self.overlays.default ];
+          };
+        in {
+          prime-agent = pkgs.prime-agent;
+        });
 
       homeManagerModules = {
         ai-stack = aiStackModule;

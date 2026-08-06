@@ -178,13 +178,31 @@
         "type": "github"
       }
     },
+    "prime-agent-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1785955153,
+        "narHash": "sha256-byn8Est+Jrr/C52nUyJOQmiegCzaEVXeCOHnGsfZB+k=",
+        "owner": "PrimeIntellect-ai",
+        "repo": "prime-agent",
+        "rev": "be9e2fa0714e7cd1c6bd9bdb1b554d2cc6550387",
+        "type": "github"
+      },
+      "original": {
+        "owner": "PrimeIntellect-ai",
+        "ref": "v0.7.0",
+        "repo": "prime-agent",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "cass": "cass",
         "home-manager": "home-manager",
         "nix-openclaw": "nix-openclaw",
         "nixpkgs": "nixpkgs_3",
-        "openclaw": "openclaw"
+        "openclaw": "openclaw",
+        "prime-agent-src": "prime-agent-src"
       }
     },
     "systems": {
