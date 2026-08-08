@@ -31,6 +31,7 @@ buildNpmPackage {
   patches = [
     ../patches/prime-agent/deterministic-model-catalog.patch
     ../patches/prime-agent/responses-v2-compaction.patch
+    ../patches/prime-agent/codex-model-discovery-client-version.patch
   ];
 
   npmDepsHash = "sha256-/jVTJAMcstZQm3Y3UA7ukI0knDw7Jj8gBoeEkqnaLF8=";

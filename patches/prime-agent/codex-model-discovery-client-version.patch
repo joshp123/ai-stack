@@ -1,0 +1,16 @@
+--- a/packages/coding-agent/src/core/model-registry.ts
++++ b/packages/coding-agent/src/core/model-registry.ts
+@@ -30 +30 @@
+-import { getAgentDir, VERSION } from "../config.js";
++import { getAgentDir } from "../config.js";
+@@ -374,0 +375,7 @@
++/**
++ * The ChatGPT backend gates the Codex model catalog by Codex CLI version, not
++ * Prime Agent's package version. Version 0.146.1 returns the GPT-5.6 catalog.
++ * Remove this patch after upstream pull request #731 ships in a release.
++ */
++const OPENAI_CODEX_CLIENT_VERSION = "0.146.1";
++
+@@ -386 +393 @@
+-	url.searchParams.set("client_version", VERSION);
++	url.searchParams.set("client_version", OPENAI_CODEX_CLIENT_VERSION);
