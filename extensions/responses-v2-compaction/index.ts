@@ -39,7 +39,7 @@ function profile(branch: readonly SessionEntry[]): CompactionProfile {
 	return entry?.type === "custom" &&
 		(entry.data === "v2-current" || entry.data === "v2-full" || entry.data === "pi")
 		? entry.data
-		: "pi";
+		: "v2-full";
 }
 
 function latestResponsesV2Details(branch: readonly SessionEntry[]): ResponsesV2CompactionDetails | undefined {
@@ -188,8 +188,11 @@ export default function responsesV2Compaction(pi: ExtensionAPI): void {
 			const auth = await ctx.modelRegistry.getApiKeyAndHeaders(ctx.model);
 			if (!auth.ok) throw new Error(auth.error);
 			const priorDetails = latestResponsesV2Details(event.branchEntries);
+			const customInstructions = event.customInstructions?.trim();
 			const context: Context = {
-				systemPrompt: ctx.getSystemPrompt(),
+				systemPrompt: customInstructions
+					? `${ctx.getSystemPrompt()}\n\n<user-instructions>\nThe user provided these instructions for this compaction. Follow them with high priority: emphasize what they ask to focus on, and preserve verbatim anything they ask to remember.\n${customInstructions}\n</user-instructions>`
+					: ctx.getSystemPrompt(),
 				messages: convertToLlm(buildSessionContext([...event.branchEntries]).messages),
 				tools: activeTools(pi),
 			};
