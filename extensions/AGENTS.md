@@ -13,12 +13,14 @@ repo or deployed agent docs.
 ## Structure
 
 - `claude-system-prompt-compat.ts`: narrow Anthropic OAuth prompt compatibility.
-- `subagent/index.ts`: bounded flat task orchestration.
-- `subagent/runner.ts`: disposable child `pi` execution and JSON-event capture.
-- `subagent/render.ts`: TUI rendering only.
-- `subagent/schema.ts`: tool parameter schema only.
-- `subagent/format.ts`: output, usage, and tool-call formatting.
-- `subagent/types.ts`: shared types.
+- `subagent/index.ts`: six public tools and parent-session persistence wiring.
+- `subagent/manager.ts`: retained-child lifecycle and recovery.
+- `subagent/child-runner.ts`: the in-process Pi child seam.
+- `subagent/schemas.ts`: tool parameter schemas.
+- `subagent/tool-support.ts`: validation and bounded tool payloads.
+- `subagent/reviewer-context.ts`: active-parent user-message snapshot.
+- `subagent/roles.ts` and `subagent/agents/`: role loading and role prompts.
+- `subagent/types.ts`: shared contract types.
 
 Keep active TypeScript extension files small enough to review. If an extension
 needs multiple concerns, split by protocol boundary rather than adding generic
