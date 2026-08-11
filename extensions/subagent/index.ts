@@ -123,20 +123,28 @@ export default function subagentExtension(pi: ExtensionAPI) {
     }
   }
 
-  function sendTerminalResult(admission: SubagentAdmission, terminalTranscript: PersistedChildTranscript): void {
+  function sendTerminalResult(
+    admission: SubagentAdmission,
+    terminalTranscript: PersistedChildTranscript,
+    deliveryMode: "live" | "recovery",
+  ): void {
     const receipt: SubagentTerminalResultReceipt = {
       child_session_file: admission.child_session_file,
       child_terminal_session_entry_id: terminalTranscript.terminal_session_entry_id,
     };
+    // Live delivery: the parent is mid-turn, so steer queues at the next turn
+    // boundary (or triggerTurn starts a fresh turn when the parent is idle).
+    // Recovery delivery: pi.sendMessage is fire-and-forget, so a triggerTurn
+    // races the user's next prompt and can be lost. nextTurn pushes synchronously
+    // and injects the result alongside the next user message.
     pi.sendMessage({
       customType: SUBAGENT_TERMINAL_RESULT_MESSAGE,
       content: terminalHandoff(admission, terminalTranscript),
       display: true,
       details: receipt,
-    }, {
-      triggerTurn: true,
-      deliverAs: "steer",
-    });
+    }, deliveryMode === "recovery"
+      ? { deliverAs: "nextTurn" }
+      : { triggerTurn: true, deliverAs: "steer" });
   }
 
   async function openAndStartResumedChild(
@@ -158,7 +166,7 @@ export default function subagentExtension(pi: ExtensionAPI) {
       admission,
       runtime,
       messageToSubagent,
-      sendTerminalResult,
+      (childAdmission, childTranscript) => sendTerminalResult(childAdmission, childTranscript, "live"),
     );
     await waitForChildTurnAdmission(liveChildren, runtime, launchedChildTurn, admission.subagent_name);
   }
@@ -173,7 +181,7 @@ export default function subagentExtension(pi: ExtensionAPI) {
         child_terminal_session_entry_id: terminalTranscript.terminal_session_entry_id,
       };
       if (!hasTerminalResultReceipt(activeBranch, receipt)) {
-        sendTerminalResult(admission, terminalTranscript);
+        sendTerminalResult(admission, terminalTranscript, "recovery");
       }
     }
   }
@@ -267,7 +275,7 @@ export default function subagentExtension(pi: ExtensionAPI) {
           admission,
           runtime,
           initialChildMessage(request, activeParentHumanConversationFile),
-          sendTerminalResult,
+          (childAdmission, childTranscript) => sendTerminalResult(childAdmission, childTranscript, "live"),
         );
         await waitForChildTurnAdmission(liveChildren, runtime, launchedChildTurn, admission.subagent_name);
         return subagentAdmissionToolResult(admission);
