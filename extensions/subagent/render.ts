@@ -261,7 +261,7 @@ function terminalMessageText(content: unknown): string {
   return "";
 }
 
-export const renderTerminalResultMessage: MessageRenderer = (message, _options, theme) => {
+export const renderTerminalResultMessage: MessageRenderer = (message, options, theme) => {
   const fullText = terminalMessageText(message.content).trim();
   const [heading, ...bodyLines] = fullText.split("\n");
   const body = bodyLines.join("\n").trim();
@@ -275,14 +275,21 @@ export const renderTerminalResultMessage: MessageRenderer = (message, _options, 
         ? theme.fg("warning", "cancelled")
         : theme.fg("error", "failed");
 
-  const box = new Box(1, 1, (text: string) => theme.bg("customMessageBg", text));
-  box.addChild(new Text(
+  const headerText =
     theme.fg("toolTitle", theme.bold("subagent ")) +
     theme.fg("accent", theme.bold(subagentName)) +
-    ` ${statusText}`,
-    0,
-    0,
-  ));
+    ` ${statusText}`;
+
+  // Collapsed (default): the status header plus the first line of the answer,
+  // matching how other Pi messages collapse. Expanded: the full handoff body.
+  if (!options.expanded) {
+    const firstLine = body.split("\n")[0]?.trim() ?? "";
+    const summary = firstLine ? truncateToLine(firstLine, 88) : "";
+    return new Text(summary ? `${headerText}\n  ${theme.fg("customMessageText", summary)}` : headerText, 0, 0);
+  }
+
+  const box = new Box(1, 1, (text: string) => theme.bg("customMessageBg", text));
+  box.addChild(new Text(headerText, 0, 0));
   if (body) {
     box.addChild(new Spacer(1));
     box.addChild(new Markdown(body, 0, 0, getMarkdownTheme(), {
