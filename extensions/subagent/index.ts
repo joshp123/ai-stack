@@ -194,6 +194,8 @@ export default function subagentExtension(pi: ExtensionAPI) {
     recoverMissingTerminalResults(ctx);
   });
 
+  let pendingTreeTerminations: LiveChild[] = [];
+
   pi.on("session_before_tree", async (event, ctx) => {
     const liveChildrenInCurrentBranch = activeBranchAdmissions(ctx)
       .map((admission) => liveChildren.get(admission.subagent_name))
@@ -203,7 +205,16 @@ export default function subagentExtension(pi: ExtensionAPI) {
       `This will terminate ${liveChildrenInCurrentBranch.length} running subagents. Continue? [y/n]`;
     const confirmed = await ctx.ui.confirm(confirmationPrompt, "", { signal: event.signal });
     if (!confirmed) return { cancel: true };
-    await Promise.all(liveChildrenInCurrentBranch.map(async (liveChild) => {
+    // Terminate only after Pi confirms the branch actually changed (session_tree).
+    // A cancelled navigation (e.g. the user aborts branch summarisation) must not
+    // kill children: session_tree never fires, and the children keep running.
+    pendingTreeTerminations = liveChildrenInCurrentBranch;
+  });
+
+  pi.on("session_tree", async () => {
+    const childrenToTerminate = pendingTreeTerminations;
+    pendingTreeTerminations = [];
+    await Promise.all(childrenToTerminate.map(async (liveChild) => {
       await liveChild.session.abort();
       await liveChild.completion;
     }));

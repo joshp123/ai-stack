@@ -132,10 +132,11 @@ the extension must ask:
 This will terminate <count> running subagents. Continue? [y/n]
 ```
 
-`n` leaves the current branch unchanged. `y` asks Pi to abort each live child
-and waits for Pi's normal abort operation before tree navigation continues. The
-extension must not silently keep a child running after its parent leaves the
-branch.
+`n` leaves the current branch unchanged. `y` permits the tree change; the
+extension terminates the departing branch's live children only after Pi
+confirms the branch actually changed (`session_tree`). A cancelled navigation
+(e.g. the user aborts branch summarisation) never kills children. The extension
+must not silently keep a child running after its parent leaves the branch.
 
 Pi branches share ancestor entries. A selected branch therefore sees every
 successful admission on its active root-to-leaf path, including one created
