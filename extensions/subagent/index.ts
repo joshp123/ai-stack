@@ -9,6 +9,21 @@ import {
   hasTerminalResultReceipt,
   SUBAGENT_TERMINAL_RESULT_MESSAGE,
 } from "./parent-session-admissions.js";
+import {
+  renderCancelSubagentCall,
+  renderCancelSubagentResult,
+  renderInspectTranscriptCall,
+  renderInspectTranscriptResult,
+  renderListModelsCall,
+  renderListModelsResult,
+  renderListSubagentsCall,
+  renderListSubagentsResult,
+  renderStartSubagentCall,
+  renderStartSubagentResult,
+  renderSteerSubagentCall,
+  renderSteerSubagentResult,
+  renderTerminalResultMessage,
+} from "./render.js";
 import { writeActiveParentHumanConversationFile } from "./reviewer-context.js";
 import { loadRoles, parentRoleGuidance } from "./roles.js";
 import { createSchemas } from "./schemas.js";
@@ -87,6 +102,7 @@ export default function subagentExtension(pi: ExtensionAPI) {
   const installedRoleNames = new Set(roles.keys());
   const schemas = createSchemas(roles);
   const liveChildren = new Map<string, LiveChild>();
+  pi.registerMessageRenderer(SUBAGENT_TERMINAL_RESULT_MESSAGE, renderTerminalResultMessage);
 
   function activeBranchAdmissions(ctx: ExtensionContext): SubagentAdmission[] {
     return currentBranchSubagentAdmissions(ctx.sessionManager.getBranch(), installedRoleNames);
@@ -240,6 +256,8 @@ export default function subagentExtension(pi: ExtensionAPI) {
     promptGuidelines: parentRoleGuidance(roles),
     parameters: schemas.start,
     executionMode: "parallel",
+    renderCall: (args, theme, context) => renderStartSubagentCall(args, theme, context.expanded),
+    renderResult: (result, _options, theme) => renderStartSubagentResult(result, theme),
     async execute(_id, rawRequest, _signal, _update, ctx) {
       try {
         const request = rawRequest as StartSubagentRequest;
@@ -302,6 +320,8 @@ export default function subagentExtension(pi: ExtensionAPI) {
     description: "Redirect a useful child or ask it to wrap up. A running child receives native Pi steering after its current assistant turn and whole tool-call batch finish; tools are not interrupted. A terminal child resumes from its retained session file.",
     parameters: schemas.steer,
     executionMode: "parallel",
+    renderCall: (args, theme) => renderSteerSubagentCall(args, theme),
+    renderResult: (result, _options, theme) => renderSteerSubagentResult(result, theme),
     async execute(_id, rawRequest, _signal, _update, ctx) {
       try {
         const request = rawRequest as SteerSubagentRequest;
@@ -328,6 +348,8 @@ export default function subagentExtension(pi: ExtensionAPI) {
     label: "List subagents",
     description: "List active-branch children. Use current_time, last_event_at, live tool calls, and transcript inspection to judge whether a child is stuck; do not use this as a tight polling loop.",
     parameters: schemas.empty,
+    renderCall: (_args, theme) => renderListSubagentsCall(_args, theme),
+    renderResult: (result, _options, theme) => renderListSubagentsResult(result, theme),
     async execute(_id, _request, _signal, _update, ctx) {
       try {
         const currentTime = Date.now();
@@ -364,6 +386,8 @@ export default function subagentExtension(pi: ExtensionAPI) {
     label: "Inspect subagent transcript",
     description: "Return the newest requested native Pi messages from a child transcript. The default is 20 messages; request more only when more evidence is needed.",
     parameters: schemas.inspect,
+    renderCall: (args, theme) => renderInspectTranscriptCall(args, theme),
+    renderResult: (result, _options, theme) => renderInspectTranscriptResult(result, theme),
     async execute(_id, rawRequest, _signal, _update, ctx) {
       try {
         const request = rawRequest as InspectSubagentTranscriptRequest;
@@ -390,6 +414,8 @@ export default function subagentExtension(pi: ExtensionAPI) {
     description: "Exceptionally abort a running child. Cancellation loses work in progress and retains its transcript. For a changed mission, steer useful work to report what it found and start another child for the new work.",
     parameters: schemas.cancel,
     executionMode: "parallel",
+    renderCall: (args, theme) => renderCancelSubagentCall(args, theme),
+    renderResult: (result, _options, theme) => renderCancelSubagentResult(result, theme),
     async execute(_id, rawRequest, _signal, _update, ctx) {
       try {
         const request = rawRequest as CancelSubagentRequest;
@@ -415,6 +441,8 @@ export default function subagentExtension(pi: ExtensionAPI) {
     label: "List subagent models",
     description: "List only authenticated Pi models, grouped by the extension's model laboratory presentation enum. Use the returned exact selector and supported thinking level with start_subagent.",
     parameters: schemas.empty,
+    renderCall: (_args, theme) => renderListModelsCall(_args, theme),
+    renderResult: (result, _options, theme) => renderListModelsResult(result, theme),
     async execute(_id, _request, _signal, _update, ctx) {
       try {
         return modelVisibleToolResult(authenticatedModelsByLaboratory(ctx.modelRegistry));

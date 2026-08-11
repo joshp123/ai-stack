@@ -119,8 +119,10 @@ export function subagentAdmissionToolResult(
   return { content: [{ type: "text", text: JSON.stringify(admission) }], details: admission };
 }
 
-export function modelVisibleToolResult<T>(payload: T): AgentToolResult<undefined> {
-  return { content: [{ type: "text", text: JSON.stringify(payload) }], details: undefined };
+export function modelVisibleToolResult<T>(payload: T): AgentToolResult<T> {
+  // content is what the model reads (a JSON string); details is what the TUI
+  // renderers consume, so renderResult receives the structured payload.
+  return { content: [{ type: "text", text: JSON.stringify(payload) }], details: payload };
 }
 
 export function throwTypedToolError(error: unknown): never {

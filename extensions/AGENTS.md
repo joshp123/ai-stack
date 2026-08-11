@@ -25,6 +25,7 @@ an explicit user decision or a demonstrated Pi failure.
 - `subagent/child-runner.ts`: the in-process Pi child create and reopen seam.
 - `subagent/schemas.ts`: model-facing tool parameter schemas.
 - `subagent/tool-support.ts`: validation, typed results and model catalogue.
+- `subagent/render.ts`: compact TUI rendering for the six tools and the terminal result message.
 - `subagent/reviewer-context.ts`: active-parent user-message snapshot.
 - `subagent/roles.ts` and `subagent/agents/`: role loading and role prompts.
 - `subagent/types.ts`: shared contract types.
