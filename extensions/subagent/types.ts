@@ -1,6 +1,5 @@
-import type { AgentMessage, ThinkingLevel } from "@earendil-works/pi-agent-core";
-import type { ToolCall } from "@earendil-works/pi-ai";
-import type { AgentSessionEvent, SessionShutdownEvent } from "@earendil-works/pi-coding-agent";
+import type { AgentMessage, AgentToolCall, ThinkingLevel } from "@earendil-works/pi-agent-core";
+import type { AgentSession } from "@earendil-works/pi-coding-agent";
 
 export const SUBAGENT_TOOL_NAMES = [
   "start_subagent",
@@ -11,14 +10,23 @@ export const SUBAGENT_TOOL_NAMES = [
   "list_subagent_models",
 ] as const;
 
+export const SUBAGENT_NAME_PATTERN = /^[a-z0-9-]{2,64}$/;
+
 export type SubagentStatus = "running" | "finished" | "failed" | "cancelled";
 export type TerminalSubagentStatus = Exclude<SubagentStatus, "running">;
-export type ParentSessionShutdownReason = SessionShutdownEvent["reason"];
 export type SubagentFailureKind =
   | "parent_process_exited_mid_run"
-  | "parent_session_ended_mid_run"
   | "model_request_failed"
   | "tool_execution_failed";
+export type ModelLaboratory =
+  | "openai"
+  | "anthropic"
+  | "deepseek"
+  | "zhipu"
+  | "moonshot"
+  | "alibaba"
+  | "minimax"
+  | "other";
 
 export interface PiModelSelector {
   provider: string;
@@ -47,30 +55,32 @@ export interface StartSubagentRequest {
   working_directory?: string;
 }
 
-export interface PersistedNotification {
-  notification_id: string;
+export interface SteerSubagentRequest {
   subagent_name: string;
-  content: string;
+  message_to_subagent: string;
 }
 
-export interface PersistedSubagentRecord {
+export interface InspectSubagentTranscriptRequest {
   subagent_name: string;
-  role?: string;
-  subagent_mission: string;
-  context: SubagentColdStartContext;
-  working_directory: string;
-  model: PiModelSelector;
-  thinking: ThinkingLevel;
-  status: SubagentStatus;
-  final_message?: string;
-  failure_kind?: SubagentFailureKind;
-  failure_detail?: string;
-  started_at: string;
-  last_event_at: string;
-  running_tool_calls: ToolCall[];
-  session_file: string;
-  active_parent_human_conversation_file?: string;
-  terminal_notifications: PersistedNotification[];
+  message_count?: number;
+}
+
+export interface CancelSubagentRequest {
+  subagent_name: string;
+}
+
+export interface SubagentAdmission {
+  version: 1;
+  subagent_name: string;
+  child_session_file: string;
+  resolved_role?: string;
+  resolved_model: PiModelSelector;
+  resolved_thinking: ThinkingLevel;
+}
+
+export interface SubagentTerminalResultReceipt {
+  child_session_file: string;
+  child_terminal_session_entry_id: string;
 }
 
 export interface RoleDefinition {
@@ -81,11 +91,34 @@ export interface RoleDefinition {
   childPrompt: string;
 }
 
-export interface TerminalOutcome {
+export interface LiveChild {
+  session: AgentSession;
+  last_event_at: number;
+  running_tool_calls: AgentToolCall[];
+  completion: Promise<void>;
+}
+
+export interface PersistedChildTranscript {
+  messages: AgentMessage[];
+  started_at: number;
+  last_event_at: number;
+  terminal_session_entry_id: string;
   status: TerminalSubagentStatus;
-  final_message: string;
   failure_kind?: SubagentFailureKind;
   failure_detail?: string;
+  handoff: string;
+}
+
+export interface ChildUserMessagePersistenceWaiter {
+  waitFor(prompt: Promise<void>): Promise<void>;
+  cancel(): void;
+}
+
+export interface ChildRuntime {
+  session: AgentSession;
+  child_session_file: string;
+  prepareNextUserMessagePersistence(): ChildUserMessagePersistenceWaiter;
+  dispose(): void;
 }
 
 export interface ToolErrorPayload {
@@ -105,10 +138,11 @@ export type ToolErrorCode =
   | "working_directory_missing"
   | "parent_session_not_persisted"
   | "child_session_file_invalid"
+  | "child_admission_invalid"
   | "reviewer_conversation_file_invalid"
   | "child_resources_failed"
   | "subagent_not_found"
-  | "subagent_already_terminal"
+  | "subagent_not_running"
   | "subagent_runtime_failed";
 
 export class SubagentToolError extends Error {
@@ -116,26 +150,4 @@ export class SubagentToolError extends Error {
     super(message);
     this.name = "SubagentToolError";
   }
-}
-
-export interface ChildRuntimeEvents {
-  onEvent: (event: AgentSessionEvent) => void;
-}
-
-export interface OpenChildRequest {
-  record: PersistedSubagentRecord;
-  parent_session_file: string;
-  child_role_prompt?: string;
-}
-
-export interface OpenChildRuntime {
-  readonly session_file: string;
-  readonly is_streaming: boolean;
-  prompt(message: string): Promise<void>;
-  steer(message: string): Promise<void>;
-  abort(): Promise<void>;
-  messages(): AgentMessage[];
-  waitForNextUserMessagePersistence(): Promise<void>;
-  close(): Promise<void>;
-  detachAndAbort(reason: ParentSessionShutdownReason): Promise<void>;
 }

@@ -10,14 +10,21 @@ This directory owns extension code only. Packaging and runtime installation live
 in `modules/pi-coding-agent.nix`; private agent policy lives in the consumer
 repo or deployed agent docs.
 
+## Sub-agent contract
+
+Read `subagent/API.md` before changing any file in `subagent/`. It is the
+locked contract. Do not add a component or change observable behaviour without
+an explicit user decision or a demonstrated Pi failure.
+
 ## Structure
 
 - `claude-system-prompt-compat.ts`: narrow Anthropic OAuth prompt compatibility.
-- `subagent/index.ts`: six public tools and parent-session persistence wiring.
-- `subagent/manager.ts`: retained-child lifecycle and recovery.
-- `subagent/child-runner.ts`: the in-process Pi child seam.
-- `subagent/schemas.ts`: tool parameter schemas.
-- `subagent/tool-support.ts`: validation and bounded tool payloads.
+- `subagent/index.ts`: six public tools and Pi event bridges.
+- `subagent/parent-session-admissions.ts`: active-branch admission scan and terminal receipts.
+- `subagent/live-children.ts`: in-memory child lifecycle.
+- `subagent/child-runner.ts`: the in-process Pi child create and reopen seam.
+- `subagent/schemas.ts`: model-facing tool parameter schemas.
+- `subagent/tool-support.ts`: validation, typed results and model catalogue.
 - `subagent/reviewer-context.ts`: active-parent user-message snapshot.
 - `subagent/roles.ts` and `subagent/agents/`: role loading and role prompts.
 - `subagent/types.ts`: shared contract types.

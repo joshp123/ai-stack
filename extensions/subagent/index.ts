@@ -1,193 +1,276 @@
-import { randomUUID } from "node:crypto";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { ThinkingLevel } from "@earendil-works/pi-agent-core";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { createSchemas } from "./schemas.js";
-import { loadRoles, parentRoleGuidance } from "./roles.js";
-import { requireExistingDirectory, SubagentManager } from "./manager.js";
-import { writeActiveParentHumanConversationFile } from "./reviewer-context.js";
+import { openChildRuntime, readPersistedChildTranscript } from "./child-runner.js";
+import { launchChildTurn, waitForChildTurnAdmission } from "./live-children.js";
 import {
-  boundedToolCallPreviews,
-  boundedTranscriptPayload,
-  groupedAvailableModels,
+  currentBranchSubagentAdmissions,
+  hasTerminalResultReceipt,
+  SUBAGENT_TERMINAL_RESULT_MESSAGE,
+} from "./parent-session-admissions.js";
+import { writeActiveParentHumanConversationFile } from "./reviewer-context.js";
+import { loadRoles, parentRoleGuidance } from "./roles.js";
+import { createSchemas } from "./schemas.js";
+import {
+  authenticatedModelsByLaboratory,
+  modelVisibleToolResult,
   resolveAuthenticatedModel,
-  successResult,
+  subagentAdmissionToolResult,
   throwTypedToolError,
   validateContextFiles,
+  validateExistingWorkingDirectory,
   validateThinking,
 } from "./tool-support.js";
-import type {
-  PersistedNotification,
-  PersistedSubagentRecord,
-  StartSubagentRequest,
-  TerminalOutcome,
+import {
+  SUBAGENT_NAME_PATTERN,
+  type CancelSubagentRequest,
+  type InspectSubagentTranscriptRequest,
+  type LiveChild,
+  type PersistedChildTranscript,
+  type RoleDefinition,
+  type StartSubagentRequest,
+  type SteerSubagentRequest,
+  type SubagentAdmission,
+  type SubagentTerminalResultReceipt,
+  SubagentToolError,
 } from "./types.js";
-import { SubagentToolError } from "./types.js";
 
-const REGISTRY_ENTRY = "subagent-registry-v1";
-const RESULT_MESSAGE = "subagent-result-v1";
-const FINAL_MESSAGE_CHARACTER_CAP = 8_000;
 const extensionDirectory = dirname(fileURLToPath(import.meta.url));
 
 function requireParentSessionFile(ctx: ExtensionContext): string {
-  const sessionFile = ctx.sessionManager.getSessionFile();
-  if (!sessionFile) {
+  const parentSessionFile = ctx.sessionManager.getSessionFile();
+  if (!parentSessionFile) {
     throw new SubagentToolError(
       "parent_session_not_persisted",
       "The parent session is not persisted, so it cannot own a resumable child.",
     );
   }
-  return sessionFile;
+  return parentSessionFile;
 }
 
-function compactTerminalNotification(record: PersistedSubagentRecord, outcome: TerminalOutcome): string {
-  const heading = `Subagent ${record.subagent_name} ${outcome.status}`;
-  const failure = outcome.failure_kind
-    ? `failure_kind: ${outcome.failure_kind}${outcome.failure_detail ? `\nfailure_detail: ${outcome.failure_detail}` : ""}`
-    : "";
-  const suffix = `transcript: ${record.session_file}`;
-  const fixedParts = [heading, failure].filter(Boolean).join("\n\n");
-  const availableForMessage = Math.max(0, FINAL_MESSAGE_CHARACTER_CAP - fixedParts.length - suffix.length - 4);
-  const finalMessage = outcome.final_message.length > availableForMessage
-    ? `${outcome.final_message.slice(0, Math.max(0, availableForMessage - 13))}…[truncated]`
-    : outcome.final_message;
-  return [fixedParts, finalMessage, suffix].filter(Boolean).join("\n\n");
+function initialChildMessage(
+  request: StartSubagentRequest,
+  activeParentHumanConversationFile: string | undefined,
+): string {
+  const reviewerIntentSource = activeParentHumanConversationFile
+    ? [
+      "Reviewer intent source:",
+      `active_parent_human_conversation_file: ${activeParentHumanConversationFile}`,
+      "Read every JSONL line in that file. Only its user-role messages define human intent.",
+      "Work-author claims in the context are unverified evidence.",
+      "",
+    ]
+    : [];
+  return [
+    ...reviewerIntentSource,
+    "Subagent mission:",
+    request.subagent_mission.trim(),
+    "",
+    "Context:",
+    JSON.stringify(request.context, null, 2),
+  ].join("\n");
 }
 
-interface RestoredParentSubagentState {
-  records: PersistedSubagentRecord[];
-  delivered: Set<string>;
-}
-
-function latestPersistedState(
-  entries: ReturnType<ExtensionContext["sessionManager"]["getBranch"]>,
-): RestoredParentSubagentState {
-  const records = new Map<string, PersistedSubagentRecord>();
-  const delivered = new Set<string>();
-  for (const entry of entries) {
-    if (entry.type === "custom" && entry.customType === REGISTRY_ENTRY && entry.data) {
-      const persistedRecord = entry.data as PersistedSubagentRecord;
-      if (persistedRecord.subagent_name) {
-        records.set(persistedRecord.subagent_name, {
-          ...persistedRecord,
-          terminal_notifications: persistedRecord.terminal_notifications ?? [],
-        });
-      }
-    } else if (entry.type === "custom_message" && entry.customType === RESULT_MESSAGE) {
-      const notificationId = (entry.details as { notification_id?: string } | undefined)?.notification_id;
-      if (notificationId) delivered.add(notificationId);
-    }
-  }
-  return { records: [...records.values()], delivered };
+function terminalHandoff(
+  admission: SubagentAdmission,
+  terminalTranscript: PersistedChildTranscript,
+): string {
+  const heading = `Subagent ${admission.subagent_name} ${terminalTranscript.status}.`;
+  if (terminalTranscript.handoff) return `${heading}\n\n${terminalTranscript.handoff}`;
+  if (terminalTranscript.failure_detail) return `${heading}\n\n${terminalTranscript.failure_detail}`;
+  return heading;
 }
 
 export default function subagentExtension(pi: ExtensionAPI) {
   const roles = loadRoles(join(extensionDirectory, "agents"));
+  const installedRoleNames = new Set(roles.keys());
   const schemas = createSchemas(roles);
-  const deliveredNotificationIds = new Set<string>();
+  const liveChildren = new Map<string, LiveChild>();
 
-  function deliverNotification(
-    notification: PersistedNotification,
-    delivery: "normal-completion" | "session-restore",
-  ): void {
-    if (deliveredNotificationIds.has(notification.notification_id)) return;
-    const message = {
-      customType: RESULT_MESSAGE,
-      content: notification.content,
-      display: true,
-      details: {
-        notification_id: notification.notification_id,
-        subagent_name: notification.subagent_name,
-      },
-    };
-    if (delivery === "session-restore") {
-      pi.sendMessage(message, { deliverAs: "nextTurn" });
-    } else {
-      pi.sendMessage(message, { deliverAs: "steer", triggerTurn: true });
+  function activeBranchAdmissions(ctx: ExtensionContext): SubagentAdmission[] {
+    return currentBranchSubagentAdmissions(ctx.sessionManager.getBranch(), installedRoleNames);
+  }
+
+  function requireAdmission(ctx: ExtensionContext, subagentName: string): SubagentAdmission {
+    const admission = activeBranchAdmissions(ctx).find((candidate) => candidate.subagent_name === subagentName);
+    if (!admission) {
+      throw new SubagentToolError("subagent_not_found", `No subagent named ${subagentName} exists in the active branch.`);
     }
-    deliveredNotificationIds.add(notification.notification_id);
+    return admission;
   }
 
-  function createTerminalNotification(
-    record: PersistedSubagentRecord,
-    outcome: TerminalOutcome,
-  ): PersistedNotification {
-    return {
-      notification_id: `${record.subagent_name}:${randomUUID()}`,
-      subagent_name: record.subagent_name,
-      content: compactTerminalNotification(record, outcome),
+  function requireRole(roleName: string | undefined): RoleDefinition | undefined {
+    if (!roleName) return undefined;
+    const role = roles.get(roleName);
+    if (!role) throw new SubagentToolError("role_not_found", `No installed role named ${roleName} exists.`);
+    return role;
+  }
+
+  function validateUnusedSubagentName(ctx: ExtensionContext, subagentName: string): void {
+    if (!SUBAGENT_NAME_PATTERN.test(subagentName)) {
+      throw new SubagentToolError(
+        "subagent_name_invalid",
+        `Subagent name ${JSON.stringify(subagentName)} must contain 2-64 lowercase letters, digits, or hyphens.`,
+      );
+    }
+    if (activeBranchAdmissions(ctx).some((admission) => admission.subagent_name === subagentName) ||
+        liveChildren.has(subagentName)) {
+      throw new SubagentToolError(
+        "subagent_name_already_used",
+        `Subagent name ${subagentName} is already used in the active branch.`,
+      );
+    }
+  }
+
+  function sendTerminalResult(admission: SubagentAdmission, terminalTranscript: PersistedChildTranscript): void {
+    const receipt: SubagentTerminalResultReceipt = {
+      child_session_file: admission.child_session_file,
+      child_terminal_session_entry_id: terminalTranscript.terminal_session_entry_id,
     };
+    pi.sendMessage({
+      customType: SUBAGENT_TERMINAL_RESULT_MESSAGE,
+      content: terminalHandoff(admission, terminalTranscript),
+      display: true,
+      details: receipt,
+    }, {
+      triggerTurn: true,
+      deliverAs: "steer",
+    });
   }
 
-  const manager = new SubagentManager({
-    persist: (record) => pi.appendEntry(REGISTRY_ENTRY, record),
-    createTerminalNotification,
-    reachedTerminalState: (_record, notification) => {
-      deliverNotification(notification, "normal-completion");
-    },
-  });
+  async function openAndStartResumedChild(
+    ctx: ExtensionContext,
+    admission: SubagentAdmission,
+    messageToSubagent: string,
+  ): Promise<void> {
+    const role = requireRole(admission.resolved_role);
+    const model = resolveAuthenticatedModel(ctx.modelRegistry, admission.resolved_model);
+    validateThinking(model, admission.resolved_thinking);
+    const runtime = await openChildRuntime({
+      child_session_file: admission.child_session_file,
+      model: admission.resolved_model,
+      thinking: admission.resolved_thinking,
+      child_role_prompt: role?.childPrompt,
+    });
+    const launchedChildTurn = launchChildTurn(
+      liveChildren,
+      admission,
+      runtime,
+      messageToSubagent,
+      sendTerminalResult,
+    );
+    await waitForChildTurnAdmission(liveChildren, runtime, launchedChildTurn, admission.subagent_name);
+  }
+
+  function recoverMissingTerminalResults(ctx: ExtensionContext): void {
+    const activeBranch = ctx.sessionManager.getBranch();
+    for (const admission of currentBranchSubagentAdmissions(activeBranch, installedRoleNames)) {
+      if (liveChildren.has(admission.subagent_name)) continue;
+      const terminalTranscript = readPersistedChildTranscript(admission.child_session_file);
+      const receipt: SubagentTerminalResultReceipt = {
+        child_session_file: admission.child_session_file,
+        child_terminal_session_entry_id: terminalTranscript.terminal_session_entry_id,
+      };
+      if (!hasTerminalResultReceipt(activeBranch, receipt)) {
+        sendTerminalResult(admission, terminalTranscript);
+      }
+    }
+  }
 
   pi.on("session_start", (_event, ctx) => {
-    const restored = latestPersistedState(ctx.sessionManager.getBranch());
-    deliveredNotificationIds.clear();
-    for (const notificationId of restored.delivered) deliveredNotificationIds.add(notificationId);
-    manager.restore(restored.records);
-    for (const notification of manager.terminalNotifications()) {
-      deliverNotification(notification, "session-restore");
-    }
+    recoverMissingTerminalResults(ctx);
   });
 
-  pi.on("session_shutdown", async (event) => {
-    await manager.parentSessionEnded(event.reason);
+  pi.on("session_compact", (_event, ctx) => {
+    recoverMissingTerminalResults(ctx);
+  });
+
+  pi.on("session_before_tree", async (event, ctx) => {
+    const liveChildrenInCurrentBranch = activeBranchAdmissions(ctx)
+      .map((admission) => liveChildren.get(admission.subagent_name))
+      .filter((liveChild): liveChild is LiveChild => Boolean(liveChild));
+    if (liveChildrenInCurrentBranch.length === 0) return;
+    const confirmationPrompt =
+      `This will terminate ${liveChildrenInCurrentBranch.length} running subagents. Continue? [y/n]`;
+    const confirmed = await ctx.ui.confirm(confirmationPrompt, "", { signal: event.signal });
+    if (!confirmed) return { cancel: true };
+    await Promise.all(liveChildrenInCurrentBranch.map(async (liveChild) => {
+      await liveChild.session.abort();
+      await liveChild.completion;
+    }));
+  });
+
+  pi.on("session_shutdown", async () => {
+    const runningChildren = [...liveChildren.values()];
+    liveChildren.clear();
+    await Promise.all(runningChildren.map(async (liveChild) => {
+      try {
+        await liveChild.session.abort();
+      } catch {} finally {
+        liveChild.session.dispose();
+      }
+      await liveChild.completion;
+    }));
   });
 
   pi.registerTool({
     name: "start_subagent",
     label: "Start subagent",
-    description: "Start one in-process, resumable Pi child. The child has no parent conversation. Put every needed absolute file, verified fact, access method, and work-author claim in the named context fields. For concurrent writers, give each child separate files. Admission means its initial context is persisted and it is running; its terminal result is pushed automatically. After a crash, terminal results use at-least-once delivery.",
+    description: "Delegate substantial independent work. Do trivial work yourself. Start several independent children in one response for parallel work, give concurrent writers separate files, and give every cold child every file, fact, and access method it needs. Terminal handoffs are pushed into this parent session; do not poll for them.",
     promptGuidelines: parentRoleGuidance(roles),
     parameters: schemas.start,
-    executionMode: "sequential",
+    executionMode: "parallel",
     async execute(_id, rawRequest, _signal, _update, ctx) {
       try {
         const request = rawRequest as StartSubagentRequest;
-        manager.validateNewName(request.subagent_name);
-        const role = request.role ? roles.get(request.role) : undefined;
-        if (request.role && !role) {
-          throw new SubagentToolError("role_not_found", `No role named ${request.role} exists.`);
-        }
+        validateUnusedSubagentName(ctx, request.subagent_name);
+        const role = requireRole(request.role);
         const modelSelector = request.model ?? role?.model;
         if (!modelSelector) {
           throw new SubagentToolError("model_required", "Provide a model or choose a role with a model default.");
         }
         const thinking = request.thinking ?? role?.thinking;
         if (!thinking) {
-          throw new SubagentToolError(
-            "thinking_required",
-            "Provide a thinking level or choose a role with a thinking default.",
-          );
+          throw new SubagentToolError("thinking_required", "Provide a thinking level or choose a role with a thinking default.");
         }
         const model = resolveAuthenticatedModel(ctx.modelRegistry, modelSelector);
         validateThinking(model, thinking as ThinkingLevel);
         validateContextFiles(request.context.files_the_subagent_must_read.map((file) => file.absolute_path));
         const workingDirectory = request.working_directory ?? ctx.cwd;
-        requireExistingDirectory(workingDirectory);
+        validateExistingWorkingDirectory(workingDirectory);
         const parentSessionFile = requireParentSessionFile(ctx);
-        const reviewerConversationFile = role?.name === "reviewer"
+        const activeParentHumanConversationFile = role?.name === "reviewer"
           ? writeActiveParentHumanConversationFile(
             parentSessionFile,
             request.subagent_name,
             ctx.sessionManager.getBranch(),
           )
           : undefined;
-        const record = await manager.start(
-          { ...request, working_directory: workingDirectory },
-          { model: modelSelector, thinking: thinking as ThinkingLevel, role },
-          parentSessionFile,
-          reviewerConversationFile,
+        const runtime = await openChildRuntime({
+          working_directory: workingDirectory,
+          parent_session_file: parentSessionFile,
+          model: modelSelector,
+          thinking: thinking as ThinkingLevel,
+          child_role_prompt: role?.childPrompt,
+        });
+        const admission: SubagentAdmission = {
+          version: 1,
+          subagent_name: request.subagent_name,
+          child_session_file: runtime.child_session_file,
+          ...(role ? { resolved_role: role.name } : {}),
+          resolved_model: { ...modelSelector },
+          resolved_thinking: thinking as ThinkingLevel,
+        };
+        const launchedChildTurn = launchChildTurn(
+          liveChildren,
+          admission,
+          runtime,
+          initialChildMessage(request, activeParentHumanConversationFile),
+          sendTerminalResult,
         );
-        return successResult({ subagent_name: record.subagent_name, session_file: record.session_file });
+        await waitForChildTurnAdmission(liveChildren, runtime, launchedChildTurn, admission.subagent_name);
+        return subagentAdmissionToolResult(admission);
       } catch (error) {
         throwTypedToolError(error);
       }
@@ -197,18 +280,24 @@ export default function subagentExtension(pi: ExtensionAPI) {
   pi.registerTool({
     name: "steer_subagent",
     label: "Steer subagent",
-    description: "Queue Pi-native steering for an active child after its current tool calls, or resume a terminal child from the same validated session file. Running tools are not aborted. Do not start message_to_subagent with /: Pi treats it as a command.",
+    description: "Redirect a useful child or ask it to wrap up. A running child receives native Pi steering after its current assistant turn and whole tool-call batch finish; tools are not interrupted. A terminal child resumes from its retained session file.",
     parameters: schemas.steer,
-    executionMode: "sequential",
-    async execute(_id, request, _signal, _update, ctx) {
+    executionMode: "parallel",
+    async execute(_id, rawRequest, _signal, _update, ctx) {
       try {
-        const record = manager.require(request.subagent_name);
-        const role = record.role ? roles.get(record.role) : undefined;
-        if (record.role && !role) {
-          throw new SubagentToolError("role_not_found", `Persisted role ${record.role} is not installed.`);
+        const request = rawRequest as SteerSubagentRequest;
+        const admission = requireAdmission(ctx, request.subagent_name);
+        const liveChild = liveChildren.get(admission.subagent_name);
+        if (liveChild?.session.isStreaming) {
+          await liveChild.session.steer(request.message_to_subagent);
+        } else {
+          if (liveChild) await liveChild.completion;
+          await openAndStartResumedChild(ctx, admission, request.message_to_subagent);
         }
-        await manager.steer(record, request.message_to_subagent, role, requireParentSessionFile(ctx));
-        return successResult({ subagent_name: record.subagent_name, session_file: record.session_file });
+        return modelVisibleToolResult({
+          subagent_name: admission.subagent_name,
+          child_session_file: admission.child_session_file,
+        });
       } catch (error) {
         throwTypedToolError(error);
       }
@@ -218,43 +307,58 @@ export default function subagentExtension(pi: ExtensionAPI) {
   pi.registerTool({
     name: "list_subagents",
     label: "List subagents",
-    description: "List every child in this parent session, with timestamps and bounded previews of current tool calls. Use it to diagnose a hang, not to poll for results. Children have no extension timeout.",
+    description: "List active-branch children. Use current_time, last_event_at, live tool calls, and transcript inspection to judge whether a child is stuck; do not use this as a tight polling loop.",
     parameters: schemas.empty,
-    async execute() {
-      const payload = {
-        current_time: new Date().toISOString(),
-        subagents: manager.all().map((record) => ({
-          subagent_name: record.subagent_name,
-          status: record.status,
-          ...(record.failure_kind ? { failure_kind: record.failure_kind } : {}),
-          ...(record.failure_detail ? { failure_detail: record.failure_detail } : {}),
-          model: record.model,
-          started_at: record.started_at,
-          last_event_at: record.last_event_at,
-          ...boundedToolCallPreviews(record.running_tool_calls),
-          session_file: record.session_file,
-        })),
-      };
-      return successResult(payload);
+    async execute(_id, _request, _signal, _update, ctx) {
+      try {
+        const currentTime = Date.now();
+        const subagents = activeBranchAdmissions(ctx).map((admission) => {
+          const terminalTranscript = readPersistedChildTranscript(admission.child_session_file);
+          const liveChild = liveChildren.get(admission.subagent_name);
+          if (liveChild) {
+            return {
+              ...admission,
+              status: "running" as const,
+              started_at: terminalTranscript.started_at,
+              last_event_at: liveChild.last_event_at,
+              running_tool_calls: [...liveChild.running_tool_calls],
+            };
+          }
+          return {
+            ...admission,
+            status: terminalTranscript.status,
+            started_at: terminalTranscript.started_at,
+            last_event_at: terminalTranscript.last_event_at,
+            ...(terminalTranscript.failure_kind ? { failure_kind: terminalTranscript.failure_kind } : {}),
+            ...(terminalTranscript.failure_detail ? { failure_detail: terminalTranscript.failure_detail } : {}),
+          };
+        });
+        return modelVisibleToolResult({ current_time: currentTime, subagents });
+      } catch (error) {
+        throwTypedToolError(error);
+      }
     },
   });
 
   pi.registerTool({
     name: "inspect_subagent_transcript",
     label: "Inspect subagent transcript",
-    description: "Read a bounded view of the newest messages from a child's real Pi transcript, including provider-exposed thinking and the child session file.",
+    description: "Return the newest requested native Pi messages from a child transcript. The default is 20 messages; request more only when more evidence is needed.",
     parameters: schemas.inspect,
-    async execute(_id, request) {
+    async execute(_id, rawRequest, _signal, _update, ctx) {
       try {
-        const record = manager.require(request.subagent_name);
-        const count = request.message_count ?? 20;
-        const newestMessages = manager.transcript(record).slice(-count);
-        return successResult(boundedTranscriptPayload(
-          new Date().toISOString(),
-          record.status,
-          record.session_file,
-          newestMessages,
-        ));
+        const request = rawRequest as InspectSubagentTranscriptRequest;
+        const admission = requireAdmission(ctx, request.subagent_name);
+        const liveChild = liveChildren.get(admission.subagent_name);
+        const terminalTranscript = readPersistedChildTranscript(admission.child_session_file);
+        const messages = (liveChild ? liveChild.session.messages : terminalTranscript.messages)
+          .slice(-(request.message_count ?? 20));
+        return modelVisibleToolResult({
+          current_time: Date.now(),
+          child_session_file: admission.child_session_file,
+          status: liveChild ? "running" : terminalTranscript.status,
+          messages,
+        });
       } catch (error) {
         throwTypedToolError(error);
       }
@@ -264,17 +368,22 @@ export default function subagentExtension(pi: ExtensionAPI) {
   pi.registerTool({
     name: "cancel_subagent",
     label: "Cancel subagent",
-    description: "Cancel a running child. Cancellation loses in-progress work. For a changed mission, steer it to report and start a new child instead.",
+    description: "Exceptionally abort a running child. Cancellation loses work in progress and retains its transcript. For a changed mission, steer useful work to report what it found and start another child for the new work.",
     parameters: schemas.cancel,
-    executionMode: "sequential",
-    async execute(_id, request) {
+    executionMode: "parallel",
+    async execute(_id, rawRequest, _signal, _update, ctx) {
       try {
-        const record = manager.require(request.subagent_name);
-        await manager.cancel(record);
-        return successResult({
-          subagent_name: record.subagent_name,
-          status: record.status,
-          session_file: record.session_file,
+        const request = rawRequest as CancelSubagentRequest;
+        const admission = requireAdmission(ctx, request.subagent_name);
+        const liveChild = liveChildren.get(admission.subagent_name);
+        if (!liveChild) {
+          throw new SubagentToolError("subagent_not_running", `Subagent ${admission.subagent_name} is not running.`);
+        }
+        await liveChild.session.abort();
+        await liveChild.completion;
+        return modelVisibleToolResult({
+          subagent_name: admission.subagent_name,
+          child_session_file: admission.child_session_file,
         });
       } catch (error) {
         throwTypedToolError(error);
@@ -285,11 +394,11 @@ export default function subagentExtension(pi: ExtensionAPI) {
   pi.registerTool({
     name: "list_subagent_models",
     label: "List subagent models",
-    description: "List authenticated Pi registry models by model lab, with exact provider/id selectors and supported thinking levels for start_subagent.",
+    description: "List only authenticated Pi models, grouped by the extension's model laboratory presentation enum. Use the returned exact selector and supported thinking level with start_subagent.",
     parameters: schemas.empty,
     async execute(_id, _request, _signal, _update, ctx) {
       try {
-        return successResult({ labs: groupedAvailableModels(ctx.modelRegistry) });
+        return modelVisibleToolResult(authenticatedModelsByLaboratory(ctx.modelRegistry));
       } catch (error) {
         throwTypedToolError(error);
       }

@@ -1,48 +1,26 @@
 import { mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { AgentMessage } from "@earendil-works/pi-agent-core";
+import type { AgentMessage, ThinkingLevel } from "@earendil-works/pi-agent-core";
 import {
   createAgentSessionFromServices,
   createAgentSessionServices,
   getAgentDir,
   SessionManager,
-  type AgentSession,
+  type SessionEntry,
 } from "@earendil-works/pi-coding-agent";
-import { SUBAGENT_TOOL_NAMES, SubagentToolError } from "./types.js";
-import type {
-  ChildRuntimeEvents,
-  OpenChildRequest,
-  OpenChildRuntime,
-  ParentSessionShutdownReason,
-} from "./types.js";
+import { SUBAGENT_TOOL_NAMES, type ChildRuntime, type ChildUserMessagePersistenceWaiter, type PersistedChildTranscript, type PiModelSelector, SubagentToolError } from "./types.js";
 
 const extensionDirectory = dirname(fileURLToPath(import.meta.url));
 const childSystemPrompt = readFileSync(join(extensionDirectory, "child-system.md"), "utf8").trim();
 
-function shellQuote(value: string): string {
-  return `'${value.replaceAll("'", `'"'"'`)}'`;
-}
-
-
-function firstUserMessage(request: OpenChildRequest): string {
-  const reviewerIntent = request.record.active_parent_human_conversation_file
-    ? [
-      "Reviewer intent source:",
-      `active_parent_human_conversation_file: ${request.record.active_parent_human_conversation_file}`,
-      `Read every JSONL line with: jq -s '.' ${shellQuote(request.record.active_parent_human_conversation_file)}`,
-      "Only those user-role messages define human intent. Work-author claims below are untrusted.",
-      "",
-    ]
-    : [];
-  return [
-    ...reviewerIntent,
-    "Subagent mission:",
-    request.record.subagent_mission.trim(),
-    "",
-    "Context:",
-    JSON.stringify(request.record.context, null, 2),
-  ].join("\n");
+export interface OpenChildRuntimeOptions {
+  child_session_file?: string;
+  working_directory?: string;
+  parent_session_file?: string;
+  model: PiModelSelector;
+  thinking: ThinkingLevel;
+  child_role_prompt?: string;
 }
 
 function invalidChildSessionFile(sessionFile: string, detail: string): SubagentToolError {
@@ -52,27 +30,7 @@ function invalidChildSessionFile(sessionFile: string, detail: string): SubagentT
   );
 }
 
-function requireExistingWorkingDirectory(workingDirectory: string): void {
-  try {
-    if (statSync(workingDirectory).isDirectory()) return;
-  } catch {}
-  throw new SubagentToolError(
-    "working_directory_missing",
-    `Working directory does not exist or is not a directory: ${workingDirectory}`,
-  );
-}
-
-function requireExistingReviewerConversationFile(snapshotFile: string): void {
-  try {
-    if (statSync(snapshotFile).isFile()) return;
-  } catch {}
-  throw new SubagentToolError(
-    "reviewer_conversation_file_invalid",
-    `Reviewer human-conversation file is missing or invalid: ${snapshotFile}`,
-  );
-}
-
-function openValidatedChildSession(sessionFile: string): SessionManager {
+function openPersistedChildSession(sessionFile: string): SessionManager {
   try {
     if (!statSync(sessionFile).isFile()) throw new Error("Path is not a regular file.");
     const sessionManager = SessionManager.open(sessionFile);
@@ -83,162 +41,249 @@ function openValidatedChildSession(sessionFile: string): SessionManager {
   }
 }
 
-function createPersistedChildSession(
-  workingDirectory: string,
-  parentSessionFile: string,
-): SessionManager {
+function createChildSession(workingDirectory: string, parentSessionFile: string): SessionManager {
   const childSessionDirectory = join(dirname(parentSessionFile), "subagent-sessions");
   const pendingSessionManager = SessionManager.create(workingDirectory, childSessionDirectory, {
     parentSession: parentSessionFile,
   });
-  const sessionFile = pendingSessionManager.getSessionFile();
-  const sessionHeader = pendingSessionManager.getHeader();
-  if (!sessionFile || !sessionHeader) {
-    throw new SubagentToolError(
-      "child_session_file_invalid",
-      "Pi did not create a child session header.",
-    );
+  const childSessionFile = pendingSessionManager.getSessionFile();
+  const childSessionHeader = pendingSessionManager.getHeader();
+  if (!childSessionFile || !childSessionHeader) {
+    throw new SubagentToolError("child_session_file_invalid", "Pi did not create a child session header.");
   }
   try {
-    mkdirSync(dirname(sessionFile), { recursive: true, mode: 0o700 });
-    writeFileSync(sessionFile, `${JSON.stringify(sessionHeader)}\n`, {
+    mkdirSync(dirname(childSessionFile), { recursive: true, mode: 0o700 });
+    writeFileSync(childSessionFile, `${JSON.stringify(childSessionHeader)}\n`, {
       encoding: "utf8",
       flag: "wx",
       mode: 0o600,
     });
   } catch (error) {
-    throw invalidChildSessionFile(sessionFile, error instanceof Error ? error.message : String(error));
+    throw invalidChildSessionFile(childSessionFile, error instanceof Error ? error.message : String(error));
   }
-  return openValidatedChildSession(sessionFile);
+  return openPersistedChildSession(childSessionFile);
 }
 
-async function closeAgentSession(
-  session: AgentSession,
-  reason: ParentSessionShutdownReason,
-): Promise<void> {
+function persistedUserMessageCountOnDisk(sessionManager: SessionManager): number {
+  const childSessionFile = sessionManager.getSessionFile();
+  if (!childSessionFile) return 0;
   try {
-    await session.extensionRunner.emit({ type: "session_shutdown", reason });
-  } finally {
-    session.dispose();
+    return readFileSync(childSessionFile, "utf8")
+      .split("\n")
+      .filter(Boolean)
+      .map((line) => JSON.parse(line) as unknown)
+      .filter((entry): entry is { type: string; message?: { role?: string } } =>
+        typeof entry === "object" && entry !== null)
+      .filter((entry) => entry.type === "message" && entry.message?.role === "user")
+      .length;
+  } catch {
+    return 0;
   }
 }
 
-export async function openChildRuntime(
-  request: OpenChildRequest,
-  events: ChildRuntimeEvents,
-): Promise<{ runtime: OpenChildRuntime; first_user_message: string }> {
-  requireExistingWorkingDirectory(request.record.working_directory);
-  const isResumedSession = Boolean(request.record.session_file);
-  const initialUserMessage = firstUserMessage(request);
-  const resumedSessionManager = isResumedSession
-    ? openValidatedChildSession(request.record.session_file)
-    : undefined;
-  if (request.record.active_parent_human_conversation_file) {
-    requireExistingReviewerConversationFile(request.record.active_parent_human_conversation_file);
-  }
-  const appendedSystemPrompt = [
-    childSystemPrompt,
-    request.child_role_prompt,
-  ].filter((value): value is string => Boolean(value));
+function afterCurrentEventLoopTurn(): Promise<void> {
+  return new Promise((resolve) => setImmediate(resolve));
+}
+
+function prepareNextUserMessagePersistence(
+  sessionManager: SessionManager,
+  runtime: ChildRuntime["session"],
+): ChildUserMessagePersistenceWaiter {
+  const userMessageCountBeforePrompt = persistedUserMessageCountOnDisk(sessionManager);
+  const hasPersistedNewUserMessage = () =>
+    persistedUserMessageCountOnDisk(sessionManager) > userMessageCountBeforePrompt;
+
+  let resolvePersistedUserMessage!: () => void;
+  let active = true;
+  const persistedUserMessage = new Promise<void>((resolve) => {
+    resolvePersistedUserMessage = resolve;
+  });
+  const unsubscribe = runtime.subscribe((event) => {
+    if (event.type !== "message_end" || event.message.role !== "user") return;
+    setImmediate(() => {
+      if (active && hasPersistedNewUserMessage()) resolvePersistedUserMessage();
+    });
+  });
+  const cancel = () => {
+    if (!active) return;
+    active = false;
+    unsubscribe();
+  };
+
+  return {
+    async waitFor(prompt: Promise<void>): Promise<void> {
+      const promptStoppedBeforeUserMessage = prompt.then(
+        async () => {
+          await afterCurrentEventLoopTurn();
+          if (!hasPersistedNewUserMessage()) {
+            throw new Error("Pi did not persist the child user message.");
+          }
+        },
+        async (error: unknown) => {
+          await afterCurrentEventLoopTurn();
+          if (!hasPersistedNewUserMessage()) throw error;
+        },
+      );
+      try {
+        await Promise.race([persistedUserMessage, promptStoppedBeforeUserMessage]);
+      } finally {
+        cancel();
+      }
+    },
+    cancel,
+  };
+}
+
+export async function openChildRuntime(options: OpenChildRuntimeOptions): Promise<ChildRuntime> {
+  const sessionManager = options.child_session_file
+    ? openPersistedChildSession(options.child_session_file)
+    : (() => {
+      if (!options.working_directory || !options.parent_session_file) {
+        throw new SubagentToolError("subagent_runtime_failed", "A new child needs a working directory and parent session file.");
+      }
+      return createChildSession(options.working_directory, options.parent_session_file);
+    })();
+  const appendedSystemPrompt = [childSystemPrompt, options.child_role_prompt].filter(
+    (value): value is string => Boolean(value),
+  );
   const services = await createAgentSessionServices({
-    cwd: request.record.working_directory,
+    cwd: sessionManager.getCwd(),
     agentDir: getAgentDir(),
     resourceLoaderOptions: {
       appendSystemPrompt: appendedSystemPrompt,
-      extensionsOverride: (loaded) => ({
-        ...loaded,
-        extensions: loaded.extensions.filter((extension) =>
-          !SUBAGENT_TOOL_NAMES.some((toolName) => extension.tools.has(toolName))),
-      }),
     },
   });
-  const diagnostics = services.diagnostics.filter((item) => item.type === "error");
+  const diagnostics = services.diagnostics.filter((diagnostic) => diagnostic.type === "error");
   const extensionErrors = services.resourceLoader.getExtensions().errors;
-  if (diagnostics.length || extensionErrors.length) {
+  if (diagnostics.length > 0 || extensionErrors.length > 0) {
     const messages = [
-      ...diagnostics.map((item) => item.message),
-      ...extensionErrors.map((item) => `${item.path}: ${item.error}`),
+      ...diagnostics.map((diagnostic) => diagnostic.message),
+      ...extensionErrors.map((extensionError) => `${extensionError.path}: ${extensionError.error}`),
     ];
     throw new SubagentToolError("child_resources_failed", `Child resources failed to load: ${messages.join("; ")}`);
   }
-  const model = services.modelRuntime.getModel(request.record.model.provider, request.record.model.id);
+  const model = services.modelRuntime.getModel(options.model.provider, options.model.id);
   if (!model) {
     throw new SubagentToolError(
       "model_not_available",
-      `Model disappeared during child creation: ${request.record.model.provider}/${request.record.model.id}`,
+      `Model disappeared during child creation: ${options.model.provider}/${options.model.id}`,
     );
   }
-  const sessionManager = resumedSessionManager
-    ?? createPersistedChildSession(request.record.working_directory, request.parent_session_file);
   const { session } = await createAgentSessionFromServices({
     services,
     sessionManager,
     model,
-    thinkingLevel: request.record.thinking,
-  });
-  const userMessagePersistenceWaiters: Array<{
-    resolve: () => void;
-    reject: (error: Error) => void;
-  }> = [];
-  const waitForNextUserMessagePersistence = (): Promise<void> => new Promise((resolve, reject) => {
-    userMessagePersistenceWaiters.push({ resolve, reject });
-  });
-  const rejectUserMessagePersistenceWaiters = (error: Error): void => {
-    for (const waiter of userMessagePersistenceWaiters.splice(0)) waiter.reject(error);
-  };
-  const unsubscribe = session.subscribe((event) => {
-    if (event.type === "message_end" && event.message.role === "user") {
-      const waiter = userMessagePersistenceWaiters.shift();
-      if (waiter) {
-        const userMessage = event.message;
-        setImmediate(() => {
-          const isPersisted = sessionManager.getBranch().some((entry) =>
-            entry.type === "message" && entry.message === userMessage);
-          if (isPersisted) waiter.resolve();
-          else waiter.reject(new Error("Pi did not persist a child user message."));
-        });
-      }
-    }
-    events.onEvent(event);
+    thinkingLevel: options.thinking,
+    excludeTools: [...SUBAGENT_TOOL_NAMES],
   });
   try {
     await session.bindExtensions({ mode: "print" });
-    if (SUBAGENT_TOOL_NAMES.some((name) => session.getActiveToolNames().includes(name))) {
+    if (SUBAGENT_TOOL_NAMES.some((toolName) => session.getActiveToolNames().includes(toolName))) {
       throw new SubagentToolError("child_resources_failed", "Child resource isolation failed: subagent tools are active.");
     }
-    if (!isResumedSession) session.setSessionName(`subagent: ${request.record.subagent_name}`);
-    const sessionFile = session.sessionFile;
-    if (!sessionFile) {
+    const childSessionFile = session.sessionFile;
+    if (!childSessionFile) {
       throw new SubagentToolError("child_session_file_invalid", "Child session persistence was not created.");
     }
-    let shutdownPromise: Promise<void> | undefined;
-    const shutdown = (reason: ParentSessionShutdownReason): Promise<void> => {
-      shutdownPromise ??= (async () => {
-        unsubscribe();
-        rejectUserMessagePersistenceWaiters(new Error("Child session closed before its user message persisted."));
-        await closeAgentSession(session, reason);
-      })();
-      return shutdownPromise;
+    return {
+      session,
+      child_session_file: childSessionFile,
+      prepareNextUserMessagePersistence: () =>
+        prepareNextUserMessagePersistence(sessionManager, session),
+      dispose: () => session.dispose(),
     };
-    const runtime: OpenChildRuntime = {
-      session_file: sessionFile,
-      get is_streaming() { return session.isStreaming; },
-      prompt: (message) => session.prompt(message),
-      steer: (message) => session.steer(message),
-      abort: () => session.abort(),
-      messages: () => session.messages,
-      waitForNextUserMessagePersistence,
-      close: () => shutdown("quit"),
-      detachAndAbort: (reason) => shutdown(reason),
-    };
-    return { runtime, first_user_message: initialUserMessage };
   } catch (error) {
-    unsubscribe();
-    await closeAgentSession(session, "quit");
+    session.dispose();
     throw error;
   }
 }
 
-export function readChildTranscript(sessionFile: string): AgentMessage[] {
-  return openValidatedChildSession(sessionFile).buildSessionContext().messages;
+function messageEntryTimestamp(entry: Extract<SessionEntry, { type: "message" }>): number | undefined {
+  const messageTimestamp = entry.message.timestamp;
+  if (typeof messageTimestamp === "number" && Number.isFinite(messageTimestamp)) return messageTimestamp;
+  const entryTimestamp = Date.parse(entry.timestamp);
+  return Number.isFinite(entryTimestamp) ? entryTimestamp : undefined;
+}
+
+function sessionHeaderTimestamp(sessionManager: SessionManager): number | undefined {
+  const headerTimestamp = sessionManager.getHeader()?.timestamp;
+  const parsedTimestamp = headerTimestamp ? Date.parse(headerTimestamp) : Number.NaN;
+  return Number.isFinite(parsedTimestamp) ? parsedTimestamp : undefined;
+}
+
+function assistantText(message: AgentMessage): string {
+  if (message.role !== "assistant") return "";
+  return message.content
+    .filter((contentBlock) => contentBlock.type === "text")
+    .map((contentBlock) => contentBlock.text)
+    .join("")
+    .trim();
+}
+
+function terminalStateFromLastChildMessage(
+  lastChildMessageEntry: Extract<SessionEntry, { type: "message" }>,
+): Pick<PersistedChildTranscript, "status" | "failure_kind" | "failure_detail" | "handoff"> {
+  const lastChildMessage = lastChildMessageEntry.message;
+  if (lastChildMessage.role === "assistant") {
+    const handoff = assistantText(lastChildMessage);
+    if (lastChildMessage.stopReason === "stop") {
+      return { status: "finished", handoff };
+    }
+    if (lastChildMessage.stopReason === "aborted") {
+      return { status: "cancelled", handoff };
+    }
+    if (lastChildMessage.stopReason === "toolUse") {
+      return {
+        status: "failed",
+        failure_kind: "parent_process_exited_mid_run",
+        failure_detail: "The parent process exited while the child was still using tools.",
+        handoff,
+      };
+    }
+    return {
+      status: "failed",
+      failure_kind: "model_request_failed",
+      failure_detail: lastChildMessage.errorMessage ?? `Child ended with ${lastChildMessage.stopReason}.`,
+      handoff,
+    };
+  }
+  if (lastChildMessage.role === "toolResult" && lastChildMessage.isError) {
+    return {
+      status: "failed",
+      failure_kind: "tool_execution_failed",
+      failure_detail: "The child ended after a tool execution error.",
+      handoff: "",
+    };
+  }
+  return {
+    status: "failed",
+    failure_kind: "parent_process_exited_mid_run",
+    failure_detail: "The parent process exited before the child completed its turn.",
+    handoff: "",
+  };
+}
+
+export function readPersistedChildTranscript(childSessionFile: string): PersistedChildTranscript {
+  const sessionManager = openPersistedChildSession(childSessionFile);
+  const messageEntries = sessionManager.getBranch().filter(
+    (entry): entry is Extract<SessionEntry, { type: "message" }> => entry.type === "message",
+  );
+  const firstChildMessageEntry = messageEntries.at(0);
+  const lastChildMessageEntry = messageEntries.at(-1);
+  if (!firstChildMessageEntry || !lastChildMessageEntry) {
+    throw invalidChildSessionFile(childSessionFile, "It has no persisted child messages.");
+  }
+  const startedAt = messageEntryTimestamp(firstChildMessageEntry) ?? sessionHeaderTimestamp(sessionManager);
+  const lastEventAt = messageEntryTimestamp(lastChildMessageEntry) ?? startedAt;
+  if (startedAt === undefined || lastEventAt === undefined) {
+    throw invalidChildSessionFile(childSessionFile, "Its timestamps are invalid.");
+  }
+  const terminalState = terminalStateFromLastChildMessage(lastChildMessageEntry);
+  return {
+    messages: messageEntries.map((entry) => entry.message),
+    started_at: startedAt,
+    last_event_at: lastEventAt,
+    terminal_session_entry_id: lastChildMessageEntry.id,
+    ...terminalState,
+  };
 }
