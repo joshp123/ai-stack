@@ -34,10 +34,11 @@
  	reasoningEffort?: "none" | "minimal" | "low" | "medium" | "high" | "xhigh" | "max";
  	reasoningSummary?: "auto" | "concise" | "detailed" | "off" | "on" | null;
  	serviceTier?: ResponseCreateParamsStreaming["service_tier"];
-@@ -663,6 +665,7 @@
+@@ -658,6 +659,7 @@
  	options?: OpenAICodexResponsesOptions,
  ): Promise<void> {
- 	await processResponsesStream(mapCodexEvents(parseSSE(response, options?.signal)), output, stream, model, {
+-	await processResponsesStream(mapCodexEvents(parseSSE(response, options?.signal), output), output, stream, model, {
++	await processResponsesStream(mapCodexEvents(parseSSE(response, options?.signal), output), output, stream, model, {
 +		onOutputItemDone: options?.onOutputItemDone,
  		serviceTier: options?.serviceTier,
  		grammarToolInputProperties,
