@@ -30,7 +30,7 @@ buildNpmPackage {
 
   patches = [
     ../patches/prime-agent/deterministic-model-catalog.patch
-    ../patches/prime-agent/responses-v2-compaction.patch
+    ../patches/prime-agent/codex-provider-stream-event.patch
     ../patches/prime-agent/codex-model-discovery-client-version.patch
   ];
 

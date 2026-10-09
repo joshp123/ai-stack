@@ -1,0 +1,44 @@
+diff --git a/packages/ai/src/providers/openai-codex-responses.ts b/packages/ai/src/providers/openai-codex-responses.ts
+index 43c95d2..4f08f45 100644
+--- a/packages/ai/src/providers/openai-codex-responses.ts
++++ b/packages/ai/src/providers/openai-codex-responses.ts
+@@ -68,6 +68,7 @@ const CODEX_RESPONSE_STATUSES = new Set<CodexResponseStatus>([
+ // ============================================================================
+ 
+ export interface OpenAICodexResponsesOptions extends StreamOptions {
++	onProviderStreamEvent?: (data: unknown) => void | Promise<void>;
+ 	reasoningEffort?: "none" | "minimal" | "low" | "medium" | "high" | "xhigh" | "max";
+ 	reasoningSummary?: "auto" | "concise" | "detailed" | "off" | "on" | null;
+ 	serviceTier?: ResponseCreateParamsStreaming["service_tier"];
+@@ -454,7 +455,7 @@ async function processStream(
+ 	model: Model<"openai-codex-responses">,
+ 	options?: OpenAICodexResponsesOptions,
+ ): Promise<void> {
+-	await processResponsesStream(mapCodexEvents(parseSSE(response)), output, stream, model, {
++	await processResponsesStream(mapCodexEvents(parseSSE(response), options?.onProviderStreamEvent), output, stream, model, {
+ 		serviceTier: options?.serviceTier,
+ 		resolveServiceTier: resolveCodexServiceTier,
+ 		applyServiceTierPricing: (usage, serviceTier) => applyServiceTierPricing(usage, serviceTier, model),
+@@ -489,8 +490,12 @@ function isCodexNonTransportError(error: unknown): boolean {
+ 	return error instanceof CodexApiError || error instanceof CodexProtocolError;
+ }
+ 
+-async function* mapCodexEvents(events: AsyncIterable<Record<string, unknown>>): AsyncGenerator<ResponseStreamEvent> {
++async function* mapCodexEvents(
++	events: AsyncIterable<Record<string, unknown>>,
++	onProviderStreamEvent?: OpenAICodexResponsesOptions["onProviderStreamEvent"],
++): AsyncGenerator<ResponseStreamEvent> {
+ 	for await (const event of events) {
++		await onProviderStreamEvent?.(event);
+ 		const type = typeof event.type === "string" ? event.type : undefined;
+ 		if (!type) continue;
+ 
+@@ -1181,7 +1186,7 @@ async function processWebSocketStream(
+ 		socket.send(JSON.stringify({ type: "response.create", ...requestBody }));
+ 		await processResponsesStream(
+ 			startWebSocketOutputOnFirstEvent(
+-				mapCodexEvents(parseWebSocket(socket, options?.signal)),
++				mapCodexEvents(parseWebSocket(socket, options?.signal), options?.onProviderStreamEvent),
+ 				output,
+ 				stream,
+ 				onStart,

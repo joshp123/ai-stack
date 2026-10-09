@@ -203,7 +203,9 @@ export default function responsesV2Compaction(pi: ExtensionAPI): void {
 				sessionId: ctx.sessionManager.getSessionId(),
 				signal: event.signal,
 				reasoningEffort: pi.getThinkingLevel() === "off" ? undefined : pi.getThinkingLevel(),
-				onOutputItemDone: (item: unknown) => rawOutputItems.push(item),
+				onProviderStreamEvent(data: unknown) {
+					if (isRecord(data) && data.type === "response.output_item.done") rawOutputItems.push(data.item);
+				},
 				onPayload(payload: unknown) {
 					const requestPayload = priorDetails ? replayCompaction(payload, priorDetails) : payload;
 					if (!isRecord(requestPayload) || !Array.isArray(requestPayload.input)) return requestPayload;
