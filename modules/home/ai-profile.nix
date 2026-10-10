@@ -12,7 +12,8 @@ let
   home = config.home.homeDirectory;
   link = path: config.lib.file.mkOutOfStoreSymlink "${cfg.profile}/${path}";
   jq = "${pkgs.jq}/bin/jq";
-  merge = file: policy: "${pkgs.bash}/bin/bash ${./ai-profile/merge-json.sh} ${file} ${jq} ${policy}";
+  merge = file: policy:
+    "${pkgs.bash}/bin/bash ${lib.escapeShellArgs [ "${./ai-profile/merge-json.sh}" file jq "${policy}" ]}";
 
   piSettings = (pkgs.formats.json { }).generate "pi-settings-policy.json" {
     packages = map (name: "${cfg.profile}/share/pi/packages/${name}") [
