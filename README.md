@@ -61,12 +61,14 @@ private repo:
    main.
 5. Install exactly the verified commit's bundle into the profile, smoke it
    again, and roll back if that fails.
-6. Copy `CuaDriver.app` to `/Applications` when its version changed, after
-   stopping its daemon.
+6. Copy `CuaDriver.app` to `/Applications` when its version differs from the
+   profile's: copy it beside the old one, stop the daemon, swap the two by
+   renaming, and move the old one to the Trash.
 7. Delete profile generations older than a week.
 
-If anything fails, nothing is pushed or installed, and the job tries again the
-next night. The system configuration is never switched by the job; a pushed
+If a build or check fails, nothing is pushed or installed. If installing the
+app fails, the previous app stays in place and the profile is rolled back to
+the generation that matches it. Either way the job tries again the next night. The system configuration is never switched by the job; a pushed
 lock bump reaches the system at your next switch.
 
 **Email alerts.** Silent while healthy. When the nightly job has not succeeded
@@ -118,6 +120,7 @@ imports = [ inputs.ai-stack.darwinModules.update-ai-tools inputs.ai-stack.darwin
 services.update-ai-tools = {
   enable = true;
   repo = "git@github.com:you/nixos-config.git";
+  upstreamRuns = "https://api.github.com/repos/joshp123/nix-ai-tools/actions/workflows/auto-bump.yml/runs?status=success&per_page=1";
   mail = { to = "you@example.com"; from = "you@gmail.com"; passwordFile = config.age.secrets."gmail-app-password".path; };
 };
 programs.codex-defaults.enable = true;
@@ -177,5 +180,7 @@ only the layout builds.
   own files next to the module.
 - The bundle contract (`share/*` paths) changes on both sides at once:
   `ai-home/layout.sh`, the pointer in `modules/`, and `ai-home-smoke.sh`.
-- Verify a change from the private repo before committing here:
-  `nix run .#build -- --override-input ai-stack path:$PWD`.
+- Verify a change from the private repo before committing here, pointing at
+  this checkout: `nix run .#build -- --override-input ai-stack path:/path/to/ai-stack`
+  (the system) and `nix build .#ai-home --override-input ai-stack path:/path/to/ai-stack`
+  (the bundle).

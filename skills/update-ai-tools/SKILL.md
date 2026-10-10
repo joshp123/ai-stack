@@ -39,7 +39,11 @@ tail -f ~/Library/Logs/update-ai-tools.log
 ```
 
 Undo the last update: `nix profile rollback --profile ~/.local/state/nix/profiles/ai`.
-Hold a version: revert the "chore: update AI tools" lock commit on main.
+This lasts until the next nightly run, which installs main again.
+
+Hold a version: pin the input URL to a commit in `flake.nix`
+(`github:joshp123/nix-ai-tools/<rev>`). Reverting the "chore: update AI tools"
+lock commit does not hold; the next nightly run moves the lock again.
 
 ## When something is stale
 
@@ -62,7 +66,8 @@ Hold a version: revert the "chore: update AI tools" lock commit on main.
 
 - Prove "latest" against upstream (npm, GitHub releases, vendor feeds), never
   against local or locked state.
-- Never pin a fast input to a revision in `flake.nix`; that silently stops all
-  updates.
+- Pin a fast input to a revision in `flake.nix` only to hold a version on
+  purpose, and remove the pin once the reason is gone: while it is there, that
+  input gets no updates.
 - No `brew upgrade`, `--override-input`, or uncommitted lock edits as an update
   path. Never switch the system to deliver an AI tool update.

@@ -7,7 +7,9 @@
 #
 # Runtime state: the profile, ~/.local/state/ai-home/ (checkout and status
 # files) and ~/Library/Logs/update-ai-tools.log. Cleanup: disable this module,
-# switch, then `nix profile remove --profile <profile> ai-home`.
+# switch, then move the profile's symlinks (`<profile>` and `<profile>-*-link`)
+# to the Trash; `nix store gc` then frees the bundles. The profile is made by
+# `nix build --profile`, so `nix profile remove` finds no packages in it.
 { config, pkgs, lib, ... }:
 
 let
@@ -70,8 +72,8 @@ in
 
     upstreamRuns = lib.mkOption {
       type = lib.types.str;
-      default = "https://api.github.com/repos/joshp123/nix-ai-tools/actions/workflows/auto-bump.yml/runs?status=success&per_page=1";
-      description = "GitHub API query for the newest green run of the packages' hourly job; three days without one is reported.";
+      example = "https://api.github.com/repos/you/nix-ai-tools/actions/workflows/auto-bump.yml/runs?status=success&per_page=1";
+      description = "GitHub API query for the newest green run of the packages repo's update job; three days without one is reported.";
     };
 
     schedule = lib.mkOption {

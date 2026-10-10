@@ -14,6 +14,7 @@ The Nix modules a private repo imports, as flake outputs.
 | `darwinModules.codex-defaults` | `darwin/codex-defaults.nix` | `/etc/codex/config.toml` and `/etc/codex/skills` |
 
 Every site-specific value (repo URL, mail addresses, secret paths, the
-profile's owner) is an option with no default that names a person. Scripts are
+upstream run-history URL) is an option with no default; no default names a
+person. The profile's owner defaults to `system.primaryUser`. Scripts are
 separate files read with `builtins.readFile`; site values reach them through
 the launchd agent's environment.

@@ -5,8 +5,9 @@
 # entries, commit, build the AI bundle and the system configuration from that
 # commit (the guard: main must always build), push, then install exactly the
 # revision it verified into the AI profile and copy its apps to /Applications.
-# Nothing is ever applied to the system. On any failure nothing is pushed or
-# installed; ai-home-mail reports failures that persist for three days.
+# Nothing is ever applied to the system. A failed build or check pushes and
+# installs nothing; a failed install leaves the previous profile and apps in
+# place. ai-home-mail reports failures that persist for three days.
 
 # Site configuration comes from the launchd agent's environment (set by
 # modules/darwin/update-ai-tools.nix); a scratch repo, profile and state
@@ -120,25 +121,83 @@ echo "AI profile at $(cat "$profile/share/ai/rev")."
 
 # Apps that must live in /Applications (CuaDriver.app hard-codes that path and
 # its daemon is launched by name). /Applications is admin-writable, so this
-# runs as the user. Replace a copy only when its version changed, after
-# stopping its daemon; running the store copy would taint the store.
-step="install apps"
+# runs as the user. Running the store copy would taint the store, so the app is
+# copied. A copy is replaced whenever its version differs from the profile's,
+# older or newer, so after a manual `nix profile rollback` the next run puts
+# back the app that generation carries.
 app_version() { /usr/bin/plutil -extract CFBundleShortVersionString raw "$1/Contents/Info.plist"; }
+
+# Moves an app to the Trash (never rm -rf). Moving a directory needs write
+# access to it, so a read-only copy (the store's modes) is made writable first;
+# macOS App Management refuses that chmod to a launchd job once the app has been
+# launched, and then the Trash refuses too.
+discard() {
+  [ -e "$1" ] || return 0
+  chmod -R u+w "$1" 2>/dev/null || true
+  /usr/bin/trash "$1"
+}
+
+# Replace $2 with a copy of $1 so that a complete app is always in place:
+# copy beside the target, stop the old daemon, rename the old app aside, rename
+# the copy in, then move the old app to the Trash. On failure: the old app is
+# back in place, the copy is gone, app_error says why, and it returns 1.
+# Called as an if condition, where errexit is off, so every command is checked.
+install_app() {
+  local src="$1" target="$2"
+  local staged old
+  staged="$(dirname "$target")/.$(basename "$target").new"
+  old="$(dirname "$target")/.$(basename "$target").old"
+  if ! discard "$staged" || ! discard "$old"; then
+    app_error="a leftover $staged or $old could not be moved to the Trash; in Terminal run: chmod -R u+w <it> && /usr/bin/trash <it>"
+    return 1
+  fi
+  if ! /usr/bin/ditto "$src" "$staged" || ! chmod -R u+w "$staged"; then
+    # ditto keeps the store's read-only modes; the copy must stay deletable.
+    app_error="could not copy $src to $staged"
+    discard "$staged" || true
+    return 1
+  fi
+  if [ -e "$target" ]; then
+    # Bounded: a bundle macOS is still assessing can hang at exec.
+    if [ -x "$target/Contents/MacOS/cua-driver" ]; then
+      timeout --kill-after 5 30 "$target/Contents/MacOS/cua-driver" stop || true
+    fi
+    if ! mv "$target" "$old"; then
+      app_error="could not move the old $target aside (macOS App Management may be blocking it)"
+      discard "$staged" || true
+      return 1
+    fi
+  fi
+  if ! mv "$staged" "$target"; then
+    app_error="could not move the new copy into $target"
+    if [ -e "$old" ]; then mv "$old" "$target" || app_error="$app_error, and could not restore the old app from $old"; fi
+    discard "$staged" || true
+    return 1
+  fi
+  if ! discard "$old"; then
+    echo "warning: could not move $old to the Trash; the next run fails until it is gone." >&2
+  fi
+}
+
+step="install apps"
 for app in "$profile"/Applications/*.app; do
   [ -e "$app" ] || continue
-  name=$(basename "$app")
-  target="$applications/$name"
+  target="$applications/$(basename "$app")"
   if [ -d "$target" ] && [ "$(app_version "$target")" = "$(app_version "$app")" ]; then
     continue
   fi
-  if [ -x "$target/Contents/MacOS/cua-driver" ]; then
-    "$target/Contents/MacOS/cua-driver" stop || true
+  app_error=""
+  if ! install_app "$(readlink -f "$app")" "$target"; then
+    echo "$app_error" >&2
+    # Keep skills and binary in step: the profile goes back to the generation
+    # whose app is still installed.
+    if [ -n "$previous" ] && [ "$(readlink "$profile" 2>/dev/null || true)" != "$previous" ]; then
+      nix profile rollback --profile "$profile"
+      echo "Rolled back the AI profile." >&2
+    fi
+    step="install $(basename "$app"): $app_error"
+    false
   fi
-  rm -rf "$target"
-  /usr/bin/ditto "$(readlink -f "$app")" "$target"
-  # ditto keeps the store's read-only modes; the next replacement must be able
-  # to delete this copy. Modes are not part of the code signature.
-  chmod -R u+w "$target"
   echo "Installed $target $(app_version "$target")."
 done
 
