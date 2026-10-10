@@ -28,11 +28,10 @@ if [ -s "$auth_path" ]; then
   if "$jq_bin" -e --rawfile key "$key_file" ".anthropic == $entry" "$auth_path" >/dev/null; then
     exit 0
   fi
-  cp -p "$auth_path" "$next"   # keeps the file mode; jq's redirect keeps it too
   "$jq_bin" --rawfile key "$key_file" ".anthropic = $entry" "$auth_path" > "$next"
 else
   "$jq_bin" -n --rawfile key "$key_file" "{anthropic: $entry}" > "$next"
-  chmod 600 "$next"
 fi
+chmod 600 "$next"   # a credential: owner-only, whatever the old file had
 
 mv -f "$next" "$auth_path"

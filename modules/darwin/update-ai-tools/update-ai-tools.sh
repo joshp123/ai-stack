@@ -107,14 +107,24 @@ fi
 rev=$(git rev-parse HEAD)
 verify "$rev"
 step="install profile"
-previous=$(readlink "$profile" 2>/dev/null || true)
+previous=$(readlink "$profile" 2>/dev/null || true)   # e.g. ai-41-link
+
+# Puts the profile back on the generation it had before this run (by number:
+# a plain rollback would go to the one before the newest, which after a manual
+# rollback is not the same).
+restore_profile() {
+  if [ -n "$previous" ] && [ "$(readlink "$profile" 2>/dev/null || true)" != "$previous" ]; then
+    local gen="${previous%-link}"
+    gen="${gen##*-}"
+    nix profile rollback --profile "$profile" --to "$gen"
+    echo "Rolled the AI profile back to generation $gen." >&2
+  fi
+}
+
 nix build --profile "$profile" "git+file://$checkout?rev=$rev#$attr"
 step="smoke profile"
 if ! ai-home-smoke "$profile"; then
-  if [ -n "$previous" ] && [ "$(readlink "$profile" 2>/dev/null || true)" != "$previous" ]; then
-    nix profile rollback --profile "$profile"
-    echo "Rolled back the AI profile." >&2
-  fi
+  restore_profile
   false
 fi
 echo "AI profile at $(cat "$profile/share/ai/rev")."
@@ -123,8 +133,9 @@ echo "AI profile at $(cat "$profile/share/ai/rev")."
 # its daemon is launched by name). /Applications is admin-writable, so this
 # runs as the user. Running the store copy would taint the store, so the app is
 # copied. A copy is replaced whenever its version differs from the profile's,
-# older or newer, so after a manual `nix profile rollback` the next run puts
-# back the app that generation carries.
+# older or newer, so after a run the app always matches the profile. A manual
+# `nix profile rollback` does not touch /Applications; the next run installs
+# main into the profile again and the matching app with it.
 app_version() { /usr/bin/plutil -extract CFBundleShortVersionString raw "$1/Contents/Info.plist"; }
 
 # Moves an app to the Trash (never rm -rf). Moving a directory needs write
@@ -139,7 +150,8 @@ discard() {
 
 # Replace $2 with a copy of $1 so that a complete app is always in place:
 # copy beside the target, stop the old daemon, rename the old app aside, rename
-# the copy in, then move the old app to the Trash. On failure: the old app is
+# the copy in, then move the old app to the Trash. mv -T (GNU) never moves into
+# an existing directory. On failure: the old app is
 # back in place, the copy is gone, app_error says why, and it returns 1.
 # Called as an if condition, where errexit is off, so every command is checked.
 install_app() {
@@ -162,15 +174,15 @@ install_app() {
     if [ -x "$target/Contents/MacOS/cua-driver" ]; then
       timeout --kill-after 5 30 "$target/Contents/MacOS/cua-driver" stop || true
     fi
-    if ! mv "$target" "$old"; then
+    if ! mv -T "$target" "$old"; then
       app_error="could not move the old $target aside (macOS App Management may be blocking it)"
       discard "$staged" || true
       return 1
     fi
   fi
-  if ! mv "$staged" "$target"; then
+  if ! mv -T "$staged" "$target"; then
     app_error="could not move the new copy into $target"
-    if [ -e "$old" ]; then mv "$old" "$target" || app_error="$app_error, and could not restore the old app from $old"; fi
+    if [ -e "$old" ]; then mv -T "$old" "$target" || app_error="$app_error, and could not restore the old app from $old"; fi
     discard "$staged" || true
     return 1
   fi
@@ -189,13 +201,10 @@ for app in "$profile"/Applications/*.app; do
   app_error=""
   if ! install_app "$(readlink -f "$app")" "$target"; then
     echo "$app_error" >&2
+    step="install $(basename "$app"): $app_error"
     # Keep skills and binary in step: the profile goes back to the generation
     # whose app is still installed.
-    if [ -n "$previous" ] && [ "$(readlink "$profile" 2>/dev/null || true)" != "$previous" ]; then
-      nix profile rollback --profile "$profile"
-      echo "Rolled back the AI profile." >&2
-    fi
-    step="install $(basename "$app"): $app_error"
+    restore_profile
     false
   fi
   echo "Installed $target $(app_version "$target")."

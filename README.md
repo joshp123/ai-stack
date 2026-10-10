@@ -67,9 +67,10 @@ private repo:
 7. Delete profile generations older than a week.
 
 If a build or check fails, nothing is pushed or installed. If installing the
-app fails, the previous app stays in place and the profile is rolled back to
-the generation that matches it. Either way the job tries again the next night. The system configuration is never switched by the job; a pushed
-lock bump reaches the system at your next switch.
+app fails, the previous app stays in place and the profile goes back to the
+generation it had before the run, which matches that app. Either way the job
+tries again the next night. The system configuration is never switched by the
+job; a pushed lock bump reaches the system at your next switch.
 
 **Email alerts.** Silent while healthy. When the nightly job has not succeeded
 for three days, or nix-ai-tools' hourly job has had no green run for three
