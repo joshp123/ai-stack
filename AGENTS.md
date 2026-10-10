@@ -6,13 +6,13 @@ written_by: ai
 
 **Public AI development experience** — shareable with anyone.
 
-Skills, agent docs, shell config, tool wiring for Claude, Codex, pi, Cursor, OpenClaw, etc.
+Skills, agent docs, shell config, tool wiring for Claude, Codex, pi, Cursor, etc.
 
 ```
 nixos-config (your system)
 ├── imports: ai-stack ← you are here
 ├── imports: nix-ai-tools (tool packages, Garnix-cached)
-├── imports: nix-openclaw, nix-secrets, ...
+├── imports: nix-secrets, ...
 └── stacks/ai/ (private AI config wiring)
 ```
 
@@ -74,11 +74,7 @@ ai-stack/
 ├── docs/agents/     # global guidance deployed to Codex/Claude/pi
 ├── config/zsh/      # public shell config
 ├── modules/         # Home Manager wiring
-│   ├── ai-stack.nix        # OpenClaw-free main module
-│   ├── openclaw-config.nix # OpenClaw defaults
-│   ├── openclaw-documents.nix # OpenClaw workspace documents
-│   └── bots/               # transitional DJTBOT role profiles
-├── documents/       # OpenClaw workspace docs (AGENTS/SOUL/TOOLS)
+│   └── ai-stack.nix        # main module
 ├── extensions/      # pi coding-agent extensions
 └── scripts/         # helper scripts called from Nix/Home Manager
 ```
@@ -90,9 +86,7 @@ ai-stack/
 | Shareable skill | `skills/` |
 | Public shell aliases | `config/zsh/` |
 | Global agent guidance | `docs/agents/` |
-| OpenClaw public config | `modules/openclaw-config.nix` |
 | Home Manager wiring | `modules/` |
-| OpenClaw workspace docs | `documents/` |
 | pi coding-agent extensions | `extensions/` |
 
 **What does NOT belong here:**
@@ -105,15 +99,11 @@ ai-stack/
 | Per-user overrides | `nixos-config` |
 | Live host topology/deploy choices | `nixos-config` |
 | Provider-side cloud resources | `~/code/opentofu-infra` |
-| OpenClaw packaging/module behavior | `nix-openclaw` |
-| OpenClaw-adjacent tool/plugin packages | `nix-openclaw-tools` via `nix-openclaw` |
-| OpenClaw product code | `~/code/openclaw` |
 
 **Rules of thumb:**
 - Tool packages → `nix-ai-tools`
 - Config, skills, public docs → here
 - Identifies a person, location, device, or contains secrets → `nixos-config`
-- Reusable OpenClaw install/lifecycle behavior → `nix-openclaw`
 - Cloud project/IAM/API-key resources → `opentofu-infra`
 
 ## No PII (public repo)
