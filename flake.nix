@@ -1,47 +1,54 @@
 {
-  description = "ai-stack: public, no-PII AI stack modules";
+  description = "ai-stack: a complete AI coding setup for Claude Code, Codex and pi, as Nix";
 
   nixConfig = {
     fallback = false;
+    extra-substituters = [ "https://joshp123-nix-ai-tools.cachix.org?priority=30" ];
+    extra-trusted-public-keys = [
+      "joshp123-nix-ai-tools.cachix.org-1:JvngUIbNs+IgAmU07ecK7JYV5t0/LD+ng1bXQCRJWjo="
+    ];
   };
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
-    cass = {
-      url = "github:Dicklesworthstone/coding_agent_session_search";
-      flake = false;
-    };
-    prime-agent-src = {
-      url = "github:PrimeIntellect-ai/prime-agent/v0.7.0";
+    # The AI tool packages, bumped hourly by their own CI. Their nixpkgs is the
+    # only nixpkgs here, so the bundle's glue derivations share it.
+    nix-ai-tools.url = "github:joshp123/nix-ai-tools";
+    nixpkgs.follows = "nix-ai-tools/nixpkgs";
+    # OpenAI's build-macos-apps plugin: the source of one pi skill collection.
+    openai-plugins = {
+      url = "github:openai/plugins/11c74d6ba24d3a6d48f54a194cd00ef3beea18f9";
       flake = false;
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, cass, prime-agent-src }:
+  outputs = { self, nixpkgs, nix-ai-tools, openai-plugins }:
     let
-      aiStackOverlays = import ./overlays { inputs = { inherit cass prime-agent-src; }; };
-
-      aiStackModule = { ... }: {
-        imports = [ ./modules/ai-stack.nix ];
-        nixpkgs.overlays = [ self.overlays.default ];
+      system = "aarch64-darwin";
+      pkgs = nixpkgs.legacyPackages.${system};
+    in
+    {
+      lib = {
+        # Builds the AI bundle: every tool plus its config and skills, laid out
+        # for the user profile. Arguments: ai-home/default.nix.
+        mkAiHome = args: import ./ai-home ({ inherit nix-ai-tools openai-plugins; } // args);
       };
-    in {
-      overlays.default = nixpkgs.lib.composeManyExtensions aiStackOverlays;
-
-      packages = nixpkgs.lib.genAttrs [ "aarch64-darwin" "x86_64-linux" ] (system:
-        let
-          pkgs = import nixpkgs {
-            inherit system;
-            overlays = [ self.overlays.default ];
-          };
-        in {
-          prime-agent = pkgs.prime-agent;
-        });
 
       homeManagerModules = {
-        ai-stack = aiStackModule;
+        ai-profile = import ./modules/home/ai-profile.nix;
+        zsh = import ./modules/home/zsh.nix;
+        ghostty = import ./modules/home/ghostty.nix;
+      };
+
+      darwinModules = {
+        update-ai-tools = import ./modules/darwin/update-ai-tools.nix;
+        codex-defaults = import ./modules/darwin/codex-defaults.nix;
+      };
+
+      # The bundle with no private additions: what CI builds, and what you get
+      # before plugging in a private repo.
+      packages.${system}.ai-home = self.lib.mkAiHome {
+        inherit pkgs;
+        rev = self.rev or self.dirtyRev or "unknown";
       };
     };
 }

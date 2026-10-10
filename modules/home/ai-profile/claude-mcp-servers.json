@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "cua-computer-use": {
+      "type": "stdio",
+      "command": "/Applications/CuaDriver.app/Contents/MacOS/cua-driver",
+      "args": ["mcp"]
+    }
+  }
+}

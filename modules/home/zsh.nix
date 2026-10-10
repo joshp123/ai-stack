@@ -2,7 +2,7 @@
 {
   programs.starship = {
     enable = true;
-    settings = builtins.fromTOML (builtins.readFile ../config/starship.toml);
+    settings = builtins.fromTOML (builtins.readFile ../../config/starship.toml);
   };
 
   programs.zsh = {
@@ -38,6 +38,6 @@
       }
     ];
 
-    initContent = lib.mkBefore (builtins.readFile ../config/zsh/init-public.zsh);
+    initContent = lib.mkBefore (builtins.readFile ../../config/zsh/init-public.zsh);
   };
 }

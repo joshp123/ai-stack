@@ -1,31 +1,17 @@
-# ai-stack Ontology
+# ai-stack ontology
 
-This repo should be understandable from `tree` before reading implementation.
-
-## Contract
-
-`ai-stack` is a public Home Manager/doc layer for AI tools. It is intentionally
-not a complete deployable system.
+`tree` should explain this repo before any implementation is read.
 
 | Path | Owns | Does not own |
 | --- | --- | --- |
-| `modules/` | public Home Manager modules and defaults | host topology, secrets, final service enablement |
-| `docs/agents/` | global agent guidance deployed by consumers | private runbooks and host facts |
-| `skills/` | shareable custom skills | built-in Codex skills or private workflows |
-| `extensions/` | pi coding-agent extension source | packaged AI CLI tools |
-| `config/` | public shell/app config | private dotfiles or machine-specific overrides |
-| `scripts/` | small helper scripts invoked by Nix/Home Manager | hidden business logic or ad-hoc operator commands |
-| `overlays/` | narrow overlays for this public module layer | fast-moving tool packages |
+| `ai-home/` | the bundle definition: which tools, the three skill trees, the `share/` layout | the packages themselves (nix-ai-tools) |
+| `modules/home/` | Home Manager modules: pointers into the profile, shell config | secrets, the owner's paths |
+| `modules/darwin/` | nix-darwin modules: the nightly updater, Codex's `/etc/codex` | which machine runs them, the repo URL, the mail addresses |
+| `skills/` | shareable skills | private workflows, Codex's built-in skills |
+| `extensions/` | pi extension source | packaged AI CLIs |
+| `docs/agents/` | global prompts and the rules every harness reads | private runbooks, host facts |
+| `config/` | zsh, starship, ghostty | machine-specific overrides |
 
-## External Owners
-
-| Thing | Owner |
-| --- | --- |
-| Live host topology, deploy commands, agenix paths | `nixos-config` |
-| Generic AI CLI packages | `nix-ai-tools` |
-| Provider-side cloud resources | `~/code/opentofu-infra` |
-
-## OpenClaw
-
-The OpenClaw bot profiles (`modules/bots/`, `modules/openclaw-*.nix`,
-`documents/`) were removed in October 2026; git history has them.
+External owners: AI CLI packages are nix-ai-tools; secrets, identity, private
+skills and host topology are the private repo; OpenClaw packaging is
+nix-openclaw; cloud resources are opentofu-infra.

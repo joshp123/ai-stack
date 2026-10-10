@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "officialPlugin": {
+    "repository": "https://github.com/openai/plugins",
+    "commit": "11c74d6ba24d3a6d48f54a194cd00ef3beea18f9",
+    "narHash": "sha256-MXvyuQzDni5EpUPFfKPW2/HBb7tMaqonZAjC6Obkm8U=",
+    "path": "plugins/build-macos-apps/skills",
+    "observedPluginVersion": "0.1.4",
+    "licence": "MIT"
+  },
+  "adaptations": [
+    "Remove Codex app Run-button and environment.toml instructions",
+    "Remove forced git init instructions",
+    "Exclude OpenAI plugin-agent metadata and the Run-button bootstrap reference"
+  ]
+}

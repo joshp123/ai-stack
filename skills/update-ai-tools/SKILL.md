@@ -15,16 +15,18 @@ healthy, or fix the package that broke it.
    upstream latest every hour and publishes only the bumps that build and load,
    cached on Cachix. Failed bumps are discarded; that package stays on its last
    good version.
-2. `nixos-config` (the machine): the launchd user agent
+2. `ai-stack` (the setup): skills, prompts, pi extensions, and the wiring
+   (`lib.mkAiHome`, the `ai-profile` Home Manager module, the
+   `update-ai-tools` nix-darwin module). It rides the same nightly update.
+3. The private repo (`nixos-config`, the machine): the launchd user agent
    `org.nixos.update-ai-tools` runs nightly at 05:00 as the user. In its own
    clone it moves the `nix-ai-tools` and `ai-stack` lock entries, commits,
    builds the `ai-home` bundle and the system configuration from that commit
-   (a lock bump must leave main building), pushes, and installs exactly that
-   bundle into the AI profile `~/.local/state/nix/profiles/ai`. The system is
+   (a lock bump must leave main building), pushes, installs exactly that
+   bundle into the AI profile `~/.local/state/nix/profiles/ai` and copies
+   CuaDriver.app to /Applications when its version changed. The system is
    never switched automatically; a pushed lock bump reaches it at the next
    `build-switch`.
-3. `ai-stack` (skills, pi extensions, agent docs) rides the same nightly
-   update into the bundle.
 
 GUI apps (Claude.app, ChatGPT.app) update themselves; Homebrew does not manage
 their versions.

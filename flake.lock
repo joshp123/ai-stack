@@ -1,48 +1,86 @@
 {
   "nodes": {
-    "cass": {
-      "flake": false,
+    "bun2nix": {
+      "inputs": {
+        "flake-parts": "flake-parts",
+        "import-tree": "import-tree",
+        "nixpkgs": "nixpkgs",
+        "systems": "systems",
+        "treefmt-nix": "treefmt-nix"
+      },
       "locked": {
-        "lastModified": 1771383304,
-        "narHash": "sha256-Nqm5P/O8NWKjznm5rchYX9iJWHg2zDtYeeil/omv+00=",
-        "owner": "Dicklesworthstone",
-        "repo": "coding_agent_session_search",
-        "rev": "9bec749af752d3e1fe63c8a8958e3c984a7bc213",
+        "lastModified": 1770895533,
+        "narHash": "sha256-v3QaK9ugy9bN9RXDnjw0i2OifKmz2NnKM82agtqm/UY=",
+        "owner": "nix-community",
+        "repo": "bun2nix",
+        "rev": "c843f477b15f51151f8c6bcc886954699440a6e1",
         "type": "github"
       },
       "original": {
-        "owner": "Dicklesworthstone",
-        "repo": "coding_agent_session_search",
+        "owner": "nix-community",
+        "repo": "bun2nix",
         "type": "github"
       }
     },
-    "home-manager": {
+    "flake-parts": {
       "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
+        "nixpkgs-lib": "nixpkgs-lib"
       },
       "locked": {
-        "lastModified": 1768240557,
-        "narHash": "sha256-bVqJ34yMiiUQwYhjliiiN5LBH1Y+UldbIjNTCUtDdwE=",
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "rev": "b3f737e70fb9eef1d2308ea6738ffed5ae080f9b",
+        "lastModified": 1769996383,
+        "narHash": "sha256-AnYjnFWgS49RlqX7LrC4uA+sCCDBj0Ry/WOJ5XWAsa0=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "57928607ea566b5db3ad13af0e57e921e6b12381",
         "type": "github"
       },
       "original": {
-        "owner": "nix-community",
-        "repo": "home-manager",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "type": "github"
+      }
+    },
+    "import-tree": {
+      "locked": {
+        "lastModified": 1763762820,
+        "narHash": "sha256-ZvYKbFib3AEwiNMLsejb/CWs/OL/srFQ8AogkebEPF0=",
+        "owner": "vic",
+        "repo": "import-tree",
+        "rev": "3c23749d8013ec6daa1d7255057590e9ca726646",
+        "type": "github"
+      },
+      "original": {
+        "owner": "vic",
+        "repo": "import-tree",
+        "type": "github"
+      }
+    },
+    "nix-ai-tools": {
+      "inputs": {
+        "bun2nix": "bun2nix",
+        "nixpkgs": "nixpkgs_2"
+      },
+      "locked": {
+        "lastModified": 1791647316,
+        "narHash": "sha256-iI7KC4oOaEBd5blGBRmqWffVqGEuocFTbCqgpJWwgvc=",
+        "owner": "joshp123",
+        "repo": "nix-ai-tools",
+        "rev": "fc46c2547b58758367ab1522ca05ce7876d5d22b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "joshp123",
+        "repo": "nix-ai-tools",
         "type": "github"
       }
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1768127708,
-        "narHash": "sha256-1Sm77VfZh3mU0F5OqKABNLWxOuDeHIlcFjsXeeiPazs=",
+        "lastModified": 1770562336,
+        "narHash": "sha256-ub1gpAONMFsT/GU2hV6ZWJjur8rJ6kKxdm9IlCT0j84=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "ffbc9f8cbaacfb331b6017d5a5abb21a492c9a38",
+        "rev": "d6c71932130818840fc8fe9509cf50be8c64634f",
         "type": "github"
       },
       "original": {
@@ -52,29 +90,99 @@
         "type": "github"
       }
     },
-    "prime-agent-src": {
-      "flake": false,
+    "nixpkgs-lib": {
       "locked": {
-        "lastModified": 1785955153,
-        "narHash": "sha256-byn8Est+Jrr/C52nUyJOQmiegCzaEVXeCOHnGsfZB+k=",
-        "owner": "PrimeIntellect-ai",
-        "repo": "prime-agent",
-        "rev": "be9e2fa0714e7cd1c6bd9bdb1b554d2cc6550387",
+        "lastModified": 1769909678,
+        "narHash": "sha256-cBEymOf4/o3FD5AZnzC3J9hLbiZ+QDT/KDuyHXVJOpM=",
+        "owner": "nix-community",
+        "repo": "nixpkgs.lib",
+        "rev": "72716169fe93074c333e8d0173151350670b824c",
         "type": "github"
       },
       "original": {
-        "owner": "PrimeIntellect-ai",
-        "ref": "v0.7.0",
-        "repo": "prime-agent",
+        "owner": "nix-community",
+        "repo": "nixpkgs.lib",
+        "type": "github"
+      }
+    },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 1768149890,
+        "narHash": "sha256-iihg1oHkVkYHD1pFQifGEP+Rw1g+LZQyDNbtAqpXtNM=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "4d113fe1f7bb454435a5cabae6cd283e64191bb7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "openai-plugins": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1783971520,
+        "narHash": "sha256-MXvyuQzDni5EpUPFfKPW2/HBb7tMaqonZAjC6Obkm8U=",
+        "owner": "openai",
+        "repo": "plugins",
+        "rev": "11c74d6ba24d3a6d48f54a194cd00ef3beea18f9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "openai",
+        "repo": "plugins",
+        "rev": "11c74d6ba24d3a6d48f54a194cd00ef3beea18f9",
         "type": "github"
       }
     },
     "root": {
       "inputs": {
-        "cass": "cass",
-        "home-manager": "home-manager",
-        "nixpkgs": "nixpkgs",
-        "prime-agent-src": "prime-agent-src"
+        "nix-ai-tools": "nix-ai-tools",
+        "nixpkgs": [
+          "nix-ai-tools",
+          "nixpkgs"
+        ],
+        "openai-plugins": "openai-plugins"
+      }
+    },
+    "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "treefmt-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nix-ai-tools",
+          "bun2nix",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1770228511,
+        "narHash": "sha256-wQ6NJSuFqAEmIg2VMnLdCnUc0b7vslUohqqGGD+Fyxk=",
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "rev": "337a4fe074be1042a35086f15481d763b8ddc0e7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "type": "github"
       }
     }
   },

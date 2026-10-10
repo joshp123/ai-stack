@@ -1,0 +1,14 @@
+# Builds the public AI bundle against the pinned nix-ai-tools. The tools come
+# from Cachix; only the layout derivations build here.
+name: build
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  ai-home:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@v16
+      - run: nix build --accept-flake-config --no-link --print-out-paths .#ai-home
