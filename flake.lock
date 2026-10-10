@@ -61,11 +61,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1791647316,
-        "narHash": "sha256-iI7KC4oOaEBd5blGBRmqWffVqGEuocFTbCqgpJWwgvc=",
+        "lastModified": 1791670897,
+        "narHash": "sha256-tUIvBul+tJNFOu4PR/q/vsyY6okIht0UuX4w9zHMqgs=",
         "owner": "joshp123",
         "repo": "nix-ai-tools",
-        "rev": "fc46c2547b58758367ab1522ca05ce7876d5d22b",
+        "rev": "13c88d2d52a82c7b56a9f032599303fe01e7e1a7",
         "type": "github"
       },
       "original": {
