@@ -1,26 +1,30 @@
 ---
 name: update-ai-tools
-description: Maintain and update fast-moving AI tools in the Nix workspace. Use when asked to refresh, verify, package, install, apply, or compare current versions of Codex, Claude Code, pi, MCP tools, XcodeBuildMCP, markit/markitdown, qmd, spogo, or other AI developer tools managed through nix-ai-tools, nixos-config, or ai-stack.
+description: Maintain and update fast-moving AI tools in the Nix workspace. Use when asked to refresh, verify, package, install, or compare current versions of Codex, Claude Code, pi, MCP tools, XcodeBuildMCP, markit/markitdown, qmd, or other AI developer tools managed through nix-ai-tools, nixos-config, or ai-stack.
 ---
 
 # Update AI Tools
 
-AI tools change daily, so updating them is automatic. Your job is usually to
-check that the automation is healthy, or fix the package that broke it.
+AI tools change daily, so updating them is automatic and never touches the
+system configuration. Your job is usually to check that the automation is
+healthy, or fix the package that broke it.
 
 ## How updates flow
 
 1. `nix-ai-tools` (packages): a GitHub Actions job bumps every package to
-   upstream latest every hour and publishes only the bumps that build, cached on
-   Cachix. Failed bumps are discarded; that package stays on its last good
-   version.
-2. `nixos-config` (the machine): `update-ai-tools` runs nightly from launchd and
-   on demand. In its own clone it updates the `nix-ai-tools` and `ai-stack`
-   inputs, builds, pushes `flake.lock` to main, and switches. The nightly run
-   switches only if `/etc/sudoers.d/update-ai-tools` exists; otherwise it
-   notifies the user to run `update-ai-tools`. Applied state always matches a
-   pushed commit.
-3. `ai-stack` (skills and config) rides the same nightly update.
+   upstream latest every hour and publishes only the bumps that build and load,
+   cached on Cachix. Failed bumps are discarded; that package stays on its last
+   good version.
+2. `nixos-config` (the machine): the launchd user agent
+   `org.nixos.update-ai-tools` runs nightly at 05:00 as the user. In its own
+   clone it moves the `nix-ai-tools` and `ai-stack` lock entries, commits,
+   builds the `ai-home` bundle and the system configuration from that commit
+   (a lock bump must leave main building), pushes, and installs exactly that
+   bundle into the AI profile `~/.local/state/nix/profiles/ai`. The system is
+   never switched automatically; a pushed lock bump reaches it at the next
+   `build-switch`.
+3. `ai-stack` (skills, pi extensions, agent docs) rides the same nightly
+   update into the bundle.
 
 GUI apps (Claude.app, ChatGPT.app) update themselves; Homebrew does not manage
 their versions.
@@ -28,10 +32,12 @@ their versions.
 ## Update now
 
 ```bash
-update-ai-tools
+launchctl kickstart gui/$(id -u)/org.nixos.update-ai-tools
+tail -f ~/Library/Logs/update-ai-tools.log
 ```
 
-It shows the version changes, then asks for sudo (Apple Watch) to switch.
+Undo the last update: `nix profile rollback --profile ~/.local/state/nix/profiles/ai`.
+Hold a version: revert the "chore: update AI tools" lock commit on main.
 
 ## When something is stale
 
@@ -45,7 +51,10 @@ It shows the version changes, then asks for sudo (Apple Watch) to switch.
   wrong, so future bumps land without help. Push; the next nightly run picks it
   up.
 - The machine is behind `nix-ai-tools` main: read
-  `~/Library/Logs/update-ai-tools.log`.
+  `~/Library/Logs/update-ai-tools.log`; the `FAILED at <step>` line names the
+  step. `~/.local/state/ai-home/last-error` holds the last failure.
+- An alert email arrived: it means one of the above has lasted three days.
+  Fixing it is a task you start; the automation never pushes fixes itself.
 
 ## Rules
 
@@ -53,5 +62,5 @@ It shows the version changes, then asks for sudo (Apple Watch) to switch.
   against local or locked state.
 - Never pin a fast input to a revision in `flake.nix`; that silently stops all
   updates.
-- No `brew upgrade`, Home Manager-only activation, `--override-input`, or
-  uncommitted lock edits as an update path.
+- No `brew upgrade`, `--override-input`, or uncommitted lock edits as an update
+  path. Never switch the system to deliver an AI tool update.
