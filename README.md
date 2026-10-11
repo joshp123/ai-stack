@@ -70,7 +70,7 @@ private repo:
    lists its models, every fixed path the system links to exists
    (`ai-tools-smoke`).
 3. **The extension guard:** load the pi extensions your system links, as
-   committed, into the new pi (`ai-tools-extension-check`). Those extensions
+   committed on main, into the new pi (`ai-tools-extension-check`). Those extensions
    change only on a switch, so a pi that cannot load them must not be
    installed.
 4. **The system guard:** build your whole system configuration from the same

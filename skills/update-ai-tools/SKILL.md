@@ -63,9 +63,12 @@ lock commit does not hold; the next nightly run moves the lock again.
 - The machine is behind `nix-ai-tools` main: read
   `~/Library/Logs/update-ai-tools.log`; the `FAILED at <step>` line names the
   step. `~/.local/state/ai-tools/last-error` holds the last failure. `FAILED
-  at pi extension guard` means the new pi cannot load the pi extensions the
-  system links: fix the extension in ai-stack (or the private repo), commit,
-  switch; the next nightly run then installs the new pi.
+  at pi extension guard` means the new pi cannot load the pi extensions on
+  main: fix the extension in ai-stack (or the private repo) and commit; the
+  next nightly run then installs the new pi, and the next switch puts the
+  fixed extension live. `FAILED at smoke ai-tools` with a `missing <path>`
+  line means a package moved a file the system links by a fixed path: fix the
+  path in ai-stack's `content/` and `ai-tools-smoke.sh`, not the package.
 - An alert email arrived: it means one of the above has lasted three days.
   Fixing it is a task you start; the automation never pushes fixes itself.
 

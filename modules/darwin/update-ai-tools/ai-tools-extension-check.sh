@@ -1,5 +1,5 @@
-# Loads the written pi extensions (the ones the current system generation
-# links) into the pi of a new AI tools bundle, the way pi does at startup.
+# Loads the written pi extensions (the ones the system links, as committed on
+# main) into the pi of a new AI tools bundle, the way pi does at startup.
 # update-ai-tools runs this before pushing or installing a bundle: the
 # extensions change only on a switch, so a pi that cannot load them must not
 # reach the profile. Same approach as nix-ai-tools' pi-package install check:
@@ -9,6 +9,7 @@
 bundle="${1:?usage: ai-tools-extension-check <bundle-root> <extensions-dir>}"
 extensions="${2:?usage: ai-tools-extension-check <bundle-root> <extensions-dir>}"
 
+shopt -s nullglob
 args=()
 for entry in "$extensions"/*; do
   args+=(--extension "$entry")
@@ -23,7 +24,7 @@ if ! HOME="$scratch" "$bundle/bin/pi" --offline --no-session \
   echo "extension check: pi failed to load the extensions in $extensions" >&2
   exit 1
 fi
-errors=$(jq -R -c 'fromjson? | select(.type == "extension_error")' "$scratch/events")
+errors=$(jq -R -c 'fromjson? | select(type == "object" and .type == "extension_error")' "$scratch/events")
 if [ -n "$errors" ]; then
   echo "extension check: an extension failed in pi: $errors" >&2
   exit 1
