@@ -219,6 +219,9 @@ for app in "$profile"/Applications/*.app; do
   echo "Installed $target $(app_version "$target")."
 done
 
+step="model check"
+ai-tools-model-check "$profile"
+
 step="upstream health"
 if created=$(curl --fail --silent --show-error --max-time 30 "$upstream_runs" | jq -r '.workflow_runs[0].created_at // empty'); then
   if [[ -n "$created" ]] && (( $(date +%s) - $(date -d "$created" +%s) >= 3 * 86400 )); then

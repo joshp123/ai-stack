@@ -84,7 +84,17 @@ private repo:
 7. Copy `CuaDriver.app` to `/Applications` when its version differs from the
    profile's: copy it beside the old one, stop the daemon, swap the two by
    renaming, and move the old one to the Trash.
-8. Delete profile generations older than a week.
+8. **The model check:** one real "Reply with one word: ok" call each to pi,
+   Codex and Claude Code with their default models (`ai-tools-model-check`).
+   A retired or gated default fails the run, and the three-day alert follows,
+   instead of failing the next time someone uses it.
+9. Delete profile generations older than a week.
+
+**Default models.** Codex and Claude Code follow the vendor: Codex has no model
+set, so the server's top-ranked model is used; Claude Code uses the `opus`
+alias. pi has no "latest" alias, so its default is one declared pin
+(`programs.ai-profile.defaultModel`), re-applied on every switch and checked
+every night by the model check.
 
 If a build or check fails, nothing is pushed or installed. If installing the
 app fails, the previous app stays in place and the profile goes back to the

@@ -28,6 +28,8 @@ let
       "pi-agent-browser-native"
     ];
     enabledModels = cfg.enabledModels;
+    defaultProvider = cfg.defaultProvider;
+    defaultModel = cfg.defaultModel;
     extensions = [ ];
   };
 in
@@ -74,12 +76,28 @@ in
     enabledModels = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [
-        "openai-codex/gpt-5.6-*"
+        "openai-codex/gpt-6.1-*"
         "anthropic/claude-fable-*"
         "anthropic/claude-opus-*"
         "ollama/*"
       ];
       description = "Model globs pi offers; pi warns when a glob matches nothing.";
+    };
+
+    defaultProvider = lib.mkOption {
+      type = lib.types.str;
+      default = "openai-codex";
+      description = "pi's default provider, re-applied on every switch.";
+    };
+
+    defaultModel = lib.mkOption {
+      type = lib.types.str;
+      default = "gpt-6.1-sol";
+      description = ''
+        pi's default model, re-applied on every switch. pi has no "latest" alias,
+        so this is a pin; the nightly model check calls it and alerts when the
+        model is retired or gated.
+      '';
     };
 
     anthropicApiKeyFile = lib.mkOption {

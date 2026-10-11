@@ -2,7 +2,7 @@
 name: reviewer
 model:
   provider: openai-codex
-  id: gpt-5.6-sol
+  id: gpt-6.1-sol
 thinking: medium
 ---
 

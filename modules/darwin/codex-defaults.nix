@@ -9,7 +9,6 @@ let
   cfg = config.programs.codex-defaults;
 
   defaults = {
-    model = "gpt-5.5";
     model_reasoning_effort = "xhigh";
     tool_output_token_limit = 25000;
     model_auto_compact_token_limit = 233000;

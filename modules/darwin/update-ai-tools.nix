@@ -30,6 +30,12 @@ let
     text = builtins.readFile ./update-ai-tools/ai-tools-extension-check.sh;
   };
 
+  aiToolsModelCheck = pkgs.writeShellApplication {
+    name = "ai-tools-model-check";
+    runtimeInputs = [ pkgs.coreutils pkgs.gnugrep ];
+    text = builtins.readFile ./update-ai-tools/ai-tools-model-check.sh;
+  };
+
   aiToolsMail = pkgs.writeShellApplication {
     name = "ai-tools-mail";
     runtimeInputs = [ pkgs.curl pkgs.coreutils ];
@@ -40,7 +46,7 @@ let
   # nixpkgs, so the job uses the same daemon and settings as the user.
   updateAiTools = pkgs.writeShellApplication {
     name = "update-ai-tools";
-    runtimeInputs = [ pkgs.git pkgs.curl pkgs.jq pkgs.coreutils aiToolsSmoke aiToolsExtensionCheck aiToolsMail ];
+    runtimeInputs = [ pkgs.git pkgs.curl pkgs.jq pkgs.coreutils aiToolsSmoke aiToolsExtensionCheck aiToolsModelCheck aiToolsMail ];
     text = builtins.readFile ./update-ai-tools/update-ai-tools.sh;
   };
 in
@@ -111,7 +117,7 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = [ updateAiTools aiToolsSmoke aiToolsExtensionCheck aiToolsMail ];
+    environment.systemPackages = [ updateAiTools aiToolsSmoke aiToolsExtensionCheck aiToolsModelCheck aiToolsMail ];
 
     launchd.user.agents.update-ai-tools.serviceConfig = {
       ProgramArguments = [ "${updateAiTools}/bin/update-ai-tools" ];
