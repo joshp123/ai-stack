@@ -4,7 +4,6 @@
 #   Claude  every public skill except anti-slop-output (a plugin provides it),
 #           pi-autoresearch's skills, and the consumer's extra skills
 #   Codex   a fixed list of public skills, served from /etc/codex/skills
-#   All three also get MobileBuildMCP's own CLI skill, generated from the binary
 { pkgs, lib, ai, openai-plugins, extraSkills, piCollections }:
 
 let
@@ -42,15 +41,6 @@ let
     ];
   };
 
-  # MobileBuildMCP's own CLI skill, generated from the packaged binary.
-  mobilebuildmcpSkill = pkgs.runCommand "mobilebuildmcp-skill" {
-    mobilebuildmcp = "${ai.xcodebuildmcp}/bin/mobilebuildmcp";
-  } (builtins.readFile ./mobilebuildmcp-skill.sh);
-  mobilebuildmcpLink = prefix: {
-    name = "${prefix}mobilebuildmcp-cli";
-    path = "${mobilebuildmcpSkill}/mobilebuildmcp-cli";
-  };
-
   pi = pkgs.linkFarm "pi-skills" (
     [ { name = "shared/ai-stack/COLLECTION.md"; path = ./pi-collections/shared-ai-stack/COLLECTION.md; } ]
     ++ links "shared/ai-stack/" publicSkills [ "grill-me" "skill-creator" "summarize" ]
@@ -62,10 +52,6 @@ let
       { name = "tools/cua-driver/COLLECTION.md"; path = ./pi-collections/tools-cua-driver/COLLECTION.md; }
       { name = "tools/cua-driver/cua-driver"; path = "${ai.cua-driver}/share/cua-driver/skills/cua-driver"; }
     ]
-    ++ [
-      { name = "tools/mobilebuildmcp/COLLECTION.md"; path = ./pi-collections/tools-mobilebuildmcp/COLLECTION.md; }
-      (mobilebuildmcpLink "tools/mobilebuildmcp/")
-    ]
     ++ lib.concatMap collectionLinks piCollections
   );
 
@@ -73,8 +59,7 @@ let
     name = "claude-skills";
     paths = [
       (pkgs.linkFarm "claude-public-skills"
-        (links "" publicSkills (lib.remove "anti-slop-output" (directoryNames publicSkills))
-          ++ [ (mobilebuildmcpLink "") ]))
+        (links "" publicSkills (lib.remove "anti-slop-output" (directoryNames publicSkills))))
       "${ai.pi-autoresearch}/share/pi-autoresearch/skills"
     ] ++ extraSkills;
   };
@@ -87,7 +72,8 @@ let
     "summarize-youtube"
     "trmnl-image-generator"
     "update-ai-tools"
-  ] ++ [ (mobilebuildmcpLink "") ]);
+    "xcodebuildmcp-cli"
+  ]);
 in
 {
   inherit pi claude codex;
