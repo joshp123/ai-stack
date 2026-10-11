@@ -6,8 +6,10 @@ description: Maintain and update fast-moving AI tools in the Nix workspace. Use 
 # Update AI Tools
 
 AI tools change daily, so updating them is automatic and never touches the
-system configuration. Your job is usually to check that the automation is
-healthy, or fix the package that broke it.
+system configuration. Only nix-ai-tools packages update this way. Skills,
+prompts, pi extensions and the rest of ai-stack change only when Josh switches
+the system. Your job is usually to check that the automation is healthy, or
+fix the package that broke it.
 
 ## How updates flow
 
@@ -16,17 +18,19 @@ healthy, or fix the package that broke it.
    cached on Cachix. Failed bumps are discarded; that package stays on its last
    good version.
 2. `ai-stack` (the setup): skills, prompts, pi extensions, and the wiring
-   (`lib.mkAiHome`, the `ai-profile` Home Manager module, the
-   `update-ai-tools` nix-darwin module). It rides the same nightly update.
+   (`lib.mkAiTools`, the `ai-profile` Home Manager module, the
+   `update-ai-tools` nix-darwin module). It is not part of the nightly update:
+   a change reaches the machine through a commit that bumps its lock entry and
+   the next `build-switch`.
 3. The private repo (`nixos-config`, the machine): the launchd user agent
    `org.nixos.update-ai-tools` runs nightly at 05:00 as the user. In its own
-   clone it moves the `nix-ai-tools` and `ai-stack` lock entries, commits,
-   builds the `ai-home` bundle and the system configuration from that commit
-   (a lock bump must leave main building), pushes, installs exactly that
-   bundle into the AI profile `~/.local/state/nix/profiles/ai` and copies
-   CuaDriver.app to /Applications when its version changed. The system is
-   never switched automatically; a pushed lock bump reaches it at the next
-   `build-switch`.
+   clone it moves the `nix-ai-tools` lock entry only, commits, builds the
+   `ai-tools` bundle, loads the system's pi extensions into the new pi, builds
+   the system configuration from that commit (a lock bump must leave main
+   building), pushes, installs exactly that bundle into the AI profile
+   `~/.local/state/nix/profiles/ai` and copies CuaDriver.app to /Applications
+   when its version changed. The system is never switched automatically; a
+   pushed lock bump reaches it at the next `build-switch`.
 
 GUI apps (Claude.app, ChatGPT.app) update themselves; Homebrew does not manage
 their versions.
@@ -58,7 +62,10 @@ lock commit does not hold; the next nightly run moves the lock again.
   up.
 - The machine is behind `nix-ai-tools` main: read
   `~/Library/Logs/update-ai-tools.log`; the `FAILED at <step>` line names the
-  step. `~/.local/state/ai-home/last-error` holds the last failure.
+  step. `~/.local/state/ai-tools/last-error` holds the last failure. `FAILED
+  at pi extension guard` means the new pi cannot load the pi extensions the
+  system links: fix the extension in ai-stack (or the private repo), commit,
+  switch; the next nightly run then installs the new pi.
 - An alert email arrived: it means one of the above has lasted three days.
   Fixing it is a task you start; the automation never pushes fixes itself.
 

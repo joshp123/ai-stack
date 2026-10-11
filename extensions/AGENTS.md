@@ -4,8 +4,10 @@ written_by: ai
 
 # extensions/
 
-pi coding-agent extension source. `ai-home/default.nix` links the shipped ones
-into the bundle's `share/pi/extensions`; the private repo may add its own.
+pi coding-agent extension source. `content/default.nix` links the shipped ones
+into `~/.pi/agent/extensions` through Home Manager, so they change only on a
+switch; the private repo may add its own. The nightly tools update loads them
+into each new pi before installing it.
 
 This directory owns extension code only; private agent policy lives in the
 consumer repo or the deployed agent docs.
