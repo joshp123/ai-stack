@@ -1,16 +1,23 @@
-# Fixed pointers from the home into the AI profile. The profile is installed and
-# updated by update-ai-tools (modules/darwin/update-ai-tools.nix); nothing here
-# changes when the tools do, so a tool update never needs a Home Manager switch.
+# The AI setup in the home, from the system generation: PATH into the AI tools
+# profile, and the authored files (content/) as Home Manager links, so skills,
+# prompts and pi extensions change only on a switch. The profile itself is
+# installed and updated by update-ai-tools (modules/darwin/update-ai-tools.nix);
+# the few package-owned files inside content/ are links to fixed profile paths,
+# so a tools update never needs a switch either.
 #
 # App-owned files are edited only when the app writes strict JSON and merges:
 # pi's settings.json and auth.json, Claude Code's ~/.claude.json. Each edit
 # merges a few keys and leaves the rest to the app (ai-profile/merge-json.sh).
+{ mkContent }:
 { config, pkgs, lib, ... }:
 
 let
   cfg = config.programs.ai-profile;
   home = config.home.homeDirectory;
-  link = path: config.lib.file.mkOutOfStoreSymlink "${cfg.profile}/${path}";
+  content = mkContent {
+    inherit pkgs;
+    inherit (cfg) profile extraClaudeSkills piCollections piExtensions;
+  };
   jq = "${pkgs.jq}/bin/jq";
   merge = file: policy:
     "${pkgs.bash}/bin/bash ${lib.escapeShellArgs [ "${./ai-profile/merge-json.sh}" file jq "${policy}" ]}";
@@ -26,12 +33,42 @@ let
 in
 {
   options.programs.ai-profile = {
-    enable = lib.mkEnableOption "pointers into the AI profile";
+    enable = lib.mkEnableOption "the AI setup in the home: PATH into the AI tools profile and the authored files";
 
     profile = lib.mkOption {
       type = lib.types.str;
       default = "${home}/.local/state/nix/profiles/ai";
-      description = "The Nix profile that update-ai-tools installs the AI bundle into.";
+      description = "The Nix profile that update-ai-tools installs the AI tools bundle into.";
+    };
+
+    extraClaudeSkills = lib.mkOption {
+      type = lib.types.listOf lib.types.path;
+      default = [ ];
+      description = "Directories of extra Claude Code skills, one skill per subdirectory.";
+    };
+
+    piCollections = lib.mkOption {
+      type = lib.types.listOf lib.types.attrs;
+      default = [ ];
+      example = lib.literalExpression ''[ { name = "apple/xcode-27"; collection = ./COLLECTION.md; skills = ./skills; } ]'';
+      description = "Extra pi skill collections: a COLLECTION.md and a directory of skills each.";
+    };
+
+    piExtensions = lib.mkOption {
+      type = lib.types.listOf lib.types.attrs;
+      default = [ ];
+      example = lib.literalExpression ''[ { name = "foo.ts"; path = ./foo.ts; } ]'';
+      description = "Extra pi extensions.";
+    };
+
+    authoredPiExtensions = lib.mkOption {
+      type = lib.types.package;
+      readOnly = true;
+      default = content.authoredPiExtensions;
+      description = ''
+        The written pi extensions this generation links (no package-owned ones).
+        update-ai-tools loads them against a new pi before installing it.
+      '';
     };
 
     enabledModels = lib.mkOption {
@@ -59,12 +96,12 @@ in
     home.sessionPath = [ "${cfg.profile}/bin" ];
 
     home.file = {
-      ".pi/agent/extensions".source = link "share/pi/extensions";
-      ".pi/agent/skills".source = link "share/pi/skills";
-      ".claude/skills".source = link "share/claude/skills";
-      ".claude/CLAUDE.md".source = link "share/claude/CLAUDE.md";
-      ".config/ai/rules.md".source = link "share/ai/rules.md";
-      ".config/ai/models.md".source = link "share/ai/models.md";
+      ".pi/agent/extensions".source = content.piExtensions;
+      ".pi/agent/skills".source = content.piSkills;
+      ".claude/skills".source = content.claudeSkills;
+      ".claude/CLAUDE.md".source = content.claudeMd;
+      ".config/ai/rules.md".source = content.rulesMd;
+      ".config/ai/models.md".source = content.modelsMd;
       # cua-driver reads this; telemetry off.
       ".cua/config.toml".source = ./ai-profile/cua-config.toml;
     };

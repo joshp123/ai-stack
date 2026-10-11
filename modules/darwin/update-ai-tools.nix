@@ -1,11 +1,13 @@
 # The nightly AI tools update, as a launchd user agent. As the user, in its own
-# clone of the config repo: move the nix-ai-tools and ai-stack lock entries,
-# commit, build the AI bundle and the system from that commit (the guard: main
-# must always build), push, install the bundle into the user's AI profile and
-# copy CuaDriver.app into /Applications. It never touches the system
-# configuration. ai-home-mail emails when a failure has lasted three days.
+# clone of the config repo: move the nix-ai-tools lock entry, commit, build the
+# AI tools bundle, load the system's written pi extensions into its pi, build
+# the system from that commit (the guard: main must always build), push,
+# install the bundle into the user's AI profile and copy CuaDriver.app into
+# /Applications. Only nix-ai-tools packages update this way; skills, prompts and
+# pi extensions change only on a switch. It never touches the system
+# configuration. ai-tools-mail emails when a failure has lasted three days.
 #
-# Runtime state: the profile, ~/.local/state/ai-home/ (checkout and status
+# Runtime state: the profile, ~/.local/state/ai-tools/ (checkout and status
 # files) and ~/Library/Logs/update-ai-tools.log. Cleanup: disable this module,
 # switch, then move the profile's symlinks (`<profile>` and `<profile>-*-link`)
 # to the Trash; `nix store gc` then frees the bundles. The profile is made by
@@ -16,23 +18,29 @@ let
   cfg = config.services.update-ai-tools;
   home = "/Users/${cfg.user}";
 
-  aiHomeSmoke = pkgs.writeShellApplication {
-    name = "ai-home-smoke";
+  aiToolsSmoke = pkgs.writeShellApplication {
+    name = "ai-tools-smoke";
     runtimeInputs = [ pkgs.coreutils ];
-    text = builtins.readFile ./update-ai-tools/ai-home-smoke.sh;
+    text = builtins.readFile ./update-ai-tools/ai-tools-smoke.sh;
   };
 
-  aiHomeMail = pkgs.writeShellApplication {
-    name = "ai-home-mail";
+  aiToolsExtensionCheck = pkgs.writeShellApplication {
+    name = "ai-tools-extension-check";
+    runtimeInputs = [ pkgs.coreutils pkgs.jq ];
+    text = builtins.readFile ./update-ai-tools/ai-tools-extension-check.sh;
+  };
+
+  aiToolsMail = pkgs.writeShellApplication {
+    name = "ai-tools-mail";
     runtimeInputs = [ pkgs.curl pkgs.coreutils ];
-    text = builtins.readFile ./update-ai-tools/ai-home-mail.sh;
+    text = builtins.readFile ./update-ai-tools/ai-tools-mail.sh;
   };
 
   # nix itself comes from the launchd PATH (the system's nix), not from
   # nixpkgs, so the job uses the same daemon and settings as the user.
   updateAiTools = pkgs.writeShellApplication {
     name = "update-ai-tools";
-    runtimeInputs = [ pkgs.git pkgs.curl pkgs.jq pkgs.coreutils aiHomeSmoke aiHomeMail ];
+    runtimeInputs = [ pkgs.git pkgs.curl pkgs.jq pkgs.coreutils aiToolsSmoke aiToolsExtensionCheck aiToolsMail ];
     text = builtins.readFile ./update-ai-tools/update-ai-tools.sh;
   };
 in
@@ -49,13 +57,23 @@ in
     repo = lib.mkOption {
       type = lib.types.str;
       example = "git@github.com:you/nixos-config.git";
-      description = "The config repo holding flake.lock and the ai-home output; its main branch is updated.";
+      description = "The config repo holding flake.lock and the ai-tools output; its main branch is updated.";
     };
 
     flakeAttr = lib.mkOption {
       type = lib.types.str;
-      default = "ai-home";
-      description = "The repo's flake output for the AI bundle.";
+      default = "ai-tools";
+      description = "The repo's flake output for the AI tools bundle.";
+    };
+
+    piExtensionsAttr = lib.mkOption {
+      type = lib.types.str;
+      default = "pi-extensions";
+      description = ''
+        The repo's flake output for the written pi extensions the system links
+        (programs.ai-profile.authoredPiExtensions). They are loaded into each
+        new pi before it is pushed or installed.
+      '';
     };
 
     systemAttr = lib.mkOption {
@@ -67,7 +85,7 @@ in
     profile = lib.mkOption {
       type = lib.types.str;
       default = "${home}/.local/state/nix/profiles/ai";
-      description = "The user-owned Nix profile the bundle is installed into.";
+      description = "The user-owned Nix profile the AI tools bundle is installed into.";
     };
 
     upstreamRuns = lib.mkOption {
@@ -93,7 +111,7 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = [ updateAiTools aiHomeSmoke aiHomeMail ];
+    environment.systemPackages = [ updateAiTools aiToolsSmoke aiToolsExtensionCheck aiToolsMail ];
 
     launchd.user.agents.update-ai-tools.serviceConfig = {
       ProgramArguments = [ "${updateAiTools}/bin/update-ai-tools" ];
@@ -103,11 +121,12 @@ in
         UPDATE_AI_TOOLS_REPO = cfg.repo;
         UPDATE_AI_TOOLS_ATTR = cfg.flakeAttr;
         UPDATE_AI_TOOLS_SYSTEM_ATTR = cfg.systemAttr;
+        UPDATE_AI_TOOLS_PI_EXTENSIONS_ATTR = cfg.piExtensionsAttr;
         UPDATE_AI_TOOLS_PROFILE = cfg.profile;
         UPDATE_AI_TOOLS_UPSTREAM_RUNS = cfg.upstreamRuns;
-        AI_HOME_MAIL_TO = cfg.mail.to;
-        AI_HOME_MAIL_FROM = cfg.mail.from;
-        AI_HOME_MAIL_PASSWORD_FILE = cfg.mail.passwordFile;
+        AI_TOOLS_MAIL_TO = cfg.mail.to;
+        AI_TOOLS_MAIL_FROM = cfg.mail.from;
+        AI_TOOLS_MAIL_PASSWORD_FILE = cfg.mail.passwordFile;
       };
       StandardOutPath = "${home}/Library/Logs/update-ai-tools.log";
       StandardErrorPath = "${home}/Library/Logs/update-ai-tools.log";

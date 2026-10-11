@@ -10,10 +10,10 @@
   };
 
   inputs = {
-    # The AI tool packages, bumped hourly by their own CI. Their nixpkgs is the
-    # only nixpkgs here, so the bundle's glue derivations share it.
+    # The AI tool packages, bumped hourly by their own CI. The tools bundle is
+    # built from their nixpkgs (nix-ai-tools.inputs.nixpkgs), never the
+    # consumer's.
     nix-ai-tools.url = "github:joshp123/nix-ai-tools";
-    nixpkgs.follows = "nix-ai-tools/nixpkgs";
     # OpenAI's build-macos-apps plugin: the source of one pi skill collection.
     openai-plugins = {
       url = "github:openai/plugins/11c74d6ba24d3a6d48f54a194cd00ef3beea18f9";
@@ -21,34 +21,47 @@
     };
   };
 
-  outputs = { self, nixpkgs, nix-ai-tools, openai-plugins }:
+  outputs = { self, nix-ai-tools, openai-plugins }:
     let
       system = "aarch64-darwin";
-      pkgs = nixpkgs.legacyPackages.${system};
+      mkContent = args: import ./content ({ inherit openai-plugins; } // args);
     in
     {
       lib = {
-        # Builds the AI bundle: every tool plus its config and skills, laid out
-        # for the user profile. Arguments: ai-home/default.nix.
-        mkAiHome = args: import ./ai-home ({ inherit nix-ai-tools openai-plugins; } // args);
+        # The AI tools bundle for the user profile: packages only (ai-tools/).
+        mkAiTools = { system }: import ./ai-tools { inherit nix-ai-tools system; };
+        # The written skills, pi extensions and prompts as store trees
+        # (content/default.nix lists the arguments). The modules below use it.
+        inherit mkContent;
       };
 
       homeManagerModules = {
-        ai-profile = import ./modules/home/ai-profile.nix;
+        ai-profile = import ./modules/home/ai-profile.nix { inherit mkContent; };
         zsh = import ./modules/home/zsh.nix;
         ghostty = import ./modules/home/ghostty.nix;
       };
 
       darwinModules = {
         update-ai-tools = import ./modules/darwin/update-ai-tools.nix;
-        codex-defaults = import ./modules/darwin/codex-defaults.nix;
+        codex-defaults = import ./modules/darwin/codex-defaults.nix { inherit mkContent; };
       };
 
-      # The bundle with no private additions: what CI builds, and what you get
-      # before plugging in a private repo.
-      packages.${system}.ai-home = self.lib.mkAiHome {
-        inherit pkgs;
-        rev = self.rev or self.dirtyRev or "unknown";
-      };
+      # What the nightly job installs, and what CI builds.
+      packages.${system}.ai-tools = self.lib.mkAiTools { inherit system; };
+
+      # The written trees with no private additions, built in CI. The profile
+      # path is a placeholder: the package-owned links dangle here.
+      checks.${system}.content =
+        let
+          pkgs = nix-ai-tools.inputs.nixpkgs.legacyPackages.${system};
+          content = mkContent { inherit pkgs; profile = "/nonexistent/ai-profile"; };
+        in
+        pkgs.linkFarm "ai-content" [
+          { name = "pi-skills"; path = content.piSkills; }
+          { name = "pi-extensions"; path = content.piExtensions; }
+          { name = "claude-skills"; path = content.claudeSkills; }
+          { name = "codex-skills"; path = content.codexSkills; }
+          { name = "CLAUDE.md"; path = content.claudeMd; }
+        ];
     };
 }

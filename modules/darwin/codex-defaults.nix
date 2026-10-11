@@ -1,8 +1,8 @@
 # Codex's admin config layer, /etc/codex. ~/.codex stays Codex-owned and
-# writable; the defaults and the skills root live here and point at the AI
-# profile, so they never change when the tools update. Codex follows the
-# symlink chain /etc/codex/skills -> store link -> profile and canonicalises it
-# once per session.
+# writable; the defaults and the skills live here, in the system generation, so
+# they change only on a switch. The one tool path, dash-mcp-server, is a fixed
+# path in the AI tools profile, so it never changes when the tools update.
+{ mkContent }:
 { config, pkgs, lib, ... }:
 
 let
@@ -39,7 +39,7 @@ let
   configToml = (pkgs.formats.toml { }).generate "codex-config.toml"
     (lib.recursiveUpdate defaults cfg.settings);
 
-  skillsLink = pkgs.runCommandLocal "codex-skills-link" { } "ln -s ${cfg.profile}/share/codex/skills $out";
+  content = mkContent { inherit pkgs; inherit (cfg) profile; };
 in
 {
   options.programs.codex-defaults = {
@@ -48,7 +48,7 @@ in
     profile = lib.mkOption {
       type = lib.types.str;
       default = "/Users/${config.system.primaryUser}/.local/state/nix/profiles/ai";
-      description = "The AI profile that holds dash-mcp-server and share/codex/skills.";
+      description = "The AI tools profile that holds dash-mcp-server.";
     };
 
     settings = lib.mkOption {
@@ -61,7 +61,7 @@ in
   config = lib.mkIf cfg.enable {
     environment.etc = {
       "codex/config.toml".source = configToml;
-      "codex/skills".source = skillsLink;
+      "codex/skills".source = content.codexSkills;
     };
   };
 }

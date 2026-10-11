@@ -141,10 +141,6 @@
     "root": {
       "inputs": {
         "nix-ai-tools": "nix-ai-tools",
-        "nixpkgs": [
-          "nix-ai-tools",
-          "nixpkgs"
-        ],
         "openai-plugins": "openai-plugins"
       }
     },

@@ -4,9 +4,13 @@
 #   Claude  every public skill except anti-slop-output (a plugin provides it),
 #           pi-autoresearch's skills, and the consumer's extra skills
 #   Codex   a fixed list of public skills, served from /etc/codex/skills
-{ pkgs, lib, ai, openai-plugins, extraSkills, piCollections }:
+# Package-owned skills (cua-driver, pi-autoresearch) are links into the AI
+# tools profile (inProfile), named here so no store path is read at evaluation
+# time.
+{ pkgs, openai-plugins, inProfile, extraClaudeSkills, piCollections }:
 
 let
+  lib = pkgs.lib;
   publicSkills = ../skills;
 
   directoryNames = root:
@@ -41,30 +45,26 @@ let
     ];
   };
 
-  pi = pkgs.linkFarm "pi-skills" (
+  piSkills = pkgs.linkFarm "pi-skills" (
     [ { name = "shared/ai-stack/COLLECTION.md"; path = ./pi-collections/shared-ai-stack/COLLECTION.md; } ]
     ++ links "shared/ai-stack/" publicSkills [ "grill-me" "skill-creator" "summarize" ]
     ++ [ { name = "openai/build-macos-apps/COLLECTION.md"; path = ./pi-collections/openai-build-macos-apps/COLLECTION.md; } ]
     ++ links "openai/build-macos-apps/" openaiSkills (directoryNames openaiSkillsSource)
-    # cua-driver ships exactly one skill; naming it avoids reading a store
-    # path at evaluation time.
     ++ [
       { name = "tools/cua-driver/COLLECTION.md"; path = ./pi-collections/tools-cua-driver/COLLECTION.md; }
-      { name = "tools/cua-driver/cua-driver"; path = "${ai.cua-driver}/share/cua-driver/skills/cua-driver"; }
+      { name = "tools/cua-driver/cua-driver"; path = inProfile "share/cua-driver/skills/cua-driver"; }
     ]
     ++ lib.concatMap collectionLinks piCollections
   );
 
-  claude = pkgs.symlinkJoin {
-    name = "claude-skills";
-    paths = [
-      (pkgs.linkFarm "claude-public-skills"
-        (links "" publicSkills (lib.remove "anti-slop-output" (directoryNames publicSkills))))
-      "${ai.pi-autoresearch}/share/pi-autoresearch/skills"
-    ] ++ extraSkills;
-  };
+  claudeSkills = pkgs.linkFarm "claude-skills" (
+    links "" publicSkills (lib.remove "anti-slop-output" (directoryNames publicSkills))
+    ++ links "" (inProfile "share/pi-autoresearch/skills")
+      [ "autoresearch-create" "autoresearch-finalize" "autoresearch-hooks" ]
+    ++ lib.concatMap (dir: links "" dir (directoryNames dir)) extraClaudeSkills
+  );
 
-  codex = pkgs.linkFarm "codex-skills" (links "" publicSkills [
+  codexSkills = pkgs.linkFarm "codex-skills" (links "" publicSkills [
     "ask-questions-if-underspecified"
     "frontend-design"
     "markdown-converter"
@@ -76,5 +76,5 @@ let
   ]);
 in
 {
-  inherit pi claude codex;
+  inherit piSkills claudeSkills codexSkills;
 }

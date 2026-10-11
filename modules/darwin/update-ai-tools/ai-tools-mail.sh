@@ -3,12 +3,12 @@
 # otherwise; at most one mail per day while a problem lasts. Gmail SMTP via
 # curl with an app password from a file; nothing else. Recipient, sender and
 # password file come from the launchd agent's environment.
-state="${AI_HOME_STATE:-$HOME/.local/state/ai-home}"
-to="${AI_HOME_MAIL_TO:?set by the update-ai-tools launchd agent}"
-from="${AI_HOME_MAIL_FROM:?set by the update-ai-tools launchd agent}"
+state="${AI_TOOLS_STATE:-$HOME/.local/state/ai-tools}"
+to="${AI_TOOLS_MAIL_TO:?set by the update-ai-tools launchd agent}"
+from="${AI_TOOLS_MAIL_FROM:?set by the update-ai-tools launchd agent}"
 smtp_url="${SMTP_URL:-smtps://smtp.gmail.com:465}"
 # Empty means no authentication (the local sink used by tests).
-password_file="${AI_HOME_MAIL_PASSWORD_FILE?set by the update-ai-tools launchd agent}"
+password_file="${AI_TOOLS_MAIL_PASSWORD_FILE?set by the update-ai-tools launchd agent}"
 host=$(hostname -s)
 now=$(date +%s)
 day=86400
@@ -44,7 +44,7 @@ trap 'rm -f "$message"' EXIT
   printf 'To: %s\r\n' "$to"
   printf 'Subject: [%s] AI tools update needs attention\r\n' "$host"
   printf 'Date: %s\r\n' "$(date -R)"
-  printf 'Message-ID: <ai-home-%s@%s>\r\n' "$now" "$host"
+  printf 'Message-ID: <ai-tools-%s@%s>\r\n' "$now" "$host"
   printf 'Content-Type: text/plain; charset=utf-8\r\n'
   printf '\r\n'
   printf 'AI tools updates are broken.\r\n\r\n'

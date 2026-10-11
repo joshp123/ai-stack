@@ -1,13 +1,16 @@
 # Nightly AI tools update, run as the user by launchd (org.nixos.update-ai-tools).
 # Run it now with: launchctl kickstart gui/$(id -u)/org.nixos.update-ai-tools
 #
-# In its own clone of the config repo: move the nix-ai-tools and ai-stack lock
-# entries, commit, build the AI bundle and the system configuration from that
+# In its own clone of the config repo: move the nix-ai-tools lock entry (and
+# nothing else), commit, build the AI tools bundle, load the system's written pi
+# extensions into its new pi, and build the system configuration from that
 # commit (the guard: main must always build), push, then install exactly the
 # revision it verified into the AI profile and copy its apps to /Applications.
-# Nothing is ever applied to the system. A failed build or check pushes and
-# installs nothing; a failed install leaves the previous profile and apps in
-# place. ai-home-mail reports failures that persist for three days.
+# The profile holds only nix-ai-tools packages; skills, prompts and extensions
+# change only when the user switches. Nothing is ever applied to the system. A
+# failed build or check pushes and installs nothing; a failed install leaves the
+# previous profile and apps in place. ai-tools-mail reports failures that
+# persist for three days.
 
 # Site configuration comes from the launchd agent's environment (set by
 # modules/darwin/update-ai-tools.nix); a scratch repo, profile and state
@@ -16,12 +19,12 @@ usage="set by the update-ai-tools launchd agent; run it with launchctl kickstart
 repo_url="${UPDATE_AI_TOOLS_REPO:?$usage}"
 attr="${UPDATE_AI_TOOLS_ATTR:?$usage}"
 system_attr="${UPDATE_AI_TOOLS_SYSTEM_ATTR:?$usage}"
+extensions_attr="${UPDATE_AI_TOOLS_PI_EXTENSIONS_ATTR:?$usage}"
 upstream_runs="${UPDATE_AI_TOOLS_UPSTREAM_RUNS:?$usage}"
 profile="${UPDATE_AI_TOOLS_PROFILE:-$HOME/.local/state/nix/profiles/ai}"
-state="${AI_HOME_STATE:-$HOME/.local/state/ai-home}"
+state="${AI_TOOLS_STATE:-$HOME/.local/state/ai-tools}"
 checkout="${UPDATE_AI_TOOLS_CHECKOUT:-$state/checkout}"
 applications="${UPDATE_AI_TOOLS_APPLICATIONS:-/Applications}"
-ai_inputs=(nix-ai-tools ai-stack)
 
 mkdir -p "$state"
 [ -f "$state/first-attempt" ] || touch "$state/first-attempt"
@@ -32,32 +35,38 @@ on_error() {
   echo "FAILED at $step" >&2
 }
 trap 'on_error $?' ERR
-trap 'ai-home-mail || true' EXIT
+trap 'ai-tools-mail || true' EXIT
 
 echo "==> $(date '+%Y-%m-%d %H:%M')"
 
-# Build the bundle and the system configuration from one committed revision;
-# both must succeed before that revision is pushed or installed.
+# Build the bundle, load the written pi extensions into its pi, and build the
+# system configuration, all from one committed revision; every step must
+# succeed before that revision is pushed or installed.
 verified_rev=""
 verify() {
   local rev="$1"
   [ "$rev" = "$verified_rev" ] && return 0
-  step="build ai-home ($rev)"
-  local out
+  step="build ai-tools ($rev)"
+  local out extensions
   out=$(nix build --no-link --print-out-paths "git+file://$checkout?rev=$rev#$attr")
-  step="smoke ai-home ($rev)"
-  ai-home-smoke "$out"
+  step="smoke ai-tools ($rev)"
+  ai-tools-smoke "$out"
+  step="pi extension guard ($rev)"
+  extensions=$(nix build --no-link --print-out-paths "git+file://$checkout?rev=$rev#$extensions_attr")
+  ai-tools-extension-check "$out" "$extensions"
   step="system build guard ($rev)"
   nix build --no-link "git+file://$checkout?rev=$rev#$system_attr"
   verified_rev="$rev"
 }
 
-# Move the lock entries and commit when they changed; sets lock_changed.
+# Move the nix-ai-tools lock entry and commit when it changed; sets
+# lock_changed. Only that entry: everything else in the lock reaches the
+# machine through a deliberate commit and switch.
 # Called as a plain statement, never as an if condition, so that errexit and
 # the ERR trap still apply and a failure is never mistaken for "unchanged".
 update_lock() {
   step="nix flake update"
-  nix flake update "${ai_inputs[@]}"
+  nix flake update nix-ai-tools
   lock_changed=false
   if ! git diff --quiet flake.lock; then
     step="commit"
@@ -123,11 +132,11 @@ restore_profile() {
 
 nix build --profile "$profile" "git+file://$checkout?rev=$rev#$attr"
 step="smoke profile"
-if ! ai-home-smoke "$profile"; then
+if ! ai-tools-smoke "$profile"; then
   restore_profile
   false
 fi
-echo "AI profile at $(cat "$profile/share/ai/rev")."
+echo "AI profile at $(readlink -f "$profile")."
 
 # Apps that must live in /Applications (CuaDriver.app hard-codes that path and
 # its daemon is launched by name). /Applications is admin-writable, so this
@@ -202,8 +211,8 @@ for app in "$profile"/Applications/*.app; do
   if ! install_app "$(readlink -f "$app")" "$target"; then
     echo "$app_error" >&2
     step="install $(basename "$app"): $app_error"
-    # Keep skills and binary in step: the profile goes back to the generation
-    # whose app is still installed.
+    # Keep the app and the profile in step: the profile goes back to the
+    # generation whose app is still installed.
     restore_profile
     false
   fi
