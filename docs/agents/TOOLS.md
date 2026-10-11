@@ -30,8 +30,8 @@ All tools support `--help` for full usage. Prefer CLI over MCP where possible.
 
 ### iOS Simulator
 - **@build-ios-apps** / **@build-macos-apps**: Built-in Codex app plugins for Apple platform build/test/run/debug/UI automation.
-- **xcodebuildmcp** (CLI-first fallback): Apple platform build/test/run/debug/log/UI automation CLI. Prefer plugin skills when available, then use the CLI for direct shell workflows.
-  - Quick checks: `xcodebuildmcp --version`, `xcodebuildmcp tools`, `xcodebuildmcp simulator list`.
+- **xcodebuildmcp** (binary `mobilebuildmcp`; CLI-first fallback): Apple platform build/test/run/debug/log/UI automation CLI. Prefer plugin skills when available, then use the CLI for direct shell workflows.
+  - Quick checks: `mobilebuildmcp --version`, `mobilebuildmcp tools`, `mobilebuildmcp simulator list`.
 - **axe**: Accessibility-based simulator automation. `axe tap`, `axe swipe`, `axe type`, `axe screenshot`. Uses Apple Accessibility APIs, no external server.
 
 ### Web Apps

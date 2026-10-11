@@ -19,11 +19,11 @@ This skill is for AI agents. It positions the XcodeBuildMCP CLI as a low‑overh
 Use `--help` to discover workflows, tools, and arguments.
 
 ```bash
-xcodebuildmcp --help
-xcodebuildmcp tools --help
-xcodebuildmcp tools --json
-xcodebuildmcp <workflow> --help
-xcodebuildmcp <workflow> <tool> --help
+mobilebuildmcp --help
+mobilebuildmcp tools --help
+mobilebuildmcp tools --json
+mobilebuildmcp <workflow> --help
+mobilebuildmcp <workflow> <tool> --help
 ```
 
 Notes:
@@ -41,14 +41,14 @@ Do not run `build` first unless the user explicitly requests both commands.
 
 If app and project details are not known:
 ```bash
-xcodebuildmcp simulator discover-projects --workspace-root .
-xcodebuildmcp simulator list-schemes --project-path ./MyApp.xcodeproj
-xcodebuildmcp simulator list
+mobilebuildmcp simulator discover-projects --workspace-root .
+mobilebuildmcp simulator list-schemes --project-path ./MyApp.xcodeproj
+mobilebuildmcp simulator list
 ```
 
 To build, install and launch the app in one command:
 ```bash
-xcodebuildmcp simulator build-and-run --scheme MyApp --project-path ./MyApp.xcodeproj --simulator-name "iPhone 17 Pro"
+mobilebuildmcp simulator build-and-run --scheme MyApp --project-path ./MyApp.xcodeproj --simulator-name "iPhone 17 Pro"
 ```
 
 ### Build only
@@ -57,7 +57,7 @@ Use this only when you want compile feedback and do not want to launch the app.
 For run/launch intent, use `build-and-run` instead of chaining `build` and `build-and-run`.
 
 ```bash
-xcodebuildmcp simulator build --scheme MyApp --project-path ./MyApp.xcodeproj --simulator-name "iPhone 17 Pro"
+mobilebuildmcp simulator build --scheme MyApp --project-path ./MyApp.xcodeproj --simulator-name "iPhone 17 Pro"
 ```
 
 ### Run Tests
@@ -65,25 +65,25 @@ xcodebuildmcp simulator build --scheme MyApp --project-path ./MyApp.xcodeproj --
 When you need to run tests, you can do so with the `test` tool.
 
 ```bash
-xcodebuildmcp simulator test --scheme MyAppTests --project-path ./MyApp.xcodeproj --simulator-name "iPhone 17 Pro"
+mobilebuildmcp simulator test --scheme MyAppTests --project-path ./MyApp.xcodeproj --simulator-name "iPhone 17 Pro"
 ```
 
 ### Install And Launch On Physical Device
 
 ```bash
-xcodebuildmcp device list
-xcodebuildmcp device build --scheme MyApp --project-path ./MyApp.xcodeproj
-xcodebuildmcp device get-app-path --scheme MyApp --project-path ./MyApp.xcodeproj
-xcodebuildmcp device get-app-bundle-id --app-path /path/to/MyApp.app
-xcodebuildmcp device install --device-id DEVICE_UDID --app-path /path/to/MyApp.app
-xcodebuildmcp device launch --device-id DEVICE_UDID --bundle-id io.sentry.MyApp
+mobilebuildmcp device list
+mobilebuildmcp device build --scheme MyApp --project-path ./MyApp.xcodeproj
+mobilebuildmcp device get-app-path --scheme MyApp --project-path ./MyApp.xcodeproj
+mobilebuildmcp device get-app-bundle-id --app-path /path/to/MyApp.app
+mobilebuildmcp device install --device-id DEVICE_UDID --app-path /path/to/MyApp.app
+mobilebuildmcp device launch --device-id DEVICE_UDID --bundle-id io.sentry.MyApp
 ```
 
 ### Capture Logs On Simulator
 
 ```bash
-xcodebuildmcp logging start-simulator-log-capture --simulator-id SIMULATOR_UDID --bundle-id io.sentry.MyApp
-xcodebuildmcp logging stop-simulator-log-capture --log-session-id LOG_SESSION_ID
+mobilebuildmcp logging start-simulator-log-capture --simulator-id SIMULATOR_UDID --bundle-id io.sentry.MyApp
+mobilebuildmcp logging stop-simulator-log-capture --log-session-id LOG_SESSION_ID
 ```
 
 ### Debug A Running App (Simulator)
@@ -93,7 +93,7 @@ xcodebuildmcp logging stop-simulator-log-capture --log-session-id LOG_SESSION_ID
 
 Launch if not already running:
 ```bash
-xcodebuildmcp simulator launch-app --bundle-id io.sentry.MyApp --simulator-id SIMULATOR_UDID
+mobilebuildmcp simulator launch-app --bundle-id io.sentry.MyApp --simulator-id SIMULATOR_UDID
 ```
 
 Attach the debugger:
@@ -101,12 +101,12 @@ Attach the debugger:
 It's generally a good idea to wait for 1-2s for the app to fully launch before attaching the debugger.
 
 ```bash
-xcodebuildmcp debugging attach --bundle-id io.sentry.MyApp --simulator-id SIMULATOR_UDID
+mobilebuildmcp debugging attach --bundle-id io.sentry.MyApp --simulator-id SIMULATOR_UDID
 ```
 
 To add/remove breakpoints, inspect stack/variables, and issue arbitrary LLDB commands, view debugging help:
 ```bash
-xcodebuildmcp debugging --help
+mobilebuildmcp debugging --help
 ```
 
 
@@ -115,56 +115,56 @@ xcodebuildmcp debugging --help
 Snapshot UI accessibility tree, tap/swipe/type, and capture screenshots:
 
 ```bash
-xcodebuildmcp ui-automation snapshot-ui --simulator-id SIMULATOR_UDID
-xcodebuildmcp ui-automation tap --simulator-id SIMULATOR_UDID --label "Submit"
-xcodebuildmcp ui-automation tap --simulator-id SIMULATOR_UDID --id "SubmitButton"
+mobilebuildmcp ui-automation snapshot-ui --simulator-id SIMULATOR_UDID
+mobilebuildmcp ui-automation tap --simulator-id SIMULATOR_UDID --label "Submit"
+mobilebuildmcp ui-automation tap --simulator-id SIMULATOR_UDID --id "SubmitButton"
 # Coordinate fallback when label/id is unavailable
-xcodebuildmcp ui-automation tap --simulator-id SIMULATOR_UDID --x 200 --y 400
-xcodebuildmcp ui-automation type-text --simulator-id SIMULATOR_UDID --text "hello"
-xcodebuildmcp ui-automation screenshot --simulator-id SIMULATOR_UDID --return-format path
+mobilebuildmcp ui-automation tap --simulator-id SIMULATOR_UDID --x 200 --y 400
+mobilebuildmcp ui-automation type-text --simulator-id SIMULATOR_UDID --text "hello"
+mobilebuildmcp ui-automation screenshot --simulator-id SIMULATOR_UDID --return-format path
 ```
 
 To see all UI automation tools, view UI automation help:
 ```bash
-xcodebuildmcp ui-automation --help
+mobilebuildmcp ui-automation --help
 ```
 
 ### macOS App Build/Run
 
 ```bash
-xcodebuildmcp macos build --scheme MyMacApp --project-path ./MyMacApp.xcodeproj
-xcodebuildmcp macos build-and-run --scheme MyMacApp --project-path ./MyMacApp.xcodeproj
+mobilebuildmcp macos build --scheme MyMacApp --project-path ./MyMacApp.xcodeproj
+mobilebuildmcp macos build-and-run --scheme MyMacApp --project-path ./MyMacApp.xcodeproj
 ```
 
 To see all macOS tools, view macOS help:
 ```bash
-xcodebuildmcp macos --help
+mobilebuildmcp macos --help
 ```
 
 ### SwiftPM Package Workflows
 
 ```bash
-xcodebuildmcp swift-package list
-xcodebuildmcp swift-package build --package-path ./MyPackage
-xcodebuildmcp swift-package test --package-path ./MyPackage
+mobilebuildmcp swift-package list
+mobilebuildmcp swift-package build --package-path ./MyPackage
+mobilebuildmcp swift-package test --package-path ./MyPackage
 ```
 
 To see all SwiftPM tools, view SwiftPM help:
 ```bash
-xcodebuildmcp swift-package --help
+mobilebuildmcp swift-package --help
 ```
 
 ### Project Discovery
 
 ```bash
-xcodebuildmcp project-discovery discover-projects --workspace-root .
-xcodebuildmcp project-discovery list-schemes --project-path ./MyApp.xcodeproj
-xcodebuildmcp project-discovery get-app-bundle-id --app-path ./Build/MyApp.app
+mobilebuildmcp project-discovery discover-projects --workspace-root .
+mobilebuildmcp project-discovery list-schemes --project-path ./MyApp.xcodeproj
+mobilebuildmcp project-discovery get-app-bundle-id --app-path ./Build/MyApp.app
 ```
 
 To see all project discovery tools, view project discovery help:
 ```bash
-xcodebuildmcp project-discovery --help
+mobilebuildmcp project-discovery --help
 ```
 
 ### Scaffolding new projects
@@ -173,13 +173,13 @@ It's worth viewing the --help for the scaffolding tools to see the available opt
 Here are some minimal examples:
 
 ```bash
-xcodebuildmcp project-scaffolding scaffold-ios --project-name MyApp --output-path ./Projects
-xcodebuildmcp project-scaffolding scaffold-macos --project-name MyMacApp --output-path ./Projects
+mobilebuildmcp project-scaffolding scaffold-ios --project-name MyApp --output-path ./Projects
+mobilebuildmcp project-scaffolding scaffold-macos --project-name MyMacApp --output-path ./Projects
 ```
 
 To see all project scaffolding tools, view project scaffolding help:
 ```bash
-xcodebuildmcp project-scaffolding --help
+mobilebuildmcp project-scaffolding --help
 ```
 
 ## Daemon Notes (Stateful Tools)
@@ -187,11 +187,11 @@ xcodebuildmcp project-scaffolding --help
 Stateful tools (logs, debug, video recording, background run) go through a per-workspace daemon that auto-starts, if you find you are getting errors with the stateful tools, you can manage the daemon process manually.
 
 ```bash
-xcodebuildmcp daemon status
-xcodebuildmcp daemon restart
+mobilebuildmcp daemon status
+mobilebuildmcp daemon restart
 ```
 
 To see all daemon commands, view daemon help:
 ```bash
-xcodebuildmcp daemon --help
+mobilebuildmcp daemon --help
 ```
