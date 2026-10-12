@@ -59,7 +59,8 @@ The module also puts the profile's `bin/` on PATH and merges a few keys into the
 apps' own JSON files, where the app writes strict JSON and merges too: pi's
 `settings.json` (its tool packages, at fixed profile paths, and enabled models)
 and `auth.json` (an Anthropic token from a file you name), and Claude Code's
-`~/.claude.json` (the `cua-computer-use` MCP server).
+`~/.claude.json` (the `cua-computer-use` MCP server) and `~/.claude/settings.json`
+(whatever `claudeSettings` sets, such as hooks).
 
 **The nightly update.** `darwinModules.update-ai-tools` is a launchd agent that
 runs as you at 05:00 (later if the Mac was asleep), in its own clone of your

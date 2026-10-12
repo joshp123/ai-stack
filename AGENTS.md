@@ -28,7 +28,8 @@ a system switch. README.md explains the whole flow; read it first.
   together with its line in `modules/darwin/update-ai-tools/ai-tools-smoke.sh`.
 - App-owned files are edited only by merging a few keys into strict JSON the
   app also merges (pi's `settings.json`/`auth.json`, Claude Code's
-  `~/.claude.json`), through `modules/home/ai-profile/merge-json.sh`.
+  `~/.claude.json` and `~/.claude/settings.json`), through
+  `modules/home/ai-profile/merge-json.sh`.
 - Never run `cua-driver` from the Nix store (`result/bin`, the profile's
   `Applications/`): macOS taints the bundle and Nix can no longer canonicalise
   it. The installed copy is `/Applications/CuaDriver.app`.

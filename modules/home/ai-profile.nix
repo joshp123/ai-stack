@@ -6,8 +6,9 @@
 # so a tools update never needs a switch either.
 #
 # App-owned files are edited only when the app writes strict JSON and merges:
-# pi's settings.json and auth.json, Claude Code's ~/.claude.json. Each edit
-# merges a few keys and leaves the rest to the app (ai-profile/merge-json.sh).
+# pi's settings.json and auth.json, Claude Code's ~/.claude.json and
+# ~/.claude/settings.json. Each edit merges a few keys and leaves the rest to
+# the app (ai-profile/merge-json.sh).
 { mkContent }:
 { config, pkgs, lib, ... }:
 
@@ -108,6 +109,17 @@ in
         it becomes pi's Anthropic api_key entry in auth.json.
       '';
     };
+
+    claudeSettings = lib.mkOption {
+      type = (pkgs.formats.json { }).type;
+      default = { };
+      example = lib.literalExpression ''{ hooks.SessionStart = [ { matcher = "compact"; hooks = [ { type = "command"; command = "..."; } ]; } ]; }'';
+      description = ''
+        Keys merged into Claude Code's ~/.claude/settings.json on switch.
+        Objects merge key by key; a list or value set here replaces the app's,
+        and the app keeps every key not set here.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -131,6 +143,11 @@ in
     # declarative; this adds the cua-computer-use entry the same way.
     home.activation.claudeMcpServers = lib.hm.dag.entryAfter [ "writeBoundary" ]
       (merge "${home}/.claude.json" ./ai-profile/claude-mcp-servers.json);
+
+    home.activation.claudeSettings = lib.mkIf (cfg.claudeSettings != { })
+      (lib.hm.dag.entryAfter [ "writeBoundary" ]
+        (merge "${home}/.claude/settings.json"
+          ((pkgs.formats.json { }).generate "claude-settings-policy.json" cfg.claudeSettings)));
 
     home.activation.piAnthropicAuth = lib.mkIf (cfg.anthropicApiKeyFile != null)
       (lib.hm.dag.entryAfter [ "writeBoundary" ] ''
