@@ -47,7 +47,7 @@ let
 
   piSkills = pkgs.linkFarm "pi-skills" (
     [ { name = "shared/ai-stack/COLLECTION.md"; path = ./pi-collections/shared-ai-stack/COLLECTION.md; } ]
-    ++ links "shared/ai-stack/" publicSkills [ "grill-me" "skill-creator" "summarize" ]
+    ++ links "shared/ai-stack/" publicSkills [ "summarize" ]
     ++ [ { name = "openai/build-macos-apps/COLLECTION.md"; path = ./pi-collections/openai-build-macos-apps/COLLECTION.md; } ]
     ++ links "openai/build-macos-apps/" openaiSkills (directoryNames openaiSkillsSource)
     ++ [
@@ -65,7 +65,6 @@ let
   );
 
   codexSkills = pkgs.linkFarm "codex-skills" (links "" publicSkills [
-    "ask-questions-if-underspecified"
     "frontend-design"
     "markdown-converter"
     "summarize"

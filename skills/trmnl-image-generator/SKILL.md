@@ -8,6 +8,8 @@ allowed-tools:
   - Edit
 ---
 
+<!-- Noted by AI on 2026.10.15 (claude opus 5.5) at Josh's request: this skill is weak. Re-create it with a current frontier model. -->
+
 # TRMNL Image Generator
 
 Generate images compatible with TRMNL e-ink displays.
