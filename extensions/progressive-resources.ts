@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { StringEnum } from "@earendil-works/pi-ai";
 import {
 	formatSkillsForPrompt,
 	truncateHead,
@@ -21,8 +22,6 @@ const DEFERRED_TOOLS = new Set([
 	"evaluate_browser",
 ]);
 
-type ToolGroup = keyof typeof TOOL_GROUPS;
-
 interface SkillCollection {
 	id: string;
 	description: string;
@@ -34,26 +33,14 @@ interface CollectionFile {
 	description: string;
 }
 
-const LoadResourcesParams = Type.Union([
-	Type.Object(
-		{ action: Type.Literal("list_skills") },
-		{ additionalProperties: false },
-	),
-	Type.Object(
-		{
-			action: Type.Literal("load_skill"),
-			name: Type.String({ minLength: 1 }),
-		},
-		{ additionalProperties: false },
-	),
-	Type.Object(
-		{
-			action: Type.Literal("load_tools"),
-			capability: Type.Literal("web"),
-		},
-		{ additionalProperties: false },
-	),
-]);
+const LoadResourcesParams = Type.Object(
+	{
+		action: StringEnum(["list_skills", "load_skill", "load_tools"] as const),
+		name: Type.Optional(Type.String({ minLength: 1 })),
+		capability: Type.Optional(Type.Literal("web")),
+	},
+	{ additionalProperties: false },
+);
 
 function readCollectionFile(path: string): CollectionFile {
 	const lines = readFileSync(path, "utf-8").split("\n");
@@ -218,6 +205,9 @@ export default function progressiveResources(pi: ExtensionAPI) {
 		async execute(_toolCallId, params) {
 			switch (params.action) {
 				case "list_skills":
+					if (params.name !== undefined || params.capability !== undefined) {
+						fail("list_skills does not accept name or capability.");
+					}
 					return {
 						content: [{ type: "text", text: listSkills(currentCollections) }],
 						details: {
@@ -226,6 +216,10 @@ export default function progressiveResources(pi: ExtensionAPI) {
 					};
 
 				case "load_skill": {
+					if (!params.name) fail("load_skill requires name.");
+					if (params.capability !== undefined) {
+						fail("load_skill does not accept capability.");
+					}
 					if (params.name !== params.name.trim()) {
 						fail("Skill names must match exactly without surrounding whitespace.");
 					}
@@ -271,7 +265,11 @@ export default function progressiveResources(pi: ExtensionAPI) {
 				}
 
 				case "load_tools": {
-					const capability = params.capability as ToolGroup;
+					if (params.capability !== "web") {
+						fail("load_tools requires capability: web.");
+					}
+					if (params.name !== undefined) fail("load_tools does not accept name.");
+					const capability = params.capability;
 					const requested = [...TOOL_GROUPS[capability]];
 					const requestedNames = new Set<string>(requested);
 					const availableTools = pi.getAllTools();
