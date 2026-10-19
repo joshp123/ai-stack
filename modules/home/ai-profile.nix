@@ -26,7 +26,6 @@ let
   piSettings = (pkgs.formats.json { }).generate "pi-settings-policy.json" {
     packages = map (name: "${cfg.profile}/share/pi/packages/${name}") [
       "pi-web-search"
-      "pi-agent-browser-native"
     ];
     enabledModels = cfg.enabledModels;
     defaultProvider = cfg.defaultProvider;

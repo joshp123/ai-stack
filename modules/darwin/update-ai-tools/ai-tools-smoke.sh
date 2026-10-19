@@ -15,7 +15,6 @@ root="${1:?usage: ai-tools-smoke <bundle-root>}"
 # skills and herdr's extension), update-ai-tools (the app).
 for path in \
   share/pi/packages/pi-web-search \
-  share/pi/packages/pi-agent-browser-native \
   bin/dash-mcp-server \
   share/cua-driver/skills/cua-driver/SKILL.md \
   share/pi-autoresearch/skills/autoresearch-create/SKILL.md \

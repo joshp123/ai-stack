@@ -34,8 +34,8 @@ leaves it byte-for-byte the same.
 
 | Path in the bundle | What |
 | --- | --- |
-| `bin/` | claude, codex, pi, herdr, agent-browser, dash-mcp-server, markit, markitdown, qmd, mobilebuildmcp (xcodebuildmcp's binary), and `cua-driver` (a link to the installed app, see below) |
-| `share/pi/packages/*` | pi's tool packages (web search, agent-browser) |
+| `bin/` | claude, codex, pi, herdr, dash-mcp-server, markit, markitdown, qmd, mobilebuildmcp (xcodebuildmcp's binary), and `cua-driver` (a link to the installed app, see below) |
+| `share/pi/packages/*` | pi's tool package (web search) |
 | `share/cua-driver/skills` | the `cua-driver` skill, shipped with the binary it describes |
 | `share/herdr/integrations/pi` | herdr's pi extension |
 | `share/pi-autoresearch/skills` | pi-autoresearch's skills |

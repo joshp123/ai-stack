@@ -28,8 +28,6 @@ let
     ai.pi-coding-agent
     ai.herdr
     ai.pi-web-search
-    ai.pi-agent-browser-native
-    ai.agent-browser
     ai.dash-mcp-server
     ai.xcodebuildmcp
     ai.markit

@@ -11,7 +11,6 @@ import { Type } from "typebox";
 const COLLECTION_FILE = "COLLECTION.md";
 const TOOL_GROUPS = {
 	web: ["web_search"],
-	browser: ["agent_browser"],
 } as const;
 
 const DEFERRED_TOOLS = new Set([
@@ -50,7 +49,7 @@ const LoadResourcesParams = Type.Union([
 	Type.Object(
 		{
 			action: Type.Literal("load_tools"),
-			capability: Type.Union([Type.Literal("web"), Type.Literal("browser")]),
+			capability: Type.Literal("web"),
 		},
 		{ additionalProperties: false },
 	),
@@ -202,16 +201,16 @@ export default function progressiveResources(pi: ExtensionAPI) {
 		label: "Load Resources",
 		description: [
 			"List available skills, load one skill by exact name, or activate an optional tool capability.",
-			"Tool capabilities are web and browser.",
+			"The one tool capability is web.",
 		].join(" "),
 		promptSnippet:
-			"Load specialised skills or optional web and browser tools on demand.",
+			"Load specialised skills or optional web tools on demand.",
 		promptGuidelines: [
 			"Load a listed skill when it matches the task; list skills when uncertain.",
 			"Prefer a service's native tools for known URLs and resources, for example git or gh for GitHub.",
 			"Load web for public discovery and current information.",
-			"Load browser for browsing, rendered-page inspection, authentication, or web UI interaction.",
-			"Load the cua-driver skill for native desktop applications and operating-system UI; prefer browser for websites.",
+			"For rendered web pages, write a Playwright script that uses its headless browser.",
+			"Load the cua-driver skill for native desktop applications and operating-system UI, not for websites.",
 		],
 		parameters: LoadResourcesParams,
 		executionMode: "sequential",
