@@ -33,14 +33,17 @@ nix run github:openclaw/nix-openclaw-tools#summarize -- "https://example.com"
 
 ## YouTube Markdown Notes
 
-For tweet-style markdownified YouTube transcripts, use the LLM markdown path:
+For tweet-style markdownified YouTube transcripts, use the LLM markdown path
+through Ollama Cloud (the free subscription):
 
 ```bash
+OPENAI_BASE_URL=https://ollama.com/v1 \
+OPENAI_API_KEY="$OLLAMA_API_KEY" \
 summarize "$YOUTUBE_URL" \
   --extract \
   --format md \
   --markdown-mode llm \
-  --model google/gemini-3.5-flash \
+  --model openai/<ollama-cloud-model> \
   --plain \
   --timeout 10m
 ```
@@ -60,25 +63,13 @@ Add `--timestamps` when timestamps matter.
 ## Models
 
 Prefer an explicit current model. Do not trust `auto` if debug output shows a stale model.
-Google direct model IDs and Ollama Cloud model IDs are different surfaces; verify the
-Ollama Cloud model name when the user asks for Ollama.
+Use Ollama Cloud through summarize's OpenAI-compatible route, as above, and check the
+current model list with `ollama list` or at ollama.com before picking one.
 
-- Google direct: `--model google/gemini-3.5-flash`
-- Ollama Cloud through summarize's OpenAI-compatible route:
-
-```bash
-OPENAI_BASE_URL=https://ollama.com/v1 \
-OPENAI_API_KEY="$OLLAMA_API_KEY" \
-summarize "$YOUTUBE_URL" \
-  --extract \
-  --format md \
-  --markdown-mode llm \
-  --model openai/gemini-3-flash-preview:cloud \
-  --plain \
-  --timeout 10m
-```
-
-As of 2026-06-02, Ollama Cloud exposes `gemini-3-flash-preview:cloud`; Google direct exposes `gemini-3.5-flash`.
+Never pass a `google/...` model or a Gemini API key: the Gemini API and every other
+paid API are banned (Josh, 25 Oct 2026; `~/code/nix/nixos-config/ai/prompts/where-things-are.md`).
+Gemini models served by Ollama Cloud (`openai/gemini-...:cloud`) are fine: that
+subscription is free.
 
 ## Debugging
 

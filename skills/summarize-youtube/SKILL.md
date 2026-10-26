@@ -24,7 +24,7 @@ Do not use this skill for tweet-style markdownified YouTube transcripts from cap
 3. Run `scripts/summarize_youtube.sh` to transcribe via yt-dlp + whisper.cpp and summarize with Claude.
 
 ## Options
-- `--cli <provider>`: claude (default), codex, gemini
+- `--cli <provider>`: claude (default), codex
 - `--length <preset>`: short|medium|long|xl|xxl (default: xxl)
 - `--model <id>`: whisper.cpp model id (default: medium.en)
 - `--timeout <duration>` and `--retries <count>`: pass through to summarize

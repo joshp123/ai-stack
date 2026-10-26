@@ -6,7 +6,7 @@ usage() {
 Usage: summarize_youtube.sh <youtube-url> [options]
 
 Options:
-  --cli <provider>     claude (default), codex, gemini
+  --cli <provider>     claude (default), codex
   --length <preset>    short|medium|long|xl|xxl (default: xxl)
   --model <id>         whisper.cpp model id (default: medium.en)
   --timeout <duration> summarize timeout (default: 10m)
