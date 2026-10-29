@@ -5,7 +5,7 @@
 # install the bundle into the user's AI profile and copy CuaDriver.app into
 # /Applications. Only nix-ai-tools packages update this way; skills, prompts and
 # pi extensions change only on a switch. It never touches the system
-# configuration. ai-tools-mail emails when a failure has lasted three days.
+# configuration. ai-tools-alert calls a webhook when a failure has lasted three days.
 #
 # Runtime state: the profile, ~/.local/state/ai-tools/ (checkout and status
 # files) and ~/Library/Logs/update-ai-tools.log. Cleanup: disable this module,
@@ -36,17 +36,17 @@ let
     text = builtins.readFile ./update-ai-tools/ai-tools-model-check.sh;
   };
 
-  aiToolsMail = pkgs.writeShellApplication {
-    name = "ai-tools-mail";
-    runtimeInputs = [ pkgs.curl pkgs.coreutils ];
-    text = builtins.readFile ./update-ai-tools/ai-tools-mail.sh;
+  aiToolsAlert = pkgs.writeShellApplication {
+    name = "ai-tools-alert";
+    runtimeInputs = [ pkgs.curl pkgs.coreutils pkgs.jq ];
+    text = builtins.readFile ./update-ai-tools/ai-tools-alert.sh;
   };
 
   # nix itself comes from the launchd PATH (the system's nix), not from
   # nixpkgs, so the job uses the same daemon and settings as the user.
   updateAiTools = pkgs.writeShellApplication {
     name = "update-ai-tools";
-    runtimeInputs = [ pkgs.git pkgs.curl pkgs.jq pkgs.coreutils aiToolsSmoke aiToolsExtensionCheck aiToolsModelCheck aiToolsMail ];
+    runtimeInputs = [ pkgs.git pkgs.curl pkgs.jq pkgs.coreutils aiToolsSmoke aiToolsExtensionCheck aiToolsModelCheck aiToolsAlert ];
     text = builtins.readFile ./update-ai-tools/update-ai-tools.sh;
   };
 in
@@ -106,18 +106,14 @@ in
       description = "launchd StartCalendarInterval. A missed run fires on wake.";
     };
 
-    mail = {
-      to = lib.mkOption { type = lib.types.str; description = "Alert recipient."; };
-      from = lib.mkOption { type = lib.types.str; description = "Gmail account the alert is sent from."; };
-      passwordFile = lib.mkOption {
-        type = lib.types.str;
-        description = "File holding that account's app password (an agenix secret).";
-      };
+    alertWebhookFile = lib.mkOption {
+      type = lib.types.str;
+      description = "File (an agenix secret) holding ALERT_WEBHOOK_URL=... and ALERT_WEBHOOK_KEY=...; alerts are POSTed there as JSON with the key as a bearer token.";
     };
   };
 
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = [ updateAiTools aiToolsSmoke aiToolsExtensionCheck aiToolsModelCheck aiToolsMail ];
+    environment.systemPackages = [ updateAiTools aiToolsSmoke aiToolsExtensionCheck aiToolsModelCheck aiToolsAlert ];
 
     launchd.user.agents.update-ai-tools.serviceConfig = {
       ProgramArguments = [ "${updateAiTools}/bin/update-ai-tools" ];
@@ -130,9 +126,7 @@ in
         UPDATE_AI_TOOLS_PI_EXTENSIONS_ATTR = cfg.piExtensionsAttr;
         UPDATE_AI_TOOLS_PROFILE = cfg.profile;
         UPDATE_AI_TOOLS_UPSTREAM_RUNS = cfg.upstreamRuns;
-        AI_TOOLS_MAIL_TO = cfg.mail.to;
-        AI_TOOLS_MAIL_FROM = cfg.mail.from;
-        AI_TOOLS_MAIL_PASSWORD_FILE = cfg.mail.passwordFile;
+        AI_TOOLS_ALERT_WEBHOOK_FILE = cfg.alertWebhookFile;
       };
       StandardOutPath = "${home}/Library/Logs/update-ai-tools.log";
       StandardErrorPath = "${home}/Library/Logs/update-ai-tools.log";

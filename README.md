@@ -104,12 +104,12 @@ tries again the next night. The system configuration is never switched by the
 job; ai-stack and everything else in your lockfile move only by your own
 commits, and reach the machine at your next switch.
 
-**Email alerts.** Silent while healthy. When the nightly job has not succeeded
-for three days, or nix-ai-tools' hourly job has had no green run for three
-days, `ai-tools-mail` sends one email a day saying what is broken, since when,
-and the last error. It uses Gmail SMTP through `curl` with an app password
-read from a file you name (an agenix secret, in the private repo). There is no
-self-repair: fixing is a task a person starts.
+**Alerts.** Silent while healthy. When the nightly job has not succeeded for
+three days, or nix-ai-tools' hourly job has had no green run for three days,
+`ai-tools-alert` POSTs JSON once a day to a webhook (for example a Grok Bot
+routine) saying what is broken, since when, and the last error. The URL and
+bearer key come from a file you name (an agenix secret, in the private repo).
+There is no self-repair: fixing is a task a person or agent starts.
 
 **Shell config.** `homeManagerModules.zsh` (starship, plugins,
 `config/zsh/init-public.zsh`) and `homeManagerModules.ghostty` are imported by
@@ -156,7 +156,7 @@ services.update-ai-tools = {
   enable = true;
   repo = "git@github.com:you/nixos-config.git";
   upstreamRuns = "https://api.github.com/repos/joshp123/nix-ai-tools/actions/workflows/auto-bump.yml/runs?status=success&per_page=1";
-  mail = { to = "you@example.com"; from = "you@gmail.com"; passwordFile = config.age.secrets."gmail-app-password".path; };
+  alertWebhookFile = config.age.secrets."alert-webhook".path;  # ALERT_WEBHOOK_URL=... and ALERT_WEBHOOK_KEY=...
 };
 programs.codex-defaults.enable = true;
 ```

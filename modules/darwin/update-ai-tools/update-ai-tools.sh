@@ -9,7 +9,7 @@
 # The profile holds only nix-ai-tools packages; skills, prompts and extensions
 # change only when the user switches. Nothing is ever applied to the system. A
 # failed build or check pushes and installs nothing; a failed install leaves the
-# previous profile and apps in place. ai-tools-mail reports failures that
+# previous profile and apps in place. ai-tools-alert reports failures that
 # persist for three days.
 
 # Site configuration comes from the launchd agent's environment (set by
@@ -35,7 +35,7 @@ on_error() {
   echo "FAILED at $step" >&2
 }
 trap 'on_error $?' ERR
-trap 'ai-tools-mail || true' EXIT
+trap 'ai-tools-alert || true' EXIT
 
 echo "==> $(date '+%Y-%m-%d %H:%M')"
 
