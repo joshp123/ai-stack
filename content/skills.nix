@@ -7,7 +7,7 @@
 # Package-owned skills (cua-driver, pi-autoresearch) are links into the AI
 # tools profile (inProfile), named here so no store path is read at evaluation
 # time.
-{ pkgs, openai-plugins, inProfile, extraClaudeSkills, piCollections }:
+{ pkgs, openai-plugins, inProfile, extraClaudeSkills, claudeSkillLinks, piCollections }:
 
 let
   lib = pkgs.lib;
@@ -62,6 +62,7 @@ let
     ++ links "" (inProfile "share/pi-autoresearch/skills")
       [ "autoresearch-create" "autoresearch-finalize" "autoresearch-hooks" ]
     ++ lib.concatMap (dir: links "" dir (directoryNames dir)) extraClaudeSkills
+    ++ lib.mapAttrsToList (name: path: { inherit name path; }) claudeSkillLinks
   );
 
   codexSkills = pkgs.linkFarm "codex-skills" (links "" publicSkills [

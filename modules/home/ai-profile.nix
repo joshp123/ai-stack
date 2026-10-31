@@ -17,7 +17,7 @@ let
   home = config.home.homeDirectory;
   content = mkContent {
     inherit pkgs;
-    inherit (cfg) profile extraClaudeSkills piCollections piExtensions;
+    inherit (cfg) profile extraClaudeSkills claudeSkillLinks piCollections piExtensions;
   };
   jq = "${pkgs.jq}/bin/jq";
   merge = file: policy:
@@ -47,6 +47,16 @@ in
       type = lib.types.listOf lib.types.path;
       default = [ ];
       description = "Directories of extra Claude Code skills, one skill per subdirectory.";
+    };
+
+    claudeSkillLinks = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      default = { };
+      description = ''
+        Named skill directories linked at runtime, for example from an installed
+        app. Paths are strings: evaluation never reads or copies their contents,
+        and the target may be absent until its app is installed.
+      '';
     };
 
     piCollections = lib.mkOption {

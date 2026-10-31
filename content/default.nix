@@ -15,17 +15,18 @@
 #   openai-plugins     OpenAI's plugins repo (filled in by ai-stack's flake)
 #   profile            the AI tools profile, e.g. ~/.local/state/nix/profiles/ai
 #   extraClaudeSkills  directories of extra skills for Claude Code (private skills)
+#   claudeSkillLinks   named runtime skill paths, without reading their contents
 #   piCollections      extra pi skill collections:
 #                      { name = "apple/xcode-27"; collection = ./COLLECTION.md; skills = ./dir; }
 #   piExtensions       extra pi extensions: { name = "foo.ts"; path = ./foo.ts; }
 { pkgs, openai-plugins, profile
-, extraClaudeSkills ? [ ], piCollections ? [ ], piExtensions ? [ ] }:
+, extraClaudeSkills ? [ ], claudeSkillLinks ? { }, piCollections ? [ ], piExtensions ? [ ] }:
 
 let
   inProfile = path: "${profile}/${path}";
 
   skills = import ./skills.nix {
-    inherit pkgs openai-plugins inProfile extraClaudeSkills piCollections;
+    inherit pkgs openai-plugins inProfile extraClaudeSkills claudeSkillLinks piCollections;
   };
 
   authoredPiExtensions = [
